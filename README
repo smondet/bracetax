@@ -1,4 +1,13 @@
 
 A simple syntax for wiki and Co...
 
+TODO:
+* A lib:
+    * Parser functor
+    * XHTMLWriter
+    * LaTeX_writer
+* A demo application:
+    * bracetax -html  -i file.brtx -o -
 
+TESTS:
+* use the application
