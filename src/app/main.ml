@@ -16,14 +16,16 @@ end
 
 let () = (
     let module DummyTransformer = Transformer.Make(DummyPrinter) in
+    let o = open_in Sys.argv.(1) in
     let t =
         DummyTransformer.create
             ~write:(fun s -> ())
             ~read:(fun () -> 
-                try Some (read_line ()) 
+                try Some (input_line o) 
                 with e -> None
             ) in
     DummyTransformer.do_transformation t;
+    close_in o;
     p (~% "Done;\n")
 )
 
