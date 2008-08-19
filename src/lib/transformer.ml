@@ -14,21 +14,41 @@ functor (Printer: Sig.PRINTER) -> struct
     let make_state l c s =
         {Sig.s_line = l; s_char = c; s_stack = s;}
 
+    type parser_state =
+        | Undef (* should not be used at the end *)
+        | Terminated
+        | TextFrom of int
+        | CommandFrom of int
+
+
     let parse_line t line number = (
         let module S = String in
         (* let i = ref 0 in *)
         let l = S.length line in
-        let rec loop i =
+        let rec loop (i, state) =
             if i < l then
-                loop begin match String.get line i with
+                loop begin match S.get line i with
                 | '#' ->
                         Printer.handle_comment_line t.t_printer
                             (make_state number i [])
-                            (String.sub line i (l - i));
-                        l
-                | _ -> (i + 1)
+                            (S.sub line i (l - i));
+                        (l, Terminated)
+                | '{' ->
+                        (* begin read command *)
+                        (* TODO read command and change state *)
+                        (i + 1, CommandFrom i)
+                | '}' ->
+                        (* end command *)
+                        (* TODO must flush text, pop command *)
+                        (i + 1, TextFrom (i + 1))
+                | ' ' | '\n' | '\r' | '\t' ->
+                        (* white space *)
+                        (i + 1, Undef)
+                | _ ->
+                        (* characters *)
+                        (i + 1, Undef)
                 end
-        in loop 0;
+        in loop (0, TextFrom 0);
     )
 
     let do_transformation t = (
