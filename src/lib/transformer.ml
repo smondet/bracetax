@@ -1,21 +1,6 @@
 
-
-module type PRINTER = sig
-    type t
-    val create: unit -> t
-    val print: t -> out_channel -> string -> unit
-end
-
-
-module type TRANSFORMER = sig
-    type t
-    val create: unit -> t
-    val transform: t -> in_channel -> out_channel -> unit
-end
-
-
 module FunctorMake =
-functor (Printer: PRINTER) -> struct
+functor (Printer: Signatures.PRINTER) -> struct
     type t = {
         t_printer: Printer.t;
     }
@@ -27,5 +12,5 @@ functor (Printer: PRINTER) -> struct
 end
 
 module Make =
-    (FunctorMake: functor (Printer: PRINTER) -> (TRANSFORMER))
+    (FunctorMake: functor (Printer: Signatures.PRINTER) -> (Signatures.TRANSFORMER))
     (* with type t = FunctorMake.t)) *)
