@@ -1,16 +1,27 @@
+module Sig = Signatures
 
 module FunctorMake =
-functor (Printer: Signatures.PRINTER) -> struct
+functor (Printer: Sig.PRINTER) -> struct
     type t = {
         t_printer: Printer.t;
+        t_read: unit -> string option;
+        t_write: string -> unit;
     }
-    let create () = {t_printer = Printer.create ()}
-    let transform t fin fout = (
-        let s = input_line fin in
-        Printer.print t.t_printer fout s;
+    let create ~read ~write = {
+        t_printer = Printer.create ~write; t_read = read; t_write = write;
+    }
+
+    let do_transformation t = (
+        let rec while_loop () = 
+            match t.t_read () with
+            | Some s ->
+                    while_loop ()
+            | None -> ()
+        in
+        while_loop ();
     )
 end
 
 module Make =
-    (FunctorMake: functor (Printer: Signatures.PRINTER) -> (Signatures.TRANSFORMER))
+    (FunctorMake: functor (Printer: Sig.PRINTER) -> (Sig.TRANSFORMER))
     (* with type t = FunctorMake.t)) *)

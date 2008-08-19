@@ -14,15 +14,15 @@ type state = {
 
 module type PRINTER = sig
     type t
-    val create: unit -> t
-    val print: t -> out_channel -> string -> unit
+    val create: write:(string -> unit) -> t
+    (* val handle_comment_line: t -> state -> string -> unit *)
 end
 
 
 module type TRANSFORMER = sig
     type t
-    val create: unit -> t
-    val transform: t -> in_channel -> out_channel -> unit
+    val create: read:(unit -> string option) -> write:(string -> unit) -> t
+    val do_transformation: t -> unit
 end
 
 
