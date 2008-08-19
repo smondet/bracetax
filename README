@@ -1,6 +1,10 @@
 
 A simple syntax for wiki and Co...
 
+BUILD:
+ocamlbuild -I src/app -I src/lib  src/app/main.byte
+
+
 TODO:
 * A lib:
     * Parser functor
