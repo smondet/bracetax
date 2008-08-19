@@ -18,8 +18,39 @@ functor (Printer: Sig.PRINTER) -> struct
         | Undef (* should not be used at the end *)
         | Terminated
         | TextFrom of int
-        | CommandFrom of int
 
+    let get_arguments s index = (
+        let rec get_args prev i acc =
+            match String.get s i with
+            | '}' -> 
+                    let l = ((prev, (i-1)) :: acc) in
+                    if String.get s (i+1) = '{' then (
+                        (* continue for another arg *)
+                        get_args (i+2) (i+2) l
+                    ) else (
+                        (* finish *)
+                        l
+                    )
+            | _ -> 
+                    get_args prev (i+1) acc
+        in
+        if String.get s index = '{' then (
+            (* there are arguments *)
+            get_args (index + 1) (index + 1) []
+        ) else (
+            []
+        )
+    )
+
+    let get_command_name s index = (
+        let rec parse i =
+            match String.get s i with
+            | ':' | '{' -> i
+            | ' ' | '\n' -> failwith "White space in command name"
+            | _ -> parse (i+1)
+        in
+        parse index
+    )
 
     let parse_line t line number = (
         let module S = String in
@@ -36,7 +67,14 @@ functor (Printer: Sig.PRINTER) -> struct
                 | '{' ->
                         (* begin read command *)
                         (* TODO read command and change state *)
-                        (i + 1, CommandFrom i)
+                        let after_name = get_command_name line i in
+                        let args = get_arguments line after_name in
+                        let after_command =
+                            match args with
+                            | [] -> after_name
+                            | (b,e) :: t -> e + 1
+                        in
+                        (after_command, TextFrom after_name)
                 | '}' ->
                         (* end command *)
                         (* TODO must flush text, pop command *)

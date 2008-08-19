@@ -1,7 +1,7 @@
 
 
-Some text {it italics} and # comments...
-{bf bold} {it italo{bf bold}}
+Some text {it:italics} and # comments...
+{bf:bold} {it:italo{bf:bold}}
 # More comments...
-{tt type-writer text}
+{tt:type-writer text}
 
