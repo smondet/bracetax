@@ -5,3 +5,9 @@ Some text {it:italics} and # comments...
 # More comments...
 {tt:type-writer text}
 
+{lkdsjf sd fsda sdk:unknown command}
+
+{unterminated comand
+}
+
+

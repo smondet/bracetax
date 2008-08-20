@@ -44,10 +44,12 @@ functor (Printer: Sig.PRINTER) -> struct
 
     let get_command_name s index = (
         let rec parse i =
-            match String.get s i with
-            | ':' | '{' -> i
-            | ' ' | '\n' -> failwith "White space in command name"
-            | _ -> parse (i+1)
+            if i < (String.length s) then
+                match String.get s i with
+                | ':' | '{' -> Some i
+                | _ -> parse (i+1)
+            else
+                None
         in
         parse index
     )
@@ -67,14 +69,19 @@ functor (Printer: Sig.PRINTER) -> struct
                 | '{' ->
                         (* begin read command *)
                         (* TODO read command and change state *)
-                        let after_name = get_command_name line i in
-                        let args = get_arguments line after_name in
-                        let after_command =
-                            match args with
-                            | [] -> after_name
-                            | (b,e) :: t -> e + 1
-                        in
-                        (after_command, TextFrom after_name)
+                        begin match get_command_name line i with
+                        | Some name_end_index ->
+                                let args = get_arguments line name_end_index in
+                                let after_command =
+                                    match args with
+                                    | [] -> name_end_index
+                                    | (b,e) :: t -> e + 1
+                                in
+                                (after_command, TextFrom after_command)
+                        | None ->
+                                (* TODO must flush text, pop command *)
+                                (i + 1, TextFrom (i + 1))
+                        end
                 | '}' ->
                         (* end command *)
                         (* TODO must flush text, pop command *)
