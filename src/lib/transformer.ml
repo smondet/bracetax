@@ -1,5 +1,7 @@
 module Sig = Signatures
 
+let (~%) = Printf.sprintf
+
 module FunctorMake =
 functor (Printer: Sig.PRINTER) -> struct
     type t = {
@@ -21,6 +23,15 @@ functor (Printer: Sig.PRINTER) -> struct
         | ReadCommand of int * string option (* the current read name *)
         | ReadArgs of int * string * string list * string option
         (* ReadArgs (since, cmd_name, arg_list, current_arg *)
+
+    let string_of_state = function
+        | Undef -> "Undef"
+        | Terminated -> "Terminated"
+        | ReadText o -> ~% "ReadText:%d" o
+        | ReadCommand (i,Some o) -> ~% "ReadCommand:%d:%s" i o
+        | ReadCommand (i, None) -> ~% "ReadCommand:%d:_" i
+        | ReadArgs (i,c,l,Some o) -> ~% "ReadArgs:%d:%s:L:%s" i c o
+        | ReadArgs (i,c,l, None) -> ~% "ReadArgs:%d:%s:L:-" i c
 
     let get_arguments s index = (
         let rec get_args prev i acc =
@@ -109,41 +120,57 @@ functor (Printer: Sig.PRINTER) -> struct
         (* let i = ref 0 in *)
         let l = Str.length line in
         let sub s since = Str.sub s since (l - since) in
+        let opt_from_to opt str i_from i_to =
+            let substr = Str.sub str i_from (i_to - i_from) in
+            match opt with
+            | None -> substr | Some s -> s ^ substr
+        in
+        let debug s i state  =
+            if true then (
+                let l = Str.length s in
+                try
+                Printf.eprintf "---{State: %s} {String:%s[%s]%s (%d)}\n%!"
+                     (string_of_state state)
+                     (Str.sub s 0 i)
+                     (Str.sub s i 1)
+                     (Str.sub s (i + 1) (l - i - 1))
+                     i
+                with
+                e -> ()
+            );
+        in
         let rec loop (i, state) =
-            if i < l then
+            if i < l then (
+                debug line i state;
                 loop begin match Str.get line i with
                 | '#' ->
                         Printer.handle_comment_line t.t_printer
                             (make_state number i []) (sub line i);
-                        (l, state)
+                        (l, state) (* i.e. go to 'EOL'  *)
                 | '{' ->
-                        (* begin read command *)
-                        (* TODO read command and change state *)
-                        begin match get_command_name line i with
-                        | Some name_end_index ->
-                                let args = get_arguments line name_end_index in
-                                let after_command =
-                                    match args with
-                                    | [] -> name_end_index
-                                    | (b,e) :: t -> e + 1
-                                in
-                                (after_command, ReadText after_command)
-                        | None ->
-                                (* TODO must flush text, pop command *)
-                                (i + 1, ReadText (i + 1))
-                        end
+                        let ni = i + 1 in
+                        let nstate =
+                            match state with
+                            | ReadText i ->
+                                    (* TODO flush text *)
+                                    ReadCommand (ni, None)
+                            | ReadCommand (since, opt) ->
+                                    ReadArgs (
+                                        ni, opt_from_to opt line since (i-1),
+                                        [], None)
+                            | ReadArgs (_) as ra -> ra
+                            | s -> s
+                        in
+                        (ni, nstate)
                 | '}' ->
                         (* end command *)
                         (* TODO must flush text, pop command *)
                         (i + 1, ReadText (i + 1))
-                | ' ' | '\n' | '\r' | '\t' ->
-                        (* white space *)
-                        (i + 1, Undef)
                 | _ ->
                         (* characters *)
-                        (i + 1, Undef)
+                        (i + 1, state)
                 end
-            else (
+            ) else (
                 (* EOL *)
                 let next_state =
                     match state with

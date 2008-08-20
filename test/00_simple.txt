@@ -9,6 +9,8 @@ Some text {it:italics} and # comments...
 
 {unterminated comand
 }
+{kjhsdf df
+gfds}
 
 {begin:cmd{arg}}
 This is
