@@ -162,6 +162,21 @@ functor (Printer: Sig.PRINTER) -> struct
                             | s -> s
                         in
                         (ni, nstate)
+                | ':' ->
+                        let ni = i + 1 in
+                        let nstate =
+                            match state with
+                            | ReadCommand (since, opt) ->
+                                    (* TODO call handler with *)
+                                    (* opt_from_to opt line since (i-1) *)
+                                    ReadArgs (
+                                        ni, opt_from_to opt line since (i-1),
+                                        [], None)
+                            | ReadArgs (_) as ra -> ra
+                            | s -> s
+                        in
+                        (ni, nstate)
+                         
                 | '}' ->
                         (* end command *)
                         (* TODO must flush text, pop command *)
