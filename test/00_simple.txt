@@ -10,4 +10,10 @@ Some text {it:italics} and # comments...
 {unterminated comand
 }
 
+{begin:cmd{arg}}
+This is
+{end}
+equivalent to
+{cmd{arg}That}
+
 

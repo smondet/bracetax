@@ -54,7 +54,7 @@ functor (Printer: Sig.PRINTER) -> struct
         parse index
     )
 
-    let parse_line t line number = (
+    let parse_line t line number state = (
         let module S = String in
         (* let i = ref 0 in *)
         let l = S.length line in
@@ -93,18 +93,21 @@ functor (Printer: Sig.PRINTER) -> struct
                         (* characters *)
                         (i + 1, Undef)
                 end
-        in loop (0, TextFrom 0);
+            else
+                state
+        in loop (0, state)
     )
 
     let do_transformation t = (
-        let rec while_loop lineno = 
+        let rec while_loop lineno state = 
             match t.t_read () with
             | Some s ->
-                    parse_line t s lineno;
-                    while_loop (lineno + 1)
+                    let new_state =
+                        parse_line t s lineno state in
+                    while_loop (lineno + 1) new_state
             | None -> ()
         in
-        while_loop 1;
+        while_loop 1 (TextFrom 0);
     )
 end
 
