@@ -24,7 +24,7 @@ functor (Printer: Sig.PRINTER) -> struct
             match String.get s i with
             | '}' -> 
                     let l = ((prev, (i-1)) :: acc) in
-                    if String.get s (i+1) = '{' then (
+                    if try String.get s (i+1) = '{' with e -> false then (
                         (* continue for another arg *)
                         get_args (i+2) (i+2) l
                     ) else (
