@@ -17,7 +17,10 @@ functor (Printer: Sig.PRINTER) -> struct
     type parser_state =
         | Undef (* should not be used at the end *)
         | Terminated
-        | TextFrom of int
+        | ReadText of int
+        | ReadCommand of int * string option (* the current read name *)
+        | ReadArgs of int * string * string list * string option
+        (* ReadArgs (since, cmd_name, arg_list, current_arg *)
 
     let get_arguments s index = (
         let rec get_args prev i acc =
@@ -54,7 +57,8 @@ functor (Printer: Sig.PRINTER) -> struct
         parse index
     )
 
-    let parse_line t line number state = (
+
+    let parse_line_old t line number state = (
         let module S = String in
         (* let i = ref 0 in *)
         let l = S.length line in
@@ -65,7 +69,7 @@ functor (Printer: Sig.PRINTER) -> struct
                         Printer.handle_comment_line t.t_printer
                             (make_state number i [])
                             (S.sub line i (l - i));
-                        (l, Terminated)
+                        (l, state)
                 | '{' ->
                         (* begin read command *)
                         (* TODO read command and change state *)
@@ -77,15 +81,15 @@ functor (Printer: Sig.PRINTER) -> struct
                                     | [] -> name_end_index
                                     | (b,e) :: t -> e + 1
                                 in
-                                (after_command, TextFrom after_command)
+                                (after_command, ReadText after_command)
                         | None ->
                                 (* TODO must flush text, pop command *)
-                                (i + 1, TextFrom (i + 1))
+                                (i + 1, ReadText (i + 1))
                         end
                 | '}' ->
                         (* end command *)
                         (* TODO must flush text, pop command *)
-                        (i + 1, TextFrom (i + 1))
+                        (i + 1, ReadText (i + 1))
                 | ' ' | '\n' | '\r' | '\t' ->
                         (* white space *)
                         (i + 1, Undef)
@@ -94,10 +98,69 @@ functor (Printer: Sig.PRINTER) -> struct
                         (i + 1, Undef)
                 end
             else
+                (* TODO if TextRead: must flush text *)
                 state
         in loop (0, state)
     )
 
+    module Str = String (* to be able to swicth easily *)
+
+    let parse_line t line number state = (
+        (* let i = ref 0 in *)
+        let l = Str.length line in
+        let sub s since = Str.sub s since (l - since) in
+        let rec loop (i, state) =
+            if i < l then
+                loop begin match Str.get line i with
+                | '#' ->
+                        Printer.handle_comment_line t.t_printer
+                            (make_state number i []) (sub line i);
+                        (l, state)
+                | '{' ->
+                        (* begin read command *)
+                        (* TODO read command and change state *)
+                        begin match get_command_name line i with
+                        | Some name_end_index ->
+                                let args = get_arguments line name_end_index in
+                                let after_command =
+                                    match args with
+                                    | [] -> name_end_index
+                                    | (b,e) :: t -> e + 1
+                                in
+                                (after_command, ReadText after_command)
+                        | None ->
+                                (* TODO must flush text, pop command *)
+                                (i + 1, ReadText (i + 1))
+                        end
+                | '}' ->
+                        (* end command *)
+                        (* TODO must flush text, pop command *)
+                        (i + 1, ReadText (i + 1))
+                | ' ' | '\n' | '\r' | '\t' ->
+                        (* white space *)
+                        (i + 1, Undef)
+                | _ ->
+                        (* characters *)
+                        (i + 1, Undef)
+                end
+            else (
+                (* EOL *)
+                let next_state =
+                    match state with
+                    | ReadText i -> (* TODO flush text *) ReadText 0
+                    | ReadCommand (since, Some s) ->
+                            ReadCommand (0, Some (s ^ (sub line since))) 
+                    | ReadCommand (since, None) ->
+                            ReadCommand (0, Some (sub line since))
+                    | ReadArgs (since, cmd_name, arg_list, Some c_arg) ->
+                            ReadArgs (0, cmd_name, arg_list,
+                                Some (c_arg ^ (sub line since)))
+                    | s -> s
+                in
+                next_state
+            )
+        in loop (0, state)
+    )
     let do_transformation t = (
         let rec while_loop lineno state = 
             match t.t_read () with
@@ -107,7 +170,7 @@ functor (Printer: Sig.PRINTER) -> struct
                     while_loop (lineno + 1) new_state
             | None -> ()
         in
-        while_loop 1 (TextFrom 0);
+        while_loop 1 (ReadText 0);
     )
 end
 
