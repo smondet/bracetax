@@ -18,7 +18,7 @@ functor (Printer: Sig.PRINTER) -> struct
 
     type meta_state =
         | Parsing
-        | BeganVerbastim of string * string list
+        | BeganVerbatim of string * string list
 
     type parser_state =
         | ReadText of int
@@ -238,9 +238,9 @@ functor (Printer: Sig.PRINTER) -> struct
                                         (parse_line t s lineno state, Parsing)
                                 | Some (endtok, opts) ->
                                         (ReadText 0,
-                                            BeganVerbastim (endtok, opts))
+                                            BeganVerbatim (endtok, opts))
                                 end
-                        | BeganVerbastim (end_token, opts) ->
+                        | BeganVerbatim (end_token, opts) ->
                                 if (
                                     ((Str.length s) >=
                                         (Str.length end_token))
