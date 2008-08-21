@@ -10,11 +10,17 @@ module DummyPrinter = struct
     let strstat s = (~% "[%d:%d]" s.Signatures.s_line s.Signatures.s_char)
     let head = "####"
     
-    let handle_comment_line t state line =
-        p (~% "%s%s[comment] \"%s\"\n" head (strstat state) line)
-    let handle_text t state line =
-        p (~% "%s%s[text] \"%s\"\n" head (strstat state) line)
+    let handle_comment_line t location line =
+        p (~% "%s%s[comment] \"%s\"\n" head (strstat location) line)
+    let handle_text t location line =
+        p (~% "%s%s[text] \"%s\"\n" head (strstat location) line)
 
+    let start_command t location name args =
+        p (~% "%s%s[start %s(%s)]\n" head (strstat location)
+            name (String.concat ", " args))
+
+    let stop_command t location = 
+        p (~% "%s%s[stop]\n" head (strstat location))
 end
 
 let () = (

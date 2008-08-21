@@ -13,8 +13,8 @@ functor (Printer: Sig.PRINTER) -> struct
         t_printer = Printer.create ~write; t_read = read; t_write = write;
     }
 
-    let make_state l c s =
-        {Sig.s_line = l; s_char = c; s_stack = s;}
+    let make_loc l c =
+        {Sig.s_line = l; s_char = c;}
 
     type parser_state =
         | ReadText of int
@@ -61,7 +61,7 @@ functor (Printer: Sig.PRINTER) -> struct
         in
         let flush_text since last =
             Printer.handle_text t.t_printer
-                (make_state number last [])
+                (make_loc number last)
                 (opt_from_to line since last)
         in
         let rec loop (i, state) =
@@ -75,7 +75,7 @@ functor (Printer: Sig.PRINTER) -> struct
                                     (* TODO pop command *)
                                     flush_text since (i - 1);
                                     Printer.handle_comment_line t.t_printer
-                                        (make_state number i [])
+                                        (make_loc number i)
                                         (sub line (i+1));
                                     ReadText l
                             | s -> s
@@ -100,8 +100,10 @@ functor (Printer: Sig.PRINTER) -> struct
                         let nstate =
                             match state with
                             | ReadCommand (since, opt) ->
-                                    (* TODO call handler with *)
-                                    (* opt_from_to opt line since (i-1) *)
+                                    Printer.start_command t.t_printer
+                                        (make_loc number i)
+                                        (opt_from_to ~opt line since (i-1))
+                                        [];
                                     ReadText ni
                             | s -> s
                         in
@@ -112,22 +114,32 @@ functor (Printer: Sig.PRINTER) -> struct
                         let nstate =
                             match state with
                             | ReadText since ->
-                                    (* TODO pop command *)
+                                    Printer.stop_command t.t_printer
+                                        (make_loc number i);
                                     flush_text since (i - 1);
                                     ReadText ni
                             | ReadCommand (since, opt) ->
-                                    (* TODO push and pop command *)
+                                    Printer.start_command t.t_printer
+                                        (make_loc number i)
+                                        (opt_from_to ~opt line since (i-1))
+                                        [];
+                                    Printer.stop_command t.t_printer
+                                        (make_loc number i);
                                     ReadText ni
                             | ReadArgs (since, cmd, args, opt) ->
+                                    let the_args =
+                                        (opt_from_to ~opt line since (i-1))
+                                            :: args
+                                    in
                                     let another_arg =
                                         ni <> l && Str.get line ni = '{' in
                                     if another_arg then (
                                         ReadArgs (
                                             ni + 1, cmd,
-                                            (opt_from_to ~opt line since (i-1))
-                                                :: args, None)
+                                            the_args, None)
                                     ) else (
-                                        (* TODO push command *)
+                                        Printer.start_command t.t_printer
+                                            (make_loc number i) cmd the_args;
                                         ReadText ni
                                     )
                         in
@@ -148,7 +160,7 @@ functor (Printer: Sig.PRINTER) -> struct
                                 flush_text since (i - 1);
                             ) else (
                                 Printer.handle_text t.t_printer
-                                    (make_state number i [])
+                                    (make_loc number i)
                                     (" ")
                             );
                             ReadText 0

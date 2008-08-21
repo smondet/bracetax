@@ -1,22 +1,17 @@
 
-type environnement =
-    | Comment
-    | Bold
-    | Italic
-    | Type
-    | Section of (int * string)
 
-type state = {
+type location = {
     s_line: int;
     s_char: int;
-    s_stack: environnement list;
 }
 
 module type PRINTER = sig
     type t
     val create: write:(string -> unit) -> t
-    val handle_comment_line: t -> state -> string -> unit
-    val handle_text: t -> state -> string -> unit
+    val handle_comment_line: t -> location -> string -> unit
+    val handle_text: t -> location -> string -> unit
+    val start_command: t -> location -> string -> string list -> unit
+    val stop_command: t -> location -> unit
 end
 
 
