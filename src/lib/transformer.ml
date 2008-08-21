@@ -16,6 +16,10 @@ functor (Printer: Sig.PRINTER) -> struct
     let make_loc l c =
         {Sig.s_line = l; s_char = c;}
 
+    type meta_state =
+        | Parsing
+        | BeganVerbastim of string * string list
+
     type parser_state =
         | ReadText of int
         | ReadCommand of int * string option (* the current read name *)
@@ -178,16 +182,64 @@ functor (Printer: Sig.PRINTER) -> struct
         in loop (0, state)
     )
 
+    let verb_pattern = "{verbatim"
+    let verb_default_end = "{endverbatim}"
+
+    let is_begin_verb line = (
+        let l_pattern = Str.length verb_pattern in
+        let l_line = (Str.length line) in
+        if not (l_line >= (l_pattern + 1)) then (
+            None
+        ) else if not ((Str.sub line 0 l_pattern) = verb_pattern) then (
+            None
+        ) else (
+            match Str.get line l_pattern with
+            | '}' ->
+                    (* start with defaults *)
+                    Some (verb_default_end, []) 
+            | '{' ->
+                    (* TODO start reading end_token then args *)
+                    None
+            | _ ->
+                    (* warning ? *)
+                    None
+        )
+
+    )
+
     let do_transformation t = (
-        let rec while_loop lineno state = 
+        let rec while_loop lineno state meta_state = 
             match t.t_read () with
             | Some s ->
-                    let new_state =
-                        parse_line t s lineno state in
-                    while_loop (lineno + 1) new_state
+                    let new_state, new_metastate =
+                        match meta_state with
+                        | Parsing ->
+                                begin match is_begin_verb s with
+                                | None ->
+                                        (parse_line t s lineno state, Parsing)
+                                | Some (endtok, opts) ->
+                                        (ReadText 0,
+                                            BeganVerbastim (endtok, opts))
+                                end
+                        | BeganVerbastim (end_token, opts) ->
+                                if (
+                                    ((Str.length s) >=
+                                        (Str.length end_token))
+                                    && (* assumption on evaluation order... *)
+                                    ((Str.sub s 0 (Str.length end_token) =
+                                        end_token))
+                                ) then (
+                                    (ReadText 0, Parsing)
+                                ) else (
+                                    Printer.handle_verbatim_line t.t_printer
+                                        (make_loc lineno 0) s opts;
+                                    (state, meta_state)
+                                )
+                    in
+                    while_loop (lineno + 1) new_state new_metastate
             | None -> lineno,state
         in
-        let last_line, last_state = while_loop 1 (ReadText 0) in
+        let last_line, last_state = while_loop 1 (ReadText 0) (Parsing) in
         (* call Printer.this_is_the_end *)
         Printer.terminate t.t_printer (make_loc last_line 0);
     )

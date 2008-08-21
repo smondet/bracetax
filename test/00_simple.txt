@@ -27,4 +27,19 @@ ouh}With
 
 some text}
 
+{verbatim{end_token}{option2}}
+That's {verbatim} {}, {{}
+end_token
+
+{verbatim{}{option2}{option3}}
+That's {verbatim} again {}, {{}
+{endverbatim} # the default end_token
+
+{verbatim}
+That's {it:still} {verbatim} {}, {{}
+{endverbatim} # the default end_token
+
+
+
+
 {no reason to pass that to the printer !
