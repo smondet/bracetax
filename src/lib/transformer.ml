@@ -22,12 +22,14 @@ functor (Printer: Sig.PRINTER) -> struct
         | ReadArgs of int * string * string list * string option
         (* ReadArgs (since, cmd_name, arg_list, current_arg *)
 
-    let string_of_state = function
+    let string_of_state =
+        let sl l = (~% "L%d" (List.length l)) in
+        function
         | ReadText o -> ~% "ReadText:%d" o
         | ReadCommand (i,Some o) -> ~% "ReadCommand:%d:%s" i o
         | ReadCommand (i, None) -> ~% "ReadCommand:%d:_" i
-        | ReadArgs (i,c,l,Some o) -> ~% "ReadArgs:%d:%s:L:%s" i c o
-        | ReadArgs (i,c,l, None) -> ~% "ReadArgs:%d:%s:L:-" i c
+        | ReadArgs (i,c,l,Some o) -> ~% "ReadArgs:%d:%s:%s:%s" i (sl l) c o
+        | ReadArgs (i,c,l, None) -> ~% "ReadArgs:%d:%s:%s:_" i (sl l) c
 
 
     module Str = String (* to be able to swicth easily *)
@@ -51,10 +53,11 @@ functor (Printer: Sig.PRINTER) -> struct
         (* let i = ref 0 in *)
         let l = Str.length line in
         let sub s since = Str.sub s since (l - since) in
-        let opt_from_to opt str i_from i_to =
-            let substr = Str.sub str i_from (i_to - i_from) in
+        let opt_from_to ?(add_space=false) opt str i_from i_to =
+            let substr = Str.sub str i_from (1 + i_to - i_from) in
             match opt with
-            | None -> substr | Some s -> s ^ substr
+            | None -> substr ^ (if add_space then " " else "")
+            | Some s -> s ^ substr ^ (if add_space then " " else "")
         in
         let rec loop (i, state) =
             if i < l then (
@@ -91,9 +94,30 @@ functor (Printer: Sig.PRINTER) -> struct
                         (ni, nstate)
                          
                 | '}' ->
+                        let ni = i + 1 in
+                        let nstate =
+                            match state with
+                            | ReadText i ->
+                                    (* TODO flush text, pop command *)
+                                    ReadText ni
+                            | ReadCommand (since, opt) ->
+                                    (* TODO push and pop command *)
+                                    ReadText ni
+                            | ReadArgs (since, cmd, args, opt) ->
+                                    let another_arg =
+                                        ni <> l && Str.get line ni = '{' in
+                                    if another_arg then (
+                                        ReadArgs (
+                                            ni + 1, cmd,
+                                            (opt_from_to opt line since (i-1))
+                                                :: args, None)
+                                    ) else (
+                                        (* TODO push command *)
+                                        ReadText ni
+                                    )
+                        in
+                        (ni, nstate)
                         (* end command *)
-                        (* TODO must flush text, pop command *)
-                        (i + 1, ReadText (i + 1))
                 | _ ->
                         (* characters *)
                         (i + 1, state)
@@ -101,14 +125,18 @@ functor (Printer: Sig.PRINTER) -> struct
             ) else (
                 (* EOL *)
                 let next_state =
+                    let add_space = 
+                        true (* '\n' is a white space => we put ' ' *) in
                     match state with
                     | ReadText i -> (* TODO flush text *) ReadText 0
                     | ReadCommand (since, opt) ->
                             ReadCommand (0,
-                                Some (opt_from_to opt line since (l-1))) 
+                                Some (opt_from_to
+                                    ~add_space opt line since (l-1))) 
                     | ReadArgs (since, cmd_name, arg_list, opt) ->
                             ReadArgs (0, cmd_name, arg_list,
-                                Some (opt_from_to opt line since (l-1))) 
+                                Some (opt_from_to
+                                    ~add_space opt line since (l-1))) 
                 in
                 next_state
             )
