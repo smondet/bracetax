@@ -43,6 +43,8 @@ let () = (
             ) in
     DummyTransformer.do_transformation t;
     close_in o;
+    let s = GrammarStack.empty () in
+    GrammarStack.push s GrammarStack.Italic;
     p (~% "Done;\n")
 )
 

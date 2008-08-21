@@ -98,8 +98,7 @@ functor (Printer: Sig.PRINTER) -> struct
                             ReadCommand (ni, None)
                         | ReadCommand (since, opt) ->
                             ReadArgs (
-                                ni, opt_from_to ~opt line since (i-1),
-                                [], None)
+                                ni, opt_from_to ~opt line since (i-1), [], None)
                         | ReadArgs (_) as ra -> ra
                     in
                     (ni, nstate)
