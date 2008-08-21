@@ -12,6 +12,7 @@ module type PRINTER = sig
     val handle_text: t -> location -> string -> unit
     val start_command: t -> location -> string -> string list -> unit
     val stop_command: t -> location -> unit
+    val terminate: t -> location -> unit
 end
 
 

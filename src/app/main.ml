@@ -21,6 +21,9 @@ module DummyPrinter = struct
 
     let stop_command t location = 
         p (~% "%s%s[stop]\n" head (strstat location))
+        
+    let terminate t location = 
+        p (~% "%s%s[This is the end...]\n" head (strstat location))
 end
 
 let () = (

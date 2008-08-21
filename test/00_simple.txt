@@ -27,3 +27,4 @@ ouh}With
 
 some text}
 
+{no reason to pass that to the printer !

@@ -114,9 +114,9 @@ functor (Printer: Sig.PRINTER) -> struct
                         let nstate =
                             match state with
                             | ReadText since ->
+                                    flush_text since (i - 1);
                                     Printer.stop_command t.t_printer
                                         (make_loc number i);
-                                    flush_text since (i - 1);
                                     ReadText ni
                             | ReadCommand (since, opt) ->
                                     Printer.start_command t.t_printer
@@ -185,10 +185,11 @@ functor (Printer: Sig.PRINTER) -> struct
                     let new_state =
                         parse_line t s lineno state in
                     while_loop (lineno + 1) new_state
-            | None -> ()
+            | None -> lineno,state
         in
-        while_loop 1 (ReadText 0);
+        let last_line, last_state = while_loop 1 (ReadText 0) in
         (* call Printer.this_is_the_end *)
+        Printer.terminate t.t_printer (make_loc last_line 0);
     )
 end
 
