@@ -13,8 +13,7 @@ functor (Printer: Sig.PRINTER) -> struct
         t_printer = Printer.create ~write; t_read = read; t_write = write;
     }
 
-    let make_loc l c =
-        {Sig.s_line = l; s_char = c;}
+    let make_loc l c = {Sig.s_line = l; s_char = c;}
 
     type meta_state =
         | Parsing
@@ -38,6 +37,13 @@ functor (Printer: Sig.PRINTER) -> struct
 
     module Str = String (* to be able to swicth easily *)
 
+    (* Substring with indexes *)
+    let sub_i s i j = Str.sub s i (j - i + 1)
+    (* Substring from 'since' to the end *)
+    let sub_end s since =
+        let l = Str.length s in Str.sub s since (l - since)
+
+
     let debug s i state  = (
         if true then (
             let l = Str.length s in
@@ -56,7 +62,6 @@ functor (Printer: Sig.PRINTER) -> struct
     let parse_line t line number state = (
         (* let i = ref 0 in *)
         let l = Str.length line in
-        let sub_end s since = Str.sub s since (l - since) in
         let opt_from_to ?(add_space=false) ?(opt=None) str i_from i_to =
             let substr = Str.sub str i_from (1 + i_to - i_from) in
             match opt with
@@ -186,8 +191,6 @@ functor (Printer: Sig.PRINTER) -> struct
     let verb_pattern = "{verbatim"
     let verb_default_end = "{endverbatim}"
 
-    let sub_i s i j = Str.sub s i (j - i + 1)
-
     let is_begin_verb line = (
         let l_pattern = Str.length verb_pattern in
         let l_line = (Str.length line) in
@@ -207,30 +210,28 @@ functor (Printer: Sig.PRINTER) -> struct
                             Str.index_from line (l_pattern + 1) '}' in
                         let end_token =
                             if next_cbra = l_pattern + 1 then
-                                    verb_default_end
-                                else 
-                                    ~% "{%s}" (
-                                        sub_i line (l_pattern + 1)
-                                            (next_cbra - 1))
+                                verb_default_end
+                            else 
+                                ~% "{%s}" (
+                                    sub_i line (l_pattern + 1) (next_cbra - 1))
                         in
                         let args =
-                            (* TODO read args *)
                             let rec parse_args cur_char acc = 
                                 let another_arg =
                                     if cur_char <> l_line then
-                                        Str.get line cur_char = '{' else false
+                                        Str.get line cur_char = '{'
+                                    else
+                                        false
                                 in
                                 if another_arg then (
-                                    let next_cbra =
+                                    let next =
                                         Str.index_from line cur_char '}' in
                                     let arg = 
-                                        sub_i line (cur_char + 1)
-                                            (next_cbra - 1) in
+                                        sub_i line (cur_char + 1) (next - 1) in
                                     (* print_string (~% "Arg: %s\n" arg); *)
-                                    parse_args (next_cbra + 1) (arg :: acc)
-                                ) else (
+                                    parse_args (next + 1) (arg :: acc)
+                                ) else
                                     acc
-                                )
                             in
                             parse_args (next_cbra + 1) []
                         in
@@ -265,8 +266,8 @@ functor (Printer: Sig.PRINTER) -> struct
                                     ((Str.length s) >=
                                         (Str.length end_token))
                                     && (* assumption on evaluation order... *)
-                                    ((Str.sub s 0 (Str.length end_token) =
-                                        end_token))
+                                    (Str.sub s 0 (Str.length end_token) =
+                                        end_token)
                                 ) then (
                                     (ReadText 0, Parsing)
                                 ) else (
