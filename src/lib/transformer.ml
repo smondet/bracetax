@@ -35,24 +35,24 @@ functor (Printer: Sig.PRINTER) -> struct
         | ReadArgs (i,c,l, None) -> ~% "ReadArgs:%d:%s:%s:_" i (sl l) c
 
 
-    module Str = String (* to be able to swicth easily *)
+    module S = String (* to be able to swicth easily *)
 
     (* Substring with indexes *)
-    let sub_i s i j = Str.sub s i (j - i + 1)
+    let sub_i s i j = S.sub s i (j - i + 1)
     (* Substring from 'since' to the end *)
     let sub_end s since =
-        let l = Str.length s in Str.sub s since (l - since)
+        let l = S.length s in S.sub s since (l - since)
 
 
     let debug s i state  = (
         if true then (
-            let l = Str.length s in
+            let l = S.length s in
             try
                 Printf.eprintf "---[State: %s] \"%s[%s]%s\"    (%d)\n%!"
                      (string_of_state state)
-                     (Str.sub s 0 i)
-                     (Str.sub s i 1)
-                     (Str.sub s (i + 1) (l - i - 1))
+                     (S.sub s 0 i)
+                     (S.sub s i 1)
+                     (S.sub s (i + 1) (l - i - 1))
                      i
             with
             e -> ()
@@ -61,9 +61,9 @@ functor (Printer: Sig.PRINTER) -> struct
 
     let parse_line t line number state = (
         (* let i = ref 0 in *)
-        let l = Str.length line in
+        let l = S.length line in
         let opt_from_to ?(add_space=false) ?(opt=None) str i_from i_to =
-            let substr = Str.sub str i_from (1 + i_to - i_from) in
+            let substr = S.sub str i_from (1 + i_to - i_from) in
             match opt with
             | None -> substr ^ (if add_space then " " else "")
             | Some s -> s ^ substr ^ (if add_space then " " else "")
@@ -76,7 +76,7 @@ functor (Printer: Sig.PRINTER) -> struct
         let rec loop (i, state) =
             if i < l then (
                 debug line i state;
-                loop begin match Str.get line i with
+                loop begin match S.get line i with
                 | '#' ->
                     let nstate =
                         match state with
@@ -135,7 +135,7 @@ functor (Printer: Sig.PRINTER) -> struct
                                 (opt_from_to ~opt line since (i-1)) :: args in
                             let another_arg =
                                 if ni <> l then
-                                    Str.get line ni = '{' else false in
+                                    S.get line ni = '{' else false in
                             if another_arg then (
                                 ReadArgs (ni + 1, cmd, the_args, None)
                             ) else (
@@ -180,14 +180,14 @@ functor (Printer: Sig.PRINTER) -> struct
     let verb_default_end = "{endverbatim}"
 
     let is_begin_verb line = (
-        let l_pattern = Str.length verb_pattern in
-        let l_line = (Str.length line) in
+        let l_pattern = S.length verb_pattern in
+        let l_line = (S.length line) in
         if not (l_line >= (l_pattern + 1)) then (
             None
-        ) else if not ((Str.sub line 0 l_pattern) = verb_pattern) then (
+        ) else if not ((S.sub line 0 l_pattern) = verb_pattern) then (
             None
         ) else (
-            match Str.get line l_pattern with
+            match S.get line l_pattern with
             | '}' ->
                 (* start with defaults *)
                 (* warning if more data after *)
@@ -195,7 +195,7 @@ functor (Printer: Sig.PRINTER) -> struct
             | '{' ->
                 begin try
                     let next_cbra =
-                        Str.index_from line (l_pattern + 1) '}' in
+                        S.index_from line (l_pattern + 1) '}' in
                     let end_token =
                         if next_cbra = l_pattern + 1 then
                             verb_default_end
@@ -207,10 +207,10 @@ functor (Printer: Sig.PRINTER) -> struct
                         let rec parse_args cur_char acc = 
                             let another_arg =
                                 if cur_char <> l_line
-                                then Str.get line cur_char = '{' else false
+                                then S.get line cur_char = '{' else false
                             in
                             if another_arg then (
-                                let next = Str.index_from line cur_char '}' in
+                                let next = S.index_from line cur_char '}' in
                                 let arg =
                                     sub_i line (cur_char + 1) (next - 1) in
                                 (* print_string (~% "Arg: %s\n" arg); *)
@@ -247,9 +247,9 @@ functor (Printer: Sig.PRINTER) -> struct
                         end
                     | BeganVerbatim (end_token, opts) ->
                         if (
-                            ((Str.length s) >= (Str.length end_token))
+                            ((S.length s) >= (S.length end_token))
                             && (* assumption on evaluation order... *)
-                            (Str.sub s 0 (Str.length end_token) = end_token)
+                            (S.sub s 0 (S.length end_token) = end_token)
                         ) then (
                             (ReadText 0, Parsing)
                         ) else (
