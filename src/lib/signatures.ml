@@ -16,6 +16,7 @@ module type PRINTER = sig
     type t
     val create: write:(string -> unit) -> t
     val handle_comment_line: t -> state -> string -> unit
+    val handle_text: t -> state -> string -> unit
 end
 
 

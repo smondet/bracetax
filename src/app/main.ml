@@ -8,9 +8,12 @@ module DummyPrinter = struct
     let print t f s = output_string f (~% "[%d]%s\n" t s)
 
     let strstat s = (~% "[%d:%d]" s.Signatures.s_line s.Signatures.s_char)
+    let head = "####"
     
     let handle_comment_line t state line =
-        p (~% "%s{comment} %s\n" (strstat state) line);
+        p (~% "%s%s[comment] \"%s\"\n" head (strstat state) line)
+    let handle_text t state line =
+        p (~% "%s%s[text] \"%s\"\n" head (strstat state) line)
 
 end
 

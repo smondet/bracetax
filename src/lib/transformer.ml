@@ -53,30 +53,44 @@ functor (Printer: Sig.PRINTER) -> struct
         (* let i = ref 0 in *)
         let l = Str.length line in
         let sub s since = Str.sub s since (l - since) in
-        let opt_from_to ?(add_space=false) opt str i_from i_to =
+        let opt_from_to ?(add_space=false) ?(opt=None) str i_from i_to =
             let substr = Str.sub str i_from (1 + i_to - i_from) in
             match opt with
             | None -> substr ^ (if add_space then " " else "")
             | Some s -> s ^ substr ^ (if add_space then " " else "")
+        in
+        let flush_text since last =
+            Printer.handle_text t.t_printer
+                (make_state number last [])
+                (opt_from_to line since last)
         in
         let rec loop (i, state) =
             if i < l then (
                 debug line i state;
                 loop begin match Str.get line i with
                 | '#' ->
-                        Printer.handle_comment_line t.t_printer
-                            (make_state number i []) (sub line i);
-                        (l, state) (* i.e. go to 'EOL'  *)
+                        let nstate =
+                            match state with
+                            | ReadText since ->
+                                    (* TODO pop command *)
+                                    flush_text since (i - 1);
+                                    Printer.handle_comment_line t.t_printer
+                                        (make_state number i [])
+                                        (sub line (i+1));
+                                    ReadText l
+                            | s -> s
+                        in
+                        (l, nstate) (* i.e. go to 'EOL'  *)
                 | '{' ->
                         let ni = i + 1 in
                         let nstate =
                             match state with
-                            | ReadText i ->
-                                    (* TODO flush text *)
+                            | ReadText since ->
+                                    flush_text since (i - 1);
                                     ReadCommand (ni, None)
                             | ReadCommand (since, opt) ->
                                     ReadArgs (
-                                        ni, opt_from_to opt line since (i-1),
+                                        ni, opt_from_to ~opt line since (i-1),
                                         [], None)
                             | ReadArgs (_) as ra -> ra
                         in
@@ -97,8 +111,9 @@ functor (Printer: Sig.PRINTER) -> struct
                         let ni = i + 1 in
                         let nstate =
                             match state with
-                            | ReadText i ->
-                                    (* TODO flush text, pop command *)
+                            | ReadText since ->
+                                    (* TODO pop command *)
+                                    flush_text since (i - 1);
                                     ReadText ni
                             | ReadCommand (since, opt) ->
                                     (* TODO push and pop command *)
@@ -109,7 +124,7 @@ functor (Printer: Sig.PRINTER) -> struct
                                     if another_arg then (
                                         ReadArgs (
                                             ni + 1, cmd,
-                                            (opt_from_to opt line since (i-1))
+                                            (opt_from_to ~opt line since (i-1))
                                                 :: args, None)
                                     ) else (
                                         (* TODO push command *)
@@ -128,15 +143,23 @@ functor (Printer: Sig.PRINTER) -> struct
                     let add_space = 
                         true (* '\n' is a white space => we put ' ' *) in
                     match state with
-                    | ReadText i -> (* TODO flush text *) ReadText 0
+                    | ReadText since ->
+                            if since <> i then (
+                                flush_text since (i - 1);
+                            ) else (
+                                Printer.handle_text t.t_printer
+                                    (make_state number i [])
+                                    (" ")
+                            );
+                            ReadText 0
                     | ReadCommand (since, opt) ->
                             ReadCommand (0,
                                 Some (opt_from_to
-                                    ~add_space opt line since (l-1))) 
+                                    ~add_space ~opt line since (l-1))) 
                     | ReadArgs (since, cmd_name, arg_list, opt) ->
                             ReadArgs (0, cmd_name, arg_list,
                                 Some (opt_from_to
-                                    ~add_space opt line since (l-1))) 
+                                    ~add_space ~opt line since (l-1))) 
                 in
                 next_state
             )
