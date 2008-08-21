@@ -56,7 +56,7 @@ functor (Printer: Sig.PRINTER) -> struct
     let parse_line t line number state = (
         (* let i = ref 0 in *)
         let l = Str.length line in
-        let sub s since = Str.sub s since (l - since) in
+        let sub_end s since = Str.sub s since (l - since) in
         let opt_from_to ?(add_space=false) ?(opt=None) str i_from i_to =
             let substr = Str.sub str i_from (1 + i_to - i_from) in
             match opt with
@@ -80,7 +80,7 @@ functor (Printer: Sig.PRINTER) -> struct
                                     flush_text since (i - 1);
                                     Printer.handle_comment_line t.t_printer
                                         (make_loc number i)
-                                        (sub line (i+1));
+                                        (sub_end line (i+1));
                                     ReadText l
                             | s -> s
                         in
@@ -136,7 +136,8 @@ functor (Printer: Sig.PRINTER) -> struct
                                             :: args
                                     in
                                     let another_arg =
-                                        ni <> l && Str.get line ni = '{' in
+                                        if ni <> l then
+                                            Str.get line ni = '{' else false in
                                     if another_arg then (
                                         ReadArgs (
                                             ni + 1, cmd,
@@ -185,6 +186,8 @@ functor (Printer: Sig.PRINTER) -> struct
     let verb_pattern = "{verbatim"
     let verb_default_end = "{endverbatim}"
 
+    let sub_i s i j = Str.sub s i (j - i + 1)
+
     let is_begin_verb line = (
         let l_pattern = Str.length verb_pattern in
         let l_line = (Str.length line) in
@@ -207,12 +210,29 @@ functor (Printer: Sig.PRINTER) -> struct
                                     verb_default_end
                                 else 
                                     ~% "{%s}" (
-                                        Str.sub line  (l_pattern + 1)
-                                            (l_line - next_cbra - 2))
+                                        sub_i line (l_pattern + 1)
+                                            (next_cbra - 1))
                         in
                         let args =
                             (* TODO read args *)
-                            []
+                            let rec parse_args cur_char acc = 
+                                let another_arg =
+                                    if cur_char <> l_line then
+                                        Str.get line cur_char = '{' else false
+                                in
+                                if another_arg then (
+                                    let next_cbra =
+                                        Str.index_from line cur_char '}' in
+                                    let arg = 
+                                        sub_i line (cur_char + 1)
+                                            (next_cbra - 1) in
+                                    (* print_string (~% "Arg: %s\n" arg); *)
+                                    parse_args (next_cbra + 1) (arg :: acc)
+                                ) else (
+                                    acc
+                                )
+                            in
+                            parse_args (next_cbra + 1) []
                         in
                         (* print_string (~% "End tok: %s\n" end_token); *)
                         Some (end_token, args)
