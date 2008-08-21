@@ -1,12 +1,12 @@
 
-type command =
-    | Italic
-    | Bold
-    | TypeWriter
-    | Verbatim of string list
+type command = [
+    | `italic
+    | `bold
+    | `typeWriter
+    | `verbatim of string list
+]
 
-
-type stack = command list ref
+type t = command list ref
 
 let empty () = ref []
 

@@ -5,7 +5,6 @@ module DummyPrinter = struct
     type t = int
 
     let create ~write = 0
-    let print t f s = output_string f (~% "[%d]%s\n" t s)
 
     let strstat s = (~% "[%d:%d]" s.Signatures.s_line s.Signatures.s_char)
     let head = "####"
@@ -32,19 +31,29 @@ module DummyPrinter = struct
 end
 
 let () = (
-    let module DummyTransformer = Transformer.Make(DummyPrinter) in
-    let o = open_in Sys.argv.(1) in
-    let t =
-        DummyTransformer.create
-            ~write:(fun s -> ())
-            ~read:(fun () -> 
-                try Some (input_line o) 
-                with e -> None
-            ) in
-    DummyTransformer.do_transformation t;
-    close_in o;
-    let s = GrammarStack.empty () in
-    GrammarStack.push s GrammarStack.Italic;
-    p (~% "Done;\n")
+    if Sys.argv.(1) = "-debug" then (
+        let module DummyTransformer = Transformer.Make(DummyPrinter) in
+        let o = open_in Sys.argv.(2) in
+        let t =
+            DummyTransformer.create
+                ~write:(fun s -> ())
+                ~read:(fun () -> 
+                    try Some (input_line o) 
+                    with e -> None
+                ) in
+        DummyTransformer.do_transformation t;
+        close_in o;
+        p (~% "Done;\n")
+    ) else (
+        let module HtmlTransformer = Transformer.Make(HtmlPrinter) in
+        let o = open_in Sys.argv.(1) in
+        let t =
+            HtmlTransformer.create
+                ~write:(print_string)
+                ~read:(fun () -> try Some (input_line o) with e -> None)
+        in
+        HtmlTransformer.do_transformation t;
+        close_in o;
+    )
 )
 
