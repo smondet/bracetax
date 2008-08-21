@@ -12,7 +12,7 @@ Some text {it:italics} and # comments...
 {kjhsdf df
 gfds}
 
-{begin:cmd{arg}}
+{begin{cmd}{arg}}
 This is
 {end}
 equivalent to
