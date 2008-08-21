@@ -24,10 +24,10 @@ functor (Printer: Sig.PRINTER) -> struct
 
     let string_of_state =
         let sl l = (~% "L%d" (List.length l)) in
+        let so = function None -> "_" | Some s -> s in
         function
         | ReadText o -> ~% "ReadText:%d" o
-        | ReadCommand (i,Some o) -> ~% "ReadCommand:%d:%s" i o
-        | ReadCommand (i, None) -> ~% "ReadCommand:%d:_" i
+        | ReadCommand (i, o) -> ~% "ReadCommand:%d:%s" i (so o)
         | ReadArgs (i,c,l,Some o) -> ~% "ReadArgs:%d:%s:%s:%s" i (sl l) c o
         | ReadArgs (i,c,l, None) -> ~% "ReadArgs:%d:%s:%s:_" i (sl l) c
 
