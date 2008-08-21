@@ -78,86 +78,78 @@ functor (Printer: Sig.PRINTER) -> struct
                 debug line i state;
                 loop begin match Str.get line i with
                 | '#' ->
-                        let nstate =
-                            match state with
-                            | ReadText since ->
-                                    (* TODO pop command *)
-                                    flush_text since (i - 1);
-                                    Printer.handle_comment_line t.t_printer
-                                        (make_loc number i)
-                                        (sub_end line (i+1));
-                                    ReadText l
-                            | s -> s
-                        in
-                        (l, nstate) (* i.e. go to 'EOL'  *)
+                    let nstate =
+                        match state with
+                        | ReadText since ->
+                            (* TODO pop command *)
+                            flush_text since (i - 1);
+                            Printer.handle_comment_line t.t_printer
+                                (make_loc number i) (sub_end line (i+1));
+                            ReadText l
+                        | s -> s
+                    in
+                    (l, nstate) (* i.e. go to 'EOL'  *)
                 | '{' ->
-                        let ni = i + 1 in
-                        let nstate =
-                            match state with
-                            | ReadText since ->
-                                    flush_text since (i - 1);
-                                    ReadCommand (ni, None)
-                            | ReadCommand (since, opt) ->
-                                    ReadArgs (
-                                        ni, opt_from_to ~opt line since (i-1),
-                                        [], None)
-                            | ReadArgs (_) as ra -> ra
-                        in
-                        (ni, nstate)
+                    let ni = i + 1 in
+                    let nstate =
+                        match state with
+                        | ReadText since ->
+                            flush_text since (i - 1);
+                            ReadCommand (ni, None)
+                        | ReadCommand (since, opt) ->
+                            ReadArgs (
+                                ni, opt_from_to ~opt line since (i-1),
+                                [], None)
+                        | ReadArgs (_) as ra -> ra
+                    in
+                    (ni, nstate)
                 | ':' ->
-                        let ni = i + 1 in
-                        let nstate =
-                            match state with
-                            | ReadCommand (since, opt) ->
-                                    Printer.start_command t.t_printer
-                                        (make_loc number i)
-                                        (opt_from_to ~opt line since (i-1))
-                                        [];
-                                    ReadText ni
-                            | s -> s
-                        in
-                        (ni, nstate)
-                         
+                    let ni = i + 1 in
+                    let nstate =
+                        match state with
+                        | ReadCommand (since, opt) ->
+                            Printer.start_command t.t_printer
+                                (make_loc number i)
+                                (opt_from_to ~opt line since (i-1)) [];
+                            ReadText ni
+                        | s -> s
+                    in
+                    (ni, nstate)
                 | '}' ->
-                        let ni = i + 1 in
-                        let nstate =
-                            match state with
-                            | ReadText since ->
-                                    flush_text since (i - 1);
-                                    Printer.stop_command t.t_printer
-                                        (make_loc number i);
-                                    ReadText ni
-                            | ReadCommand (since, opt) ->
-                                    Printer.start_command t.t_printer
-                                        (make_loc number i)
-                                        (opt_from_to ~opt line since (i-1))
-                                        [];
-                                    Printer.stop_command t.t_printer
-                                        (make_loc number i);
-                                    ReadText ni
-                            | ReadArgs (since, cmd, args, opt) ->
-                                    let the_args =
-                                        (opt_from_to ~opt line since (i-1))
-                                            :: args
-                                    in
-                                    let another_arg =
-                                        if ni <> l then
-                                            Str.get line ni = '{' else false in
-                                    if another_arg then (
-                                        ReadArgs (
-                                            ni + 1, cmd,
-                                            the_args, None)
-                                    ) else (
-                                        Printer.start_command t.t_printer
-                                            (make_loc number i) cmd the_args;
-                                        ReadText ni
-                                    )
-                        in
-                        (ni, nstate)
-                        (* end command *)
+                    let ni = i + 1 in
+                    let nstate =
+                        match state with
+                        | ReadText since ->
+                            flush_text since (i - 1);
+                            Printer.stop_command t.t_printer
+                                (make_loc number i);
+                            ReadText ni
+                        | ReadCommand (since, opt) ->
+                            Printer.start_command t.t_printer
+                                (make_loc number i)
+                                (opt_from_to ~opt line since (i-1)) [];
+                            Printer.stop_command t.t_printer
+                                (make_loc number i);
+                            ReadText ni
+                        | ReadArgs (since, cmd, args, opt) ->
+                            let the_args =
+                                (opt_from_to ~opt line since (i-1)) :: args in
+                            let another_arg =
+                                if ni <> l then
+                                    Str.get line ni = '{' else false in
+                            if another_arg then (
+                                ReadArgs (ni + 1, cmd, the_args, None)
+                            ) else (
+                                Printer.start_command t.t_printer
+                                    (make_loc number i) cmd the_args;
+                                ReadText ni
+                            )
+                    in
+                    (ni, nstate)
+                    (* end command *)
                 | _ ->
-                        (* characters *)
-                        (i + 1, state)
+                    (* characters *)
+                    (i + 1, state)
                 end
             ) else (
                 (* EOL *)
@@ -166,22 +158,19 @@ functor (Printer: Sig.PRINTER) -> struct
                         true (* '\n' is a white space => we put ' ' *) in
                     match state with
                     | ReadText since ->
-                            if since <> i then (
-                                flush_text since (i - 1);
-                            ) else (
-                                Printer.handle_text t.t_printer
-                                    (make_loc number i)
-                                    (" ")
-                            );
-                            ReadText 0
+                        if since <> i then (
+                            flush_text since (i - 1);
+                        ) else (
+                            Printer.handle_text t.t_printer
+                                (make_loc number i) " ";
+                        );
+                        ReadText 0
                     | ReadCommand (since, opt) ->
-                            ReadCommand (0,
-                                Some (opt_from_to
-                                    ~add_space ~opt line since (l-1))) 
+                        ReadCommand (0,
+                            Some (opt_from_to ~add_space ~opt line since (l-1)))
                     | ReadArgs (since, cmd_name, arg_list, opt) ->
-                            ReadArgs (0, cmd_name, arg_list,
-                                Some (opt_from_to
-                                    ~add_space ~opt line since (l-1))) 
+                        ReadArgs (0, cmd_name, arg_list,
+                            Some (opt_from_to ~add_space ~opt line since (l-1))) 
                 in
                 next_state
             )
@@ -201,45 +190,42 @@ functor (Printer: Sig.PRINTER) -> struct
         ) else (
             match Str.get line l_pattern with
             | '}' ->
-                    (* start with defaults *)
-                    (* warning if more data after *)
-                    Some (verb_default_end, []) 
+                (* start with defaults *)
+                (* warning if more data after *)
+                Some (verb_default_end, []) 
             | '{' ->
-                    begin try
-                        let next_cbra =
-                            Str.index_from line (l_pattern + 1) '}' in
-                        let end_token =
-                            if next_cbra = l_pattern + 1 then
-                                verb_default_end
-                            else 
-                                ~% "{%s}" (
-                                    sub_i line (l_pattern + 1) (next_cbra - 1))
-                        in
-                        let args =
-                            let rec parse_args cur_char acc = 
-                                let another_arg =
-                                    if cur_char <> l_line then
-                                        Str.get line cur_char = '{'
-                                    else
-                                        false
-                                in
-                                if another_arg then (
-                                    let next =
-                                        Str.index_from line cur_char '}' in
-                                    let arg = 
-                                        sub_i line (cur_char + 1) (next - 1) in
-                                    (* print_string (~% "Arg: %s\n" arg); *)
-                                    parse_args (next + 1) (arg :: acc)
-                                ) else
-                                    acc
+                begin try
+                    let next_cbra =
+                        Str.index_from line (l_pattern + 1) '}' in
+                    let end_token =
+                        if next_cbra = l_pattern + 1 then
+                            verb_default_end
+                        else 
+                            ~% "{%s}"
+                                (sub_i line (l_pattern + 1) (next_cbra - 1))
+                    in
+                    let args =
+                        let rec parse_args cur_char acc = 
+                            let another_arg =
+                                if cur_char <> l_line
+                                then Str.get line cur_char = '{' else false
                             in
-                            parse_args (next_cbra + 1) []
+                            if another_arg then (
+                                let next = Str.index_from line cur_char '}' in
+                                let arg =
+                                    sub_i line (cur_char + 1) (next - 1) in
+                                (* print_string (~% "Arg: %s\n" arg); *)
+                                parse_args (next + 1) (arg :: acc)
+                            ) else
+                                acc
                         in
-                        (* print_string (~% "End tok: %s\n" end_token); *)
-                        Some (end_token, args)
-                    with
-                    Not_found -> None
-                    end
+                        parse_args (next_cbra + 1) []
+                    in
+                    (* print_string (~% "End tok: %s\n" end_token); *)
+                    Some (end_token, args)
+                with
+                Not_found -> None
+                end
             | _ ->
                     (* warning ? *)
                     None
@@ -251,32 +237,29 @@ functor (Printer: Sig.PRINTER) -> struct
         let rec while_loop lineno state meta_state = 
             match t.t_read () with
             | Some s ->
-                    let new_state, new_metastate =
-                        match meta_state with
-                        | Parsing ->
-                                begin match is_begin_verb s with
-                                | None ->
-                                        (parse_line t s lineno state, Parsing)
-                                | Some (endtok, opts) ->
-                                        (ReadText 0,
-                                            BeganVerbatim (endtok, opts))
-                                end
-                        | BeganVerbatim (end_token, opts) ->
-                                if (
-                                    ((Str.length s) >=
-                                        (Str.length end_token))
-                                    && (* assumption on evaluation order... *)
-                                    (Str.sub s 0 (Str.length end_token) =
-                                        end_token)
-                                ) then (
-                                    (ReadText 0, Parsing)
-                                ) else (
-                                    Printer.handle_verbatim_line t.t_printer
-                                        (make_loc lineno 0) s opts;
-                                    (state, meta_state)
-                                )
-                    in
-                    while_loop (lineno + 1) new_state new_metastate
+                let new_state, new_metastate =
+                    match meta_state with
+                    | Parsing ->
+                        begin match is_begin_verb s with
+                        | None ->
+                            (parse_line t s lineno state, Parsing)
+                        | Some (endtok, opts) ->
+                            (ReadText 0, BeganVerbatim (endtok, opts))
+                        end
+                    | BeganVerbatim (end_token, opts) ->
+                        if (
+                            ((Str.length s) >= (Str.length end_token))
+                            && (* assumption on evaluation order... *)
+                            (Str.sub s 0 (Str.length end_token) = end_token)
+                        ) then (
+                            (ReadText 0, Parsing)
+                        ) else (
+                            Printer.handle_verbatim_line t.t_printer
+                                (make_loc lineno 0) s opts;
+                            (state, meta_state)
+                        )
+                in
+                while_loop (lineno + 1) new_state new_metastate
             | None -> lineno,state
         in
         let last_line, last_state = while_loop 1 (ReadText 0) (Parsing) in
