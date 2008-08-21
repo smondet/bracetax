@@ -29,7 +29,7 @@ some text}
 
 {verbatim{end_token}{option2}}
 That's {verbatim} {}, {{}
-end_token
+{end_token}
 
 {verbatim{}{option2}{option3}}
 That's {verbatim} again {}, {{}

@@ -196,10 +196,29 @@ functor (Printer: Sig.PRINTER) -> struct
             match Str.get line l_pattern with
             | '}' ->
                     (* start with defaults *)
+                    (* warning if more data after *)
                     Some (verb_default_end, []) 
             | '{' ->
-                    (* TODO start reading end_token then args *)
-                    None
+                    begin try
+                        let next_cbra =
+                            Str.index_from line (l_pattern + 1) '}' in
+                        let end_token =
+                            if next_cbra = l_pattern + 1 then
+                                    verb_default_end
+                                else 
+                                    ~% "{%s}" (
+                                        Str.sub line  (l_pattern + 1)
+                                            (l_line - next_cbra - 2))
+                        in
+                        let args =
+                            (* TODO read args *)
+                            []
+                        in
+                        (* print_string (~% "End tok: %s\n" end_token); *)
+                        Some (end_token, args)
+                    with
+                    Not_found -> None
+                    end
             | _ ->
                     (* warning ? *)
                     None
