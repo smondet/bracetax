@@ -48,13 +48,15 @@ let () = (
     ) else (
         let module HtmlTransformer = Transformer.Make(HtmlPrinter) in
         let o = open_in Sys.argv.(1) in
+        let oout = open_out Sys.argv.(2) in
         let t =
             HtmlTransformer.create
-                ~write:(print_string)
+                ~write:(output_string oout )
                 ~read:(fun () -> try Some (input_line o) with e -> None)
         in
         HtmlTransformer.do_transformation t;
         close_in o;
+        close_out oout;
     )
 )
 
