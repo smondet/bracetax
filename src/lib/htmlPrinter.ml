@@ -46,6 +46,9 @@ let handle_text t location line = (
 let start_command t location name args = ()
 let stop_command t location = () 
 let terminate t location = () 
-let handle_verbatim_line t location line args = ()
+
+let enter_verbatim t location args = ()
+let exit_verbatim t location = ()
+let handle_verbatim_line t location line = ()
 
 

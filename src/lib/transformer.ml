@@ -243,6 +243,8 @@ functor (Printer: Sig.PRINTER) -> struct
                         | None ->
                             (parse_line t s lineno state, Parsing)
                         | Some (endtok, opts) ->
+                            Printer.enter_verbatim
+                                t.t_printer (make_loc lineno 0) opts;
                             (ReadText 0, BeganVerbatim (endtok, opts))
                         end
                     | BeganVerbatim (end_token, opts) ->
@@ -251,10 +253,12 @@ functor (Printer: Sig.PRINTER) -> struct
                             && (* assumption on evaluation order... *)
                             (S.sub s 0 (S.length end_token) = end_token)
                         ) then (
+                            Printer.exit_verbatim
+                                t.t_printer (make_loc lineno 0);
                             (ReadText 0, Parsing)
                         ) else (
                             Printer.handle_verbatim_line t.t_printer
-                                (make_loc lineno 0) s opts;
+                                (make_loc lineno 0) s;
                             (state, meta_state)
                         )
                 in

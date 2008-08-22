@@ -24,10 +24,11 @@ module DummyPrinter = struct
     let terminate t location = 
         p (~% "%s%s[This is the end...]\n" head (strstat location))
 
-    let handle_verbatim_line t location line args =
-        p (~% "%s%s[verbatim (%s)] %s\n" head (strstat location)
-            (String.concat ", " args) line)
+    let handle_verbatim_line t location line =
+        p (~% "%s%s[verbatim] %s\n" head (strstat location) line)
 
+    let enter_verbatim t location args = ()
+    let exit_verbatim t location = ()
 end
 
 let () = (
