@@ -2,3 +2,8 @@
 # comments...
 # unsafe comments <!-- lksjd fsd f -->
 # unsafe comments <!-- lksjd fsd f --> slkdjf sd--> lfkdsf 
+#
+
+Some text... <dlfsd>SDAF &adffd; lkjdf s <<>>>
+And more text
+
