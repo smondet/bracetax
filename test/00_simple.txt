@@ -4,6 +4,9 @@ Some text {it:italics} and # comments...
 {bf:bold} {it:italo{bf:bold}}
 # More comments...
 {tt:type-writer text}
+A sharp: {#} A Command {cmd: The lkj fdg # comment
+}
+
 
 {lkdsjf sd fsda sdk:unknown command}
 

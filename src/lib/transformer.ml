@@ -78,17 +78,14 @@ functor (Printer: Sig.PRINTER) -> struct
                 debug line i state;
                 loop begin match S.get line i with
                 | '#' ->
-                    let nstate =
-                        match state with
-                        | ReadText since ->
-                            (* TODO pop command *)
-                            flush_text since (i - 1);
-                            Printer.handle_comment_line t.t_printer
-                                (make_loc number i) (sub_end line (i+1));
-                            ReadText l
-                        | s -> s
-                    in
-                    (l, nstate) (* i.e. go to 'EOL'  *)
+                    begin match state with
+                    | ReadText since ->
+                        flush_text since (i - 1);
+                        Printer.handle_comment_line t.t_printer
+                            (make_loc number i) (sub_end line (i+1));
+                        (l, ReadText l)
+                    | s -> (i+1, s)
+                    end
                 | '{' ->
                     let ni = i + 1 in
                     let nstate =
