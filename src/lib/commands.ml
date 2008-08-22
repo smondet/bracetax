@@ -1,9 +1,22 @@
 
 module Stack = struct
     type environment = [
+        | `unknown of string * string list
         | `italic
         | `bold
-        | `typeWriter
+        | `mono_space
+        | `under_line
+        | `superscript
+        | `subscript
+        | `paragraph
+        | `new_line
+        | `quotation of [
+            `single | `en | `fr | `de | `sp | `default | `unknown of string]
+        | `non_break_space
+        | `open_brace
+        | `close_brace
+        | `sharp
+        | `utf8_char of int
         | `verbatim of string list
     ]
 
@@ -44,4 +57,40 @@ module Names = struct
 
 end
 
+let env_of_name name args = (
+    let module C = Names in
+    let ios s = try int_of_string s with e -> 0 in
+    let quotation_type a =
+        try 
+            match List.hd a with
+            | "'"  -> `single
+            | "en" -> `en
+            | "fr" -> `fr
+            | "de" -> `de
+            | "sp" -> `sp
+            | "default" -> `default
+            | s -> `unknown s
+        with
+        | e -> `default
+    in
+    let (env:Stack.environment) =
+        match name with
+        | s when s = C.italic           ->  `italic          
+        | s when s = C.bold             ->  `bold           
+        | s when s = C.mono_space       ->  `mono_space          
+        | s when s = C.under_line       ->  `under_line          
+        | s when s = C.superscript      ->  `superscript          
+        | s when s = C.subscript        ->  `subscript          
+        | s when s = C.paragraph        ->  `paragraph          
+        | s when s = C.new_line         ->  `new_line          
+        | s when s = C.quotation        ->  `quotation (quotation_type args)
+        | s when s = C.non_break_space  ->  `non_break_space          
+        | s when s = C.open_brace       ->  `open_brace          
+        | s when s = C.close_brace      ->  `close_brace          
+        | s when s = C.sharp            ->  `sharp          
+        | s when s = C.utf8_char        ->  `utf8_char (ios (List.hd args))
+        | s -> `unknown (s, args)
+    in
+    env
+)
 
