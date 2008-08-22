@@ -45,18 +45,27 @@ let handle_text t location line = (
 
 let start_command t location name args = ()
 let stop_command t location = () 
+
 let terminate t location = (
     t.write "\n";
 ) 
 
 let enter_verbatim t location args = (
+    GS.push t.stack (`verbatim args);
     t.write "<pre>\n";
     t.current_line <- location.Signatures.s_line;
 )
 let exit_verbatim t location = (
-    t.write "</pre>\n";
-    t.current_line <- location.Signatures.s_line;
+    let env =  (GS.pop t.stack) in
+    match env with
+    | Some (`verbatim _) ->
+        t.write "</pre>\n";
+        t.current_line <- location.Signatures.s_line;
+    | _ ->
+        (* warning ? error ? anyway, *)
+        failwith "Shouldn't be there, Parser's fault ?";
 )
+
 let handle_verbatim_line t location line = (
     let pcdata = sanitize_pcdata line in
     t.write (~% "%s\n" pcdata);
