@@ -45,10 +45,22 @@ let handle_text t location line = (
 
 let start_command t location name args = ()
 let stop_command t location = () 
-let terminate t location = () 
+let terminate t location = (
+    t.write "\n";
+) 
 
-let enter_verbatim t location args = ()
-let exit_verbatim t location = ()
-let handle_verbatim_line t location line = ()
+let enter_verbatim t location args = (
+    t.write "<pre>\n";
+    t.current_line <- location.Signatures.s_line;
+)
+let exit_verbatim t location = (
+    t.write "</pre>\n";
+    t.current_line <- location.Signatures.s_line;
+)
+let handle_verbatim_line t location line = (
+    let pcdata = sanitize_pcdata line in
+    t.write (~% "%s\n" pcdata);
+    t.current_line <- location.Signatures.s_line;
+)
 
 

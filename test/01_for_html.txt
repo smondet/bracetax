@@ -7,3 +7,12 @@
 Some text... <dlfsd>SDAF &adffd; lkjdf s <<>>>
 And more text
 
+{verbatim{brout}{arg1}{arg2}}
+Some  kd dfg <pre> &nbsp;dfg</pre> sdffs
+code sls  skks skkk asdfa
+ as
+  gadf
+   gfa
+    gfds
+{brout}
+# End of the brout verbatim...
