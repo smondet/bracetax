@@ -16,7 +16,7 @@ let pop s = match !s with [] -> None | h :: t -> s:= t; Some h
 
 let head s = match !s with [] -> None | h :: t -> Some h
 
-module Commands = struct
+module Names = struct
 
     let italic = "i"
     let bold = "b"
