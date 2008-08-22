@@ -1,15 +1,15 @@
 
 type t = {
-    stack: GrammarStack.t;
+    stack: Commands.Stack.t;
     write: string -> unit;
     mutable current_line: int;
 }
-module GS = GrammarStack
+module CS = Commands.Stack
 
 let (~%) = Printf.sprintf
 let p = print_string
 
-let create ~write = {stack = GS.empty (); write = write; current_line = 1;}
+let create ~write = {stack = CS.empty (); write = write; current_line = 1;}
 
 let strstat s = (~% "[%d:%d]" s.Signatures.s_line s.Signatures.s_char)
 let debugstr t s msg = 
@@ -51,12 +51,12 @@ let terminate t location = (
 ) 
 
 let enter_verbatim t location args = (
-    GS.push t.stack (`verbatim args);
+    CS.push t.stack (`verbatim args);
     t.write "<pre>\n";
     t.current_line <- location.Signatures.s_line;
 )
 let exit_verbatim t location = (
-    let env =  (GS.pop t.stack) in
+    let env =  (CS.pop t.stack) in
     match env with
     | Some (`verbatim _) ->
         t.write "</pre>\n";
