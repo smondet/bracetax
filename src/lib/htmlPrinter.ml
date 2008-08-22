@@ -43,8 +43,23 @@ let handle_text t location line = (
     )
 )
 
-let start_command t location name args = ()
-let stop_command t location = () 
+let start_command t location name args = (
+    match Commands.non_env_cmd_of_name name args with
+    | `unknown (name, args) -> (* not a "one shot command" *)
+        ()
+    | cmd -> CS.push t.stack cmd
+)
+let stop_command t location = (
+    match CS.pop t.stack with
+    | Some `paragraph -> t.write "<p/>"
+    | Some `new_line -> t.write "<br/>"
+    | Some `non_break_space -> t.write "&nbsp;"
+    | Some `open_brace -> t.write "{"
+    | Some `close_brace -> t.write "}"
+    | Some `sharp -> t.write "#"
+    | Some (`utf8_char i) -> t.write (~% "&#%d;" i)
+    | _ -> ()
+) 
 
 let terminate t location = (
     t.write "\n";
