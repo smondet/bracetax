@@ -26,3 +26,4 @@ Quotes: {q:default}, {q{'}single}, {q{es}españolas}, {q{fr}françaises},
 {p}
 More HTML: {i:italic}, {b:bold}, {t:mono-spaced}, super{sup:script}, sub{sub:script}# Basic HTML
 {p}
+{begin{b}} A lot of{br} bold and {i:italics} {end} and {i:more}...

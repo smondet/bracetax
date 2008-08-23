@@ -62,9 +62,9 @@ let quotation_open_close a = (
     | e -> default
 )
 
-let start_environment t location name args = (
+let start_environment ?(is_begin=false) t location name args = (
     let module C = Commands.Names in
-    let cmd =
+    let cmd name args =
         match name with
         | s when s = C.quotation        ->
             let op, clo = quotation_open_close args in
@@ -75,38 +75,72 @@ let start_environment t location name args = (
         | s when s = C.mono_space       -> t.write "<tt>" ; `mono_space
         | s when s = C.superscript      -> t.write "<sup>"; `superscript
         | s when s = C.subscript        -> t.write "<sub>"; `subscript
-        | s -> `unknown (s, args)
+        | s when (C.is_end s)           -> p "push end\n"; `cmd_end
+        | s -> p (~% "unknown: %s\n" s); `unknown (s, args)
     in
-    CS.push t.stack cmd;
+    let the_cmd =
+        if C.is_begin name then (
+            match args with
+            | [] -> p "Lonely begin !!"; (`cmd_begin ("", []))
+            | h :: t -> (`cmd_begin (h, t))
+        ) else (
+            cmd name args
+        )
+    in
+    if is_begin then (
+        CS.push t.stack (`cmd_inside the_cmd);
+    ) else (
+        CS.push t.stack the_cmd;
+    );
 )
 
 
 let start_command t location name args = (
-    p (~% "Command: \"%s\"\n" name);
+    p (~% "Command: \"%s\"(%s)\n" name (String.concat ", " args));
     match Commands.non_env_cmd_of_name name args with
     | `unknown (name, args) -> start_environment t location name args
     | cmd -> CS.push t.stack cmd
 )
-let stop_command t location = (
+let rec stop_command t location = (
+    let rec out_of_env env =
+        match env with
+        | `cmd_end ->
+            begin match CS.pop t.stack with
+            | Some (`cmd_inside benv) ->
+                p (~% "{end} %s\n" (Commands.env_to_string benv));
+                out_of_env benv
+            | Some c ->
+                p (~% "Warning {end} does not end a {begin...} but %s\n"
+                    (Commands.env_to_string c));
+                CS.push t.stack c;
+                ()
+            | None -> p (~% "Nothing to {end} there !!\n")
+            end
+        | `cmd_begin (nam, args) ->
+            p (~% "cmd begin %s(%s)\n" nam (String.concat ", " args));
+            start_environment ~is_begin:true t location nam args;
+        | `paragraph -> t.write "</p><p>" (* TODO: unstack and restack ? *)
+        | `new_line -> t.write "<br/>"
+        | `non_break_space -> t.write "&nbsp;"
+        | `open_brace -> t.write "{"
+        | `close_brace -> t.write "}"
+        | `sharp -> t.write "#"
+        | (`utf8_char i) -> t.write (~% "&#%d;" i)
+        | (`quotation (op, clo)) -> t.write clo
+        | `italic       ->  t.write "</i>"  
+        | `bold         ->  t.write "</b>"  
+        | `mono_space   ->  t.write "</tt>" 
+        | `superscript  ->  t.write "</sup>"
+        | `subscript    ->  t.write "</sub>"
+        | s -> p (~% "Unknown command... %s\n" (Commands.env_to_string s)); ()
+    in
     match CS.pop t.stack with
-    | Some `paragraph -> t.write "</p><p>" (* TODO: unstack and restack ? *)
-    | Some `new_line -> t.write "<br/>"
-    | Some `non_break_space -> t.write "&nbsp;"
-    | Some `open_brace -> t.write "{"
-    | Some `close_brace -> t.write "}"
-    | Some `sharp -> t.write "#"
-    | Some (`utf8_char i) -> t.write (~% "&#%d;" i)
-    | Some (`quotation (op, clo)) -> t.write clo
-    | Some `italic       ->  t.write "</i>"  
-    | Some `bold         ->  t.write "</b>"  
-    | Some `mono_space   ->  t.write "</tt>" 
-    | Some `superscript  ->  t.write "</sup>"
-    | Some `subscript    ->  t.write "</sub>"
-    | _ -> ()
+    | Some env -> out_of_env env
+    | None -> ()
 ) 
 
 let terminate t location = (
-    t.write "\n";
+    t.write "</p>\n";
 ) 
 
 let enter_verbatim t location args = (

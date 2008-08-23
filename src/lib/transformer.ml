@@ -145,7 +145,7 @@ functor (Printer: Sig.PRINTER) -> struct
                                 ReadArgs (ni + 1, cmd, the_args, None)
                             ) else (
                                 Printer.start_command t.t_printer
-                                    (make_loc number i) cmd the_args;
+                                    (make_loc number i) cmd (List.rev the_args);
                                 ReadText ni
                             )
                     in
