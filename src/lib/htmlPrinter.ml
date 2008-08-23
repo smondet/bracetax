@@ -66,15 +66,15 @@ let start_environment ?(is_begin=false) t location name args = (
     let module C = Commands.Names in
     let cmd name args =
         match name with
-        | s when s = C.quotation        ->
+        | s when C.is_quotation s        ->
             let op, clo = quotation_open_close args in
             t.write op;
             `quotation (op, clo)
-        | s when s = C.italic           -> t.write "<i>"  ; `italic
-        | s when s = C.bold             -> t.write "<b>"  ; `bold
-        | s when s = C.mono_space       -> t.write "<tt>" ; `mono_space
-        | s when s = C.superscript      -> t.write "<sup>"; `superscript
-        | s when s = C.subscript        -> t.write "<sub>"; `subscript
+        | s when C.is_italic s           -> t.write "<i>"  ; `italic
+        | s when C.is_bold s             -> t.write "<b>"  ; `bold
+        | s when C.is_mono_space s       -> t.write "<tt>" ; `mono_space
+        | s when C.is_superscript s      -> t.write "<sup>"; `superscript
+        | s when C.is_subscript s        -> t.write "<sub>"; `subscript
         | s when (C.is_end s)           -> p "push end\n"; `cmd_end
         | s -> p (~% "unknown: %s\n" s); `unknown (s, args)
     in

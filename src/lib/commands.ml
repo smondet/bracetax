@@ -35,27 +35,26 @@ end
 
 module Names = struct
 
-    let italic = "i"
-    let bold = "b"
-    let mono_space = "t"
-    (* let under_line = "u" *)
-    let superscript = "sup"
-    let subscript = "sub"
-    let paragraph = "p"
-    let new_line = "br"
-
-    let quotation = "q"
+    let is_italic = (=) "i"
+    let is_bold = (=) "b"
+    let is_mono_space = (=) "t"
+    let is_superscript = (=) "sup"
+    let is_subscript = (=) "sub"
+    let is_quotation = (=) "q"
     (* arg1: ' | " | fr | de | sp, default '"' (en) (fr = sp + nbsp's)
      * 
      * http://en.wikipedia.org/wiki/Quotation_mark_glyphs
      * http://en.wikipedia.org/wiki/Quotation_mark,_non-English_usage
      * *)
 
-    let non_break_space = "~"
-    let open_brace = "{"
-    let close_brace = "}"
-    let sharp = "#"
-    let utf8_char = "utf" (* arg1:ocaml int *)
+    let is_non_break_space = (=) "~"
+    let is_open_brace = (=) "{"
+    let is_close_brace = (=) "}"
+    let is_sharp = (=) "#"
+    let is_paragraph = (=) "p"
+    let is_new_line = (=) "br"
+
+    let is_utf8_char = (=) "utf" (* arg1:ocaml int *)
 
     let is_begin name = name = "begin"
     let is_end name = name = "end"
@@ -68,13 +67,13 @@ let non_env_cmd_of_name name args = (
     let ios s = try int_of_string s with e -> 0 in
     let (env:Stack.environment) =
         match name with
-        | s when s = C.paragraph        ->  `paragraph          
-        | s when s = C.new_line         ->  `new_line          
-        | s when s = C.non_break_space  ->  `non_break_space          
-        | s when s = C.open_brace       ->  `open_brace          
-        | s when s = C.close_brace      ->  `close_brace          
-        | s when s = C.sharp            ->  `sharp          
-        | s when s = C.utf8_char        -> 
+        | s when C.is_paragraph s        ->  `paragraph          
+        | s when C.is_new_line s         ->  `new_line          
+        | s when C.is_non_break_space s  ->  `non_break_space          
+        | s when C.is_open_brace s       ->  `open_brace          
+        | s when C.is_close_brace s      ->  `close_brace          
+        | s when C.is_sharp s            ->  `sharp          
+        | s when C.is_utf8_char s        -> 
             (try `utf8_char (ios (List.hd args)) with e -> `unknown (s, args))
         | s -> `unknown (s, args)
     in
