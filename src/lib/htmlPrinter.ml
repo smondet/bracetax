@@ -9,7 +9,7 @@ module CS = Commands.Stack
 let (~%) = Printf.sprintf
 let p = print_string
 
-let create ~write = {stack = CS.empty (); write = write; current_line = 1;}
+let create ~write = {stack = CS.empty (); write = write; current_line = 0;}
 
 let strstat s = (~% "[%d:%d]" s.Signatures.s_line s.Signatures.s_char)
 let debugstr t s msg = 
@@ -33,6 +33,11 @@ let handle_comment_line t location line = (
 )
 
 let handle_text t location line = (
+    if t.current_line = 0 then (
+        t.write "<p>";
+        t.current_line <- location.Signatures.s_line;
+    );
+
     let debug = debugstr t location "Text" in
     let pcdata = sanitize_pcdata line in
     if location.Signatures.s_line > t.current_line then (
@@ -65,12 +70,11 @@ let start_environment t location name args = (
             let op, clo = quotation_open_close args in
             t.write op;
             `quotation (op, clo)
-        | s when s = C.italic           ->  `italic
-        | s when s = C.bold             ->  `bold           
-        | s when s = C.mono_space       ->  `mono_space          
-        | s when s = C.under_line       ->  `under_line          
-        | s when s = C.superscript      ->  `superscript          
-        | s when s = C.subscript        ->  `subscript          
+        | s when s = C.italic           -> t.write "<i>"  ; `italic
+        | s when s = C.bold             -> t.write "<b>"  ; `bold
+        | s when s = C.mono_space       -> t.write "<tt>" ; `mono_space
+        | s when s = C.superscript      -> t.write "<sup>"; `superscript
+        | s when s = C.subscript        -> t.write "<sub>"; `subscript
         | s -> `unknown (s, args)
     in
     CS.push t.stack cmd;
@@ -85,7 +89,7 @@ let start_command t location name args = (
 )
 let stop_command t location = (
     match CS.pop t.stack with
-    | Some `paragraph -> t.write "<p/>"
+    | Some `paragraph -> t.write "</p><p>" (* TODO: unstack and restack ? *)
     | Some `new_line -> t.write "<br/>"
     | Some `non_break_space -> t.write "&nbsp;"
     | Some `open_brace -> t.write "{"
@@ -93,6 +97,11 @@ let stop_command t location = (
     | Some `sharp -> t.write "#"
     | Some (`utf8_char i) -> t.write (~% "&#%d;" i)
     | Some (`quotation (op, clo)) -> t.write clo
+    | Some `italic       ->  t.write "</i>"  
+    | Some `bold         ->  t.write "</b>"  
+    | Some `mono_space   ->  t.write "</tt>" 
+    | Some `superscript  ->  t.write "</sup>"
+    | Some `subscript    ->  t.write "</sub>"
     | _ -> ()
 ) 
 
