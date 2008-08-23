@@ -94,8 +94,12 @@ functor (Printer: Sig.PRINTER) -> struct
                             flush_text since (i - 1);
                             ReadCommand (ni, None)
                         | ReadCommand (since, opt) ->
-                            ReadArgs (
-                                ni, opt_from_to ~opt line since (i-1), [], None)
+                            if since = i then (* it's a '{' command... *)
+                                ReadCommand (since, opt)
+                            else
+                                ReadArgs (
+                                    ni, opt_from_to ~opt line since (i-1),
+                                    [], None)
                         | ReadArgs (_) as ra -> ra
                     in
                     (ni, nstate)
@@ -120,13 +124,17 @@ functor (Printer: Sig.PRINTER) -> struct
                             Printer.stop_command t.t_printer
                                 (make_loc number i);
                             ReadText ni
-                        | ReadCommand (since, opt) ->
-                            Printer.start_command t.t_printer
-                                (make_loc number i)
-                                (opt_from_to ~opt line since (i-1)) [];
-                            Printer.stop_command t.t_printer
-                                (make_loc number i);
-                            ReadText ni
+                        | ReadCommand (since, opt) as st ->
+                            if since = i then (* it's a '}' command *)
+                                st
+                            else (
+                                Printer.start_command t.t_printer
+                                    (make_loc number i)
+                                    (opt_from_to ~opt line since (i-1)) [];
+                                Printer.stop_command t.t_printer
+                                    (make_loc number i);
+                                ReadText ni
+                            )
                         | ReadArgs (since, cmd, args, opt) ->
                             let the_args =
                                 (opt_from_to ~opt line since (i-1)) :: args in
