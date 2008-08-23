@@ -1,10 +1,10 @@
 
 
-Some text {it:italics} and # comments...
-{bf:bold} {it:italo{bf:bold}}
+Some text {i:italics} and # comments...
+{b:bold} {i:italo{b:bold}}
 # More comments...
-{tt:type-writer text}
-A sharp: {#} A Command {cmd: The lkj fdg # comment
+{t:type-writer text}
+A sharp: {#} A Command {cmd: The lkj fdg# comment
 }
 
 
