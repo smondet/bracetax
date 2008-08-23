@@ -14,7 +14,7 @@
 :syn match bracetaxEnvironment "{\(q\){[A-Za-z0-9'_-]*}"ms=s+1
 
 :syn match bracetaxCommand "{\(utf\){[A-Za-z0-9'_-]*}}"
-:syn match bracetaxCommand "{\(p\|br\|#\|{\|}\)}"
+:syn match bracetaxCommand "{\(p\|br\|#\|{\|}\|\~\)}"
 
 " Verbatim regions
 :syn region bracetaxVerbatim start="\(^{verbatim{}.*$\)\@<=" end="^\({endverbatim}\)\@="
