@@ -9,7 +9,11 @@ module CS = Commands.Stack
 let (~%) = Printf.sprintf
 let p = print_string
 
-let create ~write = {stack = CS.empty (); write = write; current_line = 0;}
+let create ~write = {
+    stack = CS.empty ();
+    write = write;
+    current_line = 0;
+}
 
 let strstat s = (~% "[%d:%d]" s.Signatures.s_line s.Signatures.s_char)
 let debugstr t s msg = 
@@ -62,6 +66,15 @@ let quotation_open_close a = (
     | e -> default
 )
 
+let list_start =
+    function `itemize -> "<ul>\n" | `numbered -> "<ol>\n"
+let list_item = 
+    function `itemize -> "</li>\n<li>" | `numbered -> "</li>\n<li>"
+let list_firstitem = 
+    function `itemize -> "<li>" | `numbered -> "<li>"
+let list_stop = 
+    function `itemize -> "</li>\n</ul>\n" | `numbered -> "</li>\n</ol>\n"
+
 let start_environment ?(is_begin=false) t location name args = (
     let module C = Commands.Names in
     let cmd name args =
@@ -76,6 +89,14 @@ let start_environment ?(is_begin=false) t location name args = (
         | s when C.is_superscript s      -> t.write "<sup>"; `superscript
         | s when C.is_subscript s        -> t.write "<sub>"; `subscript
         | s when (C.is_end s)           -> p "push end\n"; `cmd_end
+        | s when C.is_list s             ->
+            let style, other_args, waiting =
+                match args with
+                | [] -> (`itemize, [], ref true)
+                | h :: t -> (C.list_style h, t, ref true) in
+            t.write (list_start style);
+            `list (style, other_args, waiting)
+        | s when C.is_item s -> p "push item"; `item
         | s -> p (~% "unknown: %s\n" s); `unknown (s, args)
     in
     let the_cmd =
@@ -113,14 +134,13 @@ let rec stop_command t location = (
                 p (~% "Warning {end} does not end a {begin...} but %s\n"
                     (Commands.env_to_string c));
                 CS.push t.stack c;
-                ()
             | None -> p (~% "Nothing to {end} there !!\n")
             end
         | `cmd_begin (nam, args) ->
             p (~% "cmd begin %s(%s)\n" nam (String.concat ", " args));
             start_environment ~is_begin:true t location nam args;
-        | `paragraph -> t.write "</p><p>" (* TODO: unstack and restack ? *)
-        | `new_line -> t.write "<br/>"
+        | `paragraph -> t.write "</p>\n<p>" (* TODO: unstack and restack ? *)
+        | `new_line -> t.write "<br/>\n"
         | `non_break_space -> t.write "&nbsp;"
         | `open_brace -> t.write "{"
         | `close_brace -> t.write "}"
@@ -132,6 +152,23 @@ let rec stop_command t location = (
         | `mono_space   ->  t.write "</tt>" 
         | `superscript  ->  t.write "</sup>"
         | `subscript    ->  t.write "</sub>"
+        | `list (style, _, r) -> t.write (list_stop style)
+        | `item ->
+            begin match CS.head t.stack with
+            | Some (`list (style, _, r))
+            | Some (`cmd_inside (`list (style, _, r))) ->
+                if !r then (
+                    t.write (list_firstitem style);
+                    r := false;
+                ) else (
+                    t.write (list_item style);
+                );
+            | Some c ->
+                p (~% "Warning {item} is not just under list but %s\n"
+                    (Commands.env_to_string c));
+                CS.push t.stack c;
+            | None -> p (~% "Warning {item}... nothing to itemize !\n")
+            end
         | s -> p (~% "Unknown command... %s\n" (Commands.env_to_string s)); ()
     in
     match CS.pop t.stack with
