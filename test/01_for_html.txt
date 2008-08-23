@@ -18,7 +18,9 @@ code sls  skks skkk asdfa
 # End of the brout verbatim...
 A br:{br}Continues after...{p}Next paragraph...{p}
 
-Some characters:{{}braced{}} an nbsp{~}:{~}...{#}sharp{#}{br}
+Some characters:{{}braced{}} an nbsp{~}:{~}... {#}sharp{#}{br}
 Some UTF-8: {utf{0x201C}}{utf{339}}{utf{0x201D}}
 {p}
+Quotes: {q:default}, {q{'}single}, {q{es}españolas}, {q{fr}françaises},
+{q{en}English}, {q{de}Deutsch} and {q{brout}unknown is default}{br}
 

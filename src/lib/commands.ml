@@ -10,8 +10,7 @@ module Stack = struct
         | `subscript
         | `paragraph
         | `new_line
-        | `quotation of [
-            `single | `en | `fr | `de | `sp | `default | `unknown of string]
+        | `quotation of string * string
         | `non_break_space
         | `open_brace
         | `close_brace
@@ -44,7 +43,7 @@ module Names = struct
 
     let quotation = "q"
     (* arg1: ' | " | fr | de | sp, default '"' (en) (fr = sp + nbsp's)
-     * http://en.wikipedia.org/wiki/Smart_quotes
+     * 
      * http://en.wikipedia.org/wiki/Quotation_mark_glyphs
      * http://en.wikipedia.org/wiki/Quotation_mark,_non-English_usage
      * *)
@@ -58,19 +57,6 @@ module Names = struct
 
 end
 
-let quotation_type a = (
-    try
-        match List.hd a with
-        | "'"  -> `single
-        | "en" -> `en
-        | "fr" -> `fr
-        | "de" -> `de
-        | "sp" -> `sp
-        | "default" -> `default
-        | s -> `unknown s
-    with
-    | e -> `default
-)
 
 let non_env_cmd_of_name name args = (
     let module C = Names in
@@ -90,12 +76,4 @@ let non_env_cmd_of_name name args = (
     env
 )
 
-(*
-| s when s = C.quotation        ->  `quotation (quotation_type args)
-| s when s = C.italic           ->  `italic
-| s when s = C.bold             ->  `bold           
-| s when s = C.mono_space       ->  `mono_space          
-| s when s = C.under_line       ->  `under_line          
-| s when s = C.superscript      ->  `superscript          
-| s when s = C.subscript        ->  `subscript          
-*)
+

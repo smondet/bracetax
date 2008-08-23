@@ -43,10 +43,44 @@ let handle_text t location line = (
     )
 )
 
+let quotation_open_close a = (
+    let default = ("&ldquo;", "&rdquo;") in
+    try
+        match List.hd a with
+        | "'"  -> ("&lsquo;", "&rsquo;")
+        | "en" -> ("&ldquo;", "&rdquo;")
+        | "fr" -> ("&laquo;&nbsp;", "&nbsp;&raquo;")
+        | "de" -> ("&bdquo;", "&rdquo;")
+        | "es" -> ("&laquo;", "&raquo;")
+        | s    ->  default
+    with
+    | e -> default
+)
+
+let start_environment t location name args = (
+    let module C = Commands.Names in
+    let cmd =
+        match name with
+        | s when s = C.quotation        ->
+            let op, clo = quotation_open_close args in
+            t.write op;
+            `quotation (op, clo)
+        | s when s = C.italic           ->  `italic
+        | s when s = C.bold             ->  `bold           
+        | s when s = C.mono_space       ->  `mono_space          
+        | s when s = C.under_line       ->  `under_line          
+        | s when s = C.superscript      ->  `superscript          
+        | s when s = C.subscript        ->  `subscript          
+        | s -> `unknown (s, args)
+    in
+    CS.push t.stack cmd;
+)
+
+
 let start_command t location name args = (
+    p (~% "Command: \"%s\"\n" name);
     match Commands.non_env_cmd_of_name name args with
-    | `unknown (name, args) -> (* not a "one shot command" *)
-        ()
+    | `unknown (name, args) -> start_environment t location name args
     | cmd -> CS.push t.stack cmd
 )
 let stop_command t location = (
@@ -58,6 +92,7 @@ let stop_command t location = (
     | Some `close_brace -> t.write "}"
     | Some `sharp -> t.write "#"
     | Some (`utf8_char i) -> t.write (~% "&#%d;" i)
+    | Some (`quotation (op, clo)) -> t.write clo
     | _ -> ()
 ) 
 
