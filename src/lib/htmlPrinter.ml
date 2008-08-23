@@ -132,7 +132,7 @@ let start_command t location name args = (
     | `unknown (name, args) -> start_environment t location name args
     | cmd -> CS.push t.stack cmd
 )
-let rec stop_command t location = (
+let stop_command t location = (
     let rec out_of_env env =
         match env with
         | `cmd_end ->
