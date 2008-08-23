@@ -75,6 +75,12 @@ let list_firstitem =
 let list_stop = 
     function `itemize -> "</li>\n</ul>\n" | `numbered -> "</li>\n</ol>\n"
 
+let section_start n l = (* TODO sanitize *)
+    ~% "<h%d><a name=\"%s\" id=\"%s\">" (n + 1) l l
+
+let section_stop n l =
+    ~% "</a></h%d>\n" (n + 1)
+
 let start_environment ?(is_begin=false) t location name args = (
     let module C = Commands.Names in
     let cmd name args =
@@ -97,6 +103,10 @@ let start_environment ?(is_begin=false) t location name args = (
             t.write (list_start style);
             `list (style, other_args, waiting)
         | s when C.is_item s -> p "push item"; `item
+        | s when C.is_section s -> 
+            let level, label = C.section_params args in
+            t.write (section_start level label);
+            `section (level, label)
         | s -> p (~% "unknown: %s\n" s); `unknown (s, args)
     in
     let the_cmd =
@@ -169,6 +179,8 @@ let rec stop_command t location = (
                 CS.push t.stack c;
             | None -> p (~% "Warning {item}... nothing to itemize !\n")
             end
+        | `section (level, label) ->
+            t.write (section_stop level label);
         | s -> p (~% "Unknown command... %s\n" (Commands.env_to_string s)); ()
     in
     match CS.pop t.stack with

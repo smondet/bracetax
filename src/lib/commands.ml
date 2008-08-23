@@ -22,6 +22,7 @@ module Stack = struct
         | `verbatim of string list
         | `list of [`itemize | `numbered ] * string list * bool ref
         | `item
+        | `section of int * string
     ]
 
     type t = environment list ref
@@ -69,6 +70,20 @@ module Names = struct
 
     let is_item name = name = "item"
 
+    let is_section = (=) "section"
+    let section_params =
+        let default = 1 in
+        let level n = 
+            let nn = (try int_of_string n with e -> default) in
+            if 1 <= nn && nn <= 4 then nn else default
+        in
+        function
+        | [] -> (default, "")
+        | [n] -> (level n, "")
+        | n :: l :: q -> (level n, l)
+
+
+
 end
 
 
@@ -114,4 +129,5 @@ let env_to_string (e:Stack.environment) = (
     | `verbatim l                -> spr "verbatim l             "
     | `list l                    -> spr "list                   "
     | `item                      -> spr "item                   "
+    | `section (n, l)            -> spr "section %d  %s     " n l
 )

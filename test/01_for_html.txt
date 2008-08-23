@@ -38,3 +38,13 @@ More HTML: {i:italic}, {b:bold}, {t:mono-spaced}, super{sup:script}, sub{sub:scr
   {item} Four
 {end}
 
+{section{1} An h2...}
+
+{section{2} An {i:H3}}
+bla bla
+{section{2}{2nd_h3} Another {i:H3}}
+bla bla
+{section{1} {i:Another} h2...}
+bla bla
+
+
