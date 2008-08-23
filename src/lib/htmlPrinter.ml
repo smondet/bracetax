@@ -30,6 +30,12 @@ let sanitize_pcdata line =
     let patterns = [('<', "&lt;"); ('>', "&gt;"); ('&', "&amp;")] in
     Escape.replace_chars ~src:line ~patterns
 
+let sanitize_xml_attribute src =
+    let patterns =
+        [('<', "&lt;"); ('>', "&gt;"); ('&', "&amp;"); ('"', "&quot;")] in
+    Escape.replace_chars ~src ~patterns
+
+
 let handle_comment_line t location line = (
     t.write (~% "%s<!--%s-->\n" (debugstr t location "Comment")
         (sanitize_comments line));
@@ -75,8 +81,9 @@ let list_firstitem =
 let list_stop = 
     function `itemize -> "</li>\n</ul>\n" | `numbered -> "</li>\n</ol>\n"
 
-let section_start n l = (* TODO sanitize *)
-    ~% "<h%d><a name=\"%s\" id=\"%s\">" (n + 1) l l
+let section_start n l =
+    let lsan = sanitize_xml_attribute l in
+    ~% "<h%d><a name=\"%s\" id=\"%s\">" (n + 1) lsan lsan
 
 let section_stop n l =
     ~% "</a></h%d>\n" (n + 1)
