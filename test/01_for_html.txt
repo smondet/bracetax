@@ -24,5 +24,5 @@ Some UTF-8: {utf{0x201C}}{utf{339}}{utf{0x201D}}
 Quotes: {q:default}, {q{'}single}, {q{es}españolas}, {q{fr}françaises},
 {q{en}English}, {q{de}Deutsch} and {q{brout}unknown is default}{br}
 {p}
-More HTML: {i:italic}, {b:bold}, {t:mono-spaced}, super{sup:script}, sub{sub:script}
+More HTML: {i:italic}, {b:bold}, {t:mono-spaced}, super{sup:script}, sub{sub:script}# Basic HTML
 {p}
