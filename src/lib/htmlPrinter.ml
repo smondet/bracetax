@@ -101,6 +101,20 @@ let link_start printer args = (
         `link ("", [])
 )
 
+let image_start t args = (
+    let src, opts, lbl = Commands.Names.image_params args in
+    let opts_str =
+        let strs =List.map (function
+        | `w w -> (~% "width=\"%d\""  w)
+        | `h h -> (~% "height=\"%d\"" h)) opts in
+        String.concat " " strs
+    in
+    t.write (~% "<img src=\"%s\" %s id=\"%s\" >"
+        (sanitize_xml_attribute src) opts_str (sanitize_xml_attribute lbl)
+    );
+    `image (src, opts, lbl)
+)
+
 let start_environment ?(is_begin=false) t location name args = (
     let module C = Commands.Names in
     let cmd name args =
@@ -128,6 +142,7 @@ let start_environment ?(is_begin=false) t location name args = (
             t.write (section_start level label);
             `section (level, label)
         | s when C.is_link s -> (link_start t args)
+        | s when C.is_image s -> image_start t args
         | s -> p (~% "unknown: %s\n" s); `unknown (s, args)
     in
     let the_cmd =
@@ -203,6 +218,7 @@ let stop_command t location = (
         | `section (level, label) ->
             t.write (section_stop level label);
         | `link _ -> t.write "</a>";
+        | `image _ -> t.write "</img>";
         | s -> p (~% "Unknown command... %s\n" (Commands.env_to_string s)); ()
     in
     match CS.pop t.stack with

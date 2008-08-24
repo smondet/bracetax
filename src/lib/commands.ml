@@ -24,6 +24,7 @@ module Stack = struct
         | `item
         | `section of int * string
         | `link of string * string list
+        | `image of string * [`w of int | `h of int ] list * string
     ]
 
     type t = environment list ref
@@ -92,6 +93,20 @@ module Names = struct
             ) else (false, name)
         else (false, name)
 
+    let is_image = (=) "image"
+    let image_params =
+        let parse_options str =
+            try 
+                begin try Scanf.sscanf str "%d,%d" (fun w h -> [`w w; `h h])
+                with _ -> Scanf.sscanf str "%d" (fun w -> [`w w])
+                end
+            with  _ -> []
+        in
+        function
+        | [] -> ("", [], "")
+        | [s] -> (s, [], "")
+        | s :: o :: [] -> (s, parse_options o, "")
+        | s :: o :: l :: t -> (s, parse_options o, l)
 
 
 end
@@ -141,4 +156,5 @@ let env_to_string (e:Stack.environment) = (
     | `item                      -> spr "item                   "
     | `section (n, l)            -> spr "section %d  %s     " n l
     | `link    (n, l)            -> spr "link to %s        " n 
+    | `image (src, _,_)          -> spr "image %s" src
 )
