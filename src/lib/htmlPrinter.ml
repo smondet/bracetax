@@ -88,6 +88,19 @@ let section_start n l =
 let section_stop n l =
     ~% "</a></h%d>\n" (n + 1)
 
+let link_start printer args = (
+    match args with
+    | linkto :: t ->
+        let is_local, link = Commands.Names.is_local linkto in
+        let href =
+            if is_local then ~% "#%s" (link) else linkto in
+        printer.write (~% "<a href=\"%s\">" (sanitize_xml_attribute href));
+        `link (href, t)
+    | [] -> 
+        printer.write (~% "<a>");
+        `link ("", [])
+)
+
 let start_environment ?(is_begin=false) t location name args = (
     let module C = Commands.Names in
     let cmd name args =
@@ -114,6 +127,7 @@ let start_environment ?(is_begin=false) t location name args = (
             let level, label = C.section_params args in
             t.write (section_start level label);
             `section (level, label)
+        | s when C.is_link s -> (link_start t args)
         | s -> p (~% "unknown: %s\n" s); `unknown (s, args)
     in
     let the_cmd =
@@ -188,6 +202,7 @@ let stop_command t location = (
             end
         | `section (level, label) ->
             t.write (section_stop level label);
+        | `link _ -> t.write "</a>";
         | s -> p (~% "Unknown command... %s\n" (Commands.env_to_string s)); ()
     in
     match CS.pop t.stack with

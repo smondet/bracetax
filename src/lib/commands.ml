@@ -23,6 +23,7 @@ module Stack = struct
         | `list of [`itemize | `numbered ] * string list * bool ref
         | `item
         | `section of int * string
+        | `link of string * string list
     ]
 
     type t = environment list ref
@@ -82,6 +83,15 @@ module Names = struct
         | [n] -> (level n, "")
         | n :: l :: q -> (level n, l)
 
+    let is_link = (=) "link"
+    let is_local name =
+        let l = String.length name in
+        if l >= 6 then
+            if String.sub name 0 6 = "local:" then (
+                (true, String.sub name 6 (l - 6))
+            ) else (false, name)
+        else (false, name)
+
 
 
 end
@@ -130,4 +140,5 @@ let env_to_string (e:Stack.environment) = (
     | `list l                    -> spr "list                   "
     | `item                      -> spr "item                   "
     | `section (n, l)            -> spr "section %d  %s     " n l
+    | `link    (n, l)            -> spr "link to %s        " n 
 )
