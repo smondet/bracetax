@@ -10,11 +10,13 @@
 " Commands TODO
 " :syn match bracetaxOpenBrace "{"
 " :syn match bracetaxCloseBrace "}"
-:syn match bracetaxEnvironment "{\(q\|i\|b\|t\|sup\|sub\):"ms=s+1
-:syn match bracetaxEnvironment "{\(q\){[A-Za-z0-9'_-]*}"ms=s+1
+:syn match bracetaxEnvironment "{\(q\|i\|b\|t\|sup\|sub\|section\|link\):"ms=s+1
+" :syn match bracetaxEnvironment "{\(q\|section\|link\|list\){[A-Za-z0-9'_/\-:\.]*}"ms=s+1
+:syn match bracetaxEnvironment "{\(q\|section\|link\|list\){[^}]\{-}}"ms=s+1
+:syn match bracetaxEnvironment "{\(section\)\({[A-Za-z0-9'_-]*}\)\{2}"ms=s+1
 
 :syn match bracetaxCommand "{\(utf\){[A-Za-z0-9'_-]*}}"
-:syn match bracetaxCommand "{\(p\|br\|#\|{\|}\|\~\)}"
+:syn match bracetaxCommand "{\(p\|br\|#\|{\|}\|\~\|item\)}"
 
 " Verbatim regions
 :syn region bracetaxVerbatim start="\(^{verbatim{}.*$\)\@<=" end="^\({endverbatim}\)\@="
