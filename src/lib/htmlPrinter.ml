@@ -109,8 +109,9 @@ let image_start t args = (
         | `h h -> (~% "height=\"%d\"" h)) opts in
         String.concat " " strs
     in
-    t.write (~% "<img src=\"%s\" %s id=\"%s\" >"
-        (sanitize_xml_attribute src) opts_str (sanitize_xml_attribute lbl)
+    let sansrc = sanitize_xml_attribute src in
+    t.write (~% "<a href=\"%s\"><img src=\"%s\" %s id=\"%s\" >"
+        sansrc sansrc opts_str (sanitize_xml_attribute lbl)
     );
     `image (src, opts, lbl)
 )
@@ -218,7 +219,7 @@ let stop_command t location = (
         | `section (level, label) ->
             t.write (section_stop level label);
         | `link _ -> t.write "</a>";
-        | `image _ -> t.write "</img>";
+        | `image _ -> t.write "</img></a>";
         | s -> p (~% "Unknown command... %s\n" (Commands.env_to_string s)); ()
     in
     match CS.pop t.stack with
