@@ -110,11 +110,14 @@ let image_start t args = (
         String.concat " " strs
     in
     let sansrc = sanitize_xml_attribute src in
-    t.write (~% "<a href=\"%s\"><img src=\"%s\" %s id=\"%s\" >"
+    t.write (~%
+        "<div class=\"figure\"><a href=\"%s\">\
+        <img src=\"%s\" %s id=\"%s\" /></a><br/>"
         sansrc sansrc opts_str (sanitize_xml_attribute lbl)
     );
     `image (src, opts, lbl)
 )
+let image_stop = "</div>"
 
 let start_environment ?(is_begin=false) t location name args = (
     let module C = Commands.Names in
@@ -219,7 +222,7 @@ let stop_command t location = (
         | `section (level, label) ->
             t.write (section_stop level label);
         | `link _ -> t.write "</a>";
-        | `image _ -> t.write "</img></a>";
+        | `image _ -> t.write image_stop;
         | s -> p (~% "Unknown command... %s\n" (Commands.env_to_string s)); ()
     in
     match CS.pop t.stack with
