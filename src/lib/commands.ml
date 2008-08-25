@@ -114,7 +114,7 @@ module Names = struct
 
     let is_header = (=) "header"
     let is_title  = (=) "title"
-    let is_authors  = (=) "author"
+    let is_authors  = (=) "authors"
     let is_subtitle = (=) "subtitle"
 
 end

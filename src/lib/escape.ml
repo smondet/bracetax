@@ -47,3 +47,16 @@ val patterns : (char * string) list =
 
  *)
 
+let is_white_space str = (
+    try 
+        String.iter (fun c ->
+            if c <> ' ' && c <> '\t' && c <> '\n' && c <> '\r'  then
+                raise Exit
+        ) str;
+        true
+    with 
+    Exit -> false
+)
+
+
+

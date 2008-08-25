@@ -3,6 +3,8 @@ type t = {
     stack: Commands.Stack.t;
     write: string -> unit;
     mutable current_line: int;
+    mutable started_text: bool;
+    mutable inside_header:bool;
 }
 module CS = Commands.Stack
 
@@ -12,7 +14,9 @@ let p = print_string
 let create ~write = {
     stack = CS.empty ();
     write = write;
-    current_line = 0;
+    current_line = 1;
+    started_text = false;
+    inside_header = false;
 }
 
 let strstat s = (~% "[%d:%d]" s.Signatures.s_line s.Signatures.s_char)
@@ -35,28 +39,6 @@ let sanitize_xml_attribute src =
         [('<', "&lt;"); ('>', "&gt;"); ('&', "&amp;"); ('"', "&quot;")] in
     Escape.replace_chars ~src ~patterns
 
-
-let handle_comment_line t location line = (
-    t.write (~% "%s<!--%s-->\n" (debugstr t location "Comment")
-        (sanitize_comments line));
-    t.current_line <- t.current_line + 1;
-)
-
-let handle_text t location line = (
-    if t.current_line = 0 then (
-        t.write "<p>";
-        t.current_line <- location.Signatures.s_line;
-    );
-
-    let debug = debugstr t location "Text" in
-    let pcdata = sanitize_pcdata line in
-    if location.Signatures.s_line > t.current_line then (
-        t.write (~% "%s%s\n" debug pcdata);
-        t.current_line <- location.Signatures.s_line;
-    ) else (
-        t.write (~% "%s%s" debug pcdata);
-    )
-)
 
 let quotation_open_close a = (
     let default = ("&ldquo;", "&rdquo;") in
@@ -119,14 +101,22 @@ let image_start t args = (
 )
 let image_stop = "</div>"
 
-let header_start = "</p><div class=\"header\">"
-let header_stop = "</div><p>"
-let title_start = "<h1>"
-let title_stop = "</h1>"
-let authors_start = "<div class=\"authors\">"
-let authors_stop = "</div>"
-let subtitle_start = "<div class=\"subtitle\">"
-let subtitle_stop = "</div>"
+let header_start t = (
+    t.inside_header <- true; 
+    ~% "%s\n<div class=\"header\">\n" (if t.started_text then "</p>" else "")
+)
+let header_stop t = (
+    t.inside_header <- false;
+    t.started_text <- true; (* we put the <p> *)
+    "</div> <!-- END HEADER -->\n<p>\n"
+)
+
+let title_start = "\n  <h1>"
+let title_stop = "</h1>\n"
+let authors_start = "  <div class=\"authors\">"
+let authors_stop = "</div>\n"
+let subtitle_start = "  <div class=\"subtitle\">"
+let subtitle_stop = "</div>\n"
 
 let start_environment ?(is_begin=false) t location name args = (
     let module C = Commands.Names in
@@ -156,7 +146,7 @@ let start_environment ?(is_begin=false) t location name args = (
             `section (level, label)
         | s when C.is_link s -> (link_start t args)
         | s when C.is_image s -> image_start t args
-        | s when C.is_header s -> t.write header_start; `header
+        | s when C.is_header s -> t.write (header_start t); `header
         | s when C.is_title s -> t.write title_start; `title
         | s when C.is_subtitle s -> t.write subtitle_start; `subtitle
         | s when C.is_authors s -> t.write authors_start; `authors
@@ -178,6 +168,7 @@ let start_environment ?(is_begin=false) t location name args = (
     );
 )
 
+(* ==== PRINTER module type's functions ==== *)
 
 let start_command t location name args = (
     p (~% "Command: \"%s\"(%s)\n" name (String.concat ", " args));
@@ -236,7 +227,7 @@ let stop_command t location = (
             t.write (section_stop level label);
         | `link _ -> t.write "</a>";
         | `image _ -> t.write image_stop;
-        | `header -> t.write header_stop;
+        | `header ->  t.write (header_stop t);
         | `title -> t.write title_stop;
         | `subtitle -> t.write subtitle_stop;
         | `authors -> t.write authors_stop;
@@ -246,6 +237,45 @@ let stop_command t location = (
     | Some env -> out_of_env env
     | None -> ()
 ) 
+
+let handle_comment_line t location line = (
+    t.write (~% "%s<!--%s-->\n" (debugstr t location "Comment")
+        (sanitize_comments line));
+    t.current_line <- t.current_line + 1;
+)
+
+let handle_text t location line = (
+    if
+        not t.started_text &&
+        not t.inside_header &&
+        not (Escape.is_white_space line)
+    then (
+        t.started_text <- true;
+        t.write "<p>";
+    );
+        
+    if 
+        (t.started_text && (not t.inside_header)) ||
+        (t.inside_header && (CS.head t.stack <> Some `header)) then (
+
+        let debug = debugstr t location "Text" in
+        let pcdata = sanitize_pcdata line in
+        if location.Signatures.s_line > t.current_line then (
+            t.write (~% "%s%s\n" debug pcdata);
+            t.current_line <- location.Signatures.s_line;
+        ) else (
+            t.write (~% "%s%s" debug pcdata);
+        )
+    ) else (
+        if
+            CS.head t.stack = Some `header
+            && (not (Escape.is_white_space line))
+        then (
+            t.write (~% "<!-- IGNORED TEXT: %s -->" (sanitize_comments line));
+        );
+
+    )
+)
 
 let terminate t location = (
     t.write "</p>\n";
