@@ -25,6 +25,10 @@ module Stack = struct
         | `section of int * string
         | `link of string * string list
         | `image of string * [`w of int | `h of int ] list * string
+        | `header
+        | `title
+        | `authors
+        | `subtitle
     ]
 
     type t = environment list ref
@@ -108,6 +112,10 @@ module Names = struct
         | s :: o :: [] -> (s, parse_options o, "")
         | s :: o :: l :: t -> (s, parse_options o, l)
 
+    let is_header = (=) "header"
+    let is_title  = (=) "title"
+    let is_authors  = (=) "author"
+    let is_subtitle = (=) "subtitle"
 
 end
 
@@ -157,4 +165,8 @@ let env_to_string (e:Stack.environment) = (
     | `section (n, l)            -> spr "section %d  %s     " n l
     | `link    (n, l)            -> spr "link to %s        " n 
     | `image (src, _,_)          -> spr "image %s" src
+    | `header                    -> spr "header  "       
+    | `title                     -> spr "title   "      
+    | `authors                   -> spr "authors "        
+    | `subtitle                  -> spr "subtitle"         
 )
