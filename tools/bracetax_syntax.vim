@@ -7,28 +7,32 @@
 " Comments from conf.vim:
 :syn match bracetaxComment "\({\)\@<!#.*$" contains=bracetaxTodo
 
-" Commands TODO
-" :syn match bracetaxOpenBrace "{"
-" :syn match bracetaxCloseBrace "}"
-:syn match bracetaxEnvironment "{\(q\|i\|b\|t\|sup\|sub\|section\|link\):"ms=s+1
-" :syn match bracetaxEnvironment "{\(q\|section\|link\|list\){[A-Za-z0-9'_/\-:\.]*}"ms=s+1
-:syn match bracetaxEnvironment "{\(q\|section\|link\|list\){[^}]\{-}}"ms=s+1
-:syn match bracetaxEnvironment "{\(section\)\({[A-Za-z0-9'_-]*}\)\{2}"ms=s+1
-
-:syn match bracetaxCommand "{\(utf\){[A-Za-z0-9'_-]*}}"
-:syn match bracetaxCommand "{\(p\|br\|#\|{\|}\|\~\|item\)}"
-
-" Verbatim regions
-:syn region bracetaxVerbatim start="\(^{verbatim{}.*$\)\@<=" end="^\({endverbatim}\)\@="
-:syn region bracetaxVerbatim start="\(^{verbatim}\)\@<=" end="^\({endverbatim}\)\@="
+" Verbatim regions (TODO: repair...)
+:syn region bracetaxVerbatim start="\(^{verbatim{}\_.*$\)\@<=" end="^\({endverbatim}\)\@="
+:syn region bracetaxVerbatim start="\(^{verbatim}$\)\@<=" end="^\({endverbatim}\)\@="
 :syn region bracetaxVerbatim start="\(^{verbatim{\z(\w\+\)}.*$\)\@<=" end="\(^{\z1}\)\@="
 
 
+" Commands
+:syn match bracetaxSpecialChar "{"
+:syn match bracetaxSpecialChar "}"
+:syn match bracetaxSpecialChar "|"
+:syn match bracetaxSpecialChar "{begin"
+:syn match bracetaxSpecialChar "{end}"
+
+" :syn match bracetaxCommand "{\_.\{-}\(|\|}\)" contains=bracetaxSpecialChar,bracetaxKnown
+:syn region bracetaxCommand keepend start="{" skip="\\|\|\\}" end="\(|\|}\)" contains=bracetaxSpecialChar,bracetaxKnown
+
+:syn match bracetaxKnown "\({\|{begin\s\)\@<=\<\(c\|q\|i\|b\|t\|sup\|sub\|section\|link\|list\|utf\|image\|table\|header\|title\|subtitle\|authors\)\>"
+:syn match bracetaxSimple "{\(p\|br\|#\|{\|}\|\~\|item\)}" contains=bracetaxSpecialChar
+
+" Setting colorization:
+
 :hi def link bracetaxComment Comment
-" :hi def link bracetaxOpenBrace Keyword 
-" :hi def link bracetaxCloseBrace Keyword 
+:hi def link bracetaxSpecialChar Keyword
+:hi def link bracetaxSimple Identifier 
+:hi def link bracetaxKnown Identifier
 :hi def link bracetaxCommand  PreProc
-:hi def link bracetaxEnvironment Type
 :hi def link bracetaxVerbatim SpecialComment
 
 :let b:current_syntax = "bracetax"

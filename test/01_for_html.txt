@@ -33,7 +33,7 @@ Quotes: {q|default}, {q '|single}, {q es|españolas}, {q fr|françaises},
 {p}
 More HTML: {i|italic}, {b|bold}, {t|mono-spaced}, super{sup|script}, sub{sub|script}# Basic HTML
 {p}
-{begin{b}} A lot of{br} bold and {i|italics} {end} and {i|more}...
+{begin b} A lot of{br} bold and {i|italics} {end} and {i|more}...
 {p}
 {list item| {item} one item {item} another}{br}
 
@@ -47,11 +47,11 @@ More HTML: {i|italic}, {b|bold}, {t|mono-spaced}, super{sup|script}, sub{sub|scr
 
 {section 1| An h2...}
 
-{section 2| An {i:H3}}
+{section 2| An {i|H3}}
 bla bla
-{section 2  2nd_h3| Another {i:H3}}
+{section 2  2nd_h3| Another {i|H3}}
 bla bla
-{section 1  An\ ugly\ "\ lks\ <id>\ &ff;|{i:Another} h2...}
+{section 1  An\ ugly\ "\ lks\ <id>\ &ff;|{i|Another} h2...}
 bla bla
 
 A {link http://sebmdt.googlepages.com|link to seb}...{br}
