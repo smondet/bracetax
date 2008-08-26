@@ -1,6 +1,7 @@
 module Sig = Signatures
 
 let (~%) = Printf.sprintf
+let p = print_string
 
 module FunctorMake =
 functor (Printer: Sig.PRINTER) -> struct
@@ -68,15 +69,32 @@ functor (Printer: Sig.PRINTER) -> struct
             | None -> substr ^ (if add_space then " " else "")
             | Some s -> s ^ substr ^ (if add_space then " " else "")
         in
-        let flush_text since last =
+        let flush_text ?add_space since last =
             Printer.handle_text t.t_printer
                 (make_loc number last)
-                (opt_from_to line since last)
+                (opt_from_to ?add_space line since last)
         in
+        let escaping = ref false in
+        let escaping_next = ref false in
         let rec loop (i, state) =
             if i < l then (
                 debug line i state;
-                loop begin match S.get line i with
+                escaping := !escaping_next;
+                escaping_next := false;
+                let nexts = match S.get line i with
+                | '\\' ->
+                    let ni = i + 1 in
+                    let nstate =
+                        match state with
+                        | ReadCommand (since, opt) as rc ->
+                            if not !escaping then escaping_next := true;
+                            rc
+                        | ReadArgs (since, cmd, args, opt) as ra ->
+                            if not !escaping then escaping_next := true;
+                            ra
+                        | s -> s
+                    in
+                    (ni, nstate)
                 | '#' ->
                     begin match state with
                     | ReadText since ->
@@ -93,26 +111,29 @@ functor (Printer: Sig.PRINTER) -> struct
                         | ReadText since ->
                             flush_text since (i - 1);
                             ReadCommand (ni, None)
-                        | ReadCommand (since, opt) ->
-                            if since = i then (* it's a '{' command... *)
-                                ReadCommand (since, opt)
-                            else
-                                ReadArgs (
-                                    ni, opt_from_to ~opt line since (i-1),
-                                    [], None)
-                        | ReadArgs (_) as ra -> ra
+                        | s -> s
                     in
                     (ni, nstate)
-                | ':' ->
+                | '|' ->
                     let ni = i + 1 in
                     let nstate =
-                        match state with
-                        | ReadCommand (since, opt) ->
-                            Printer.start_command t.t_printer
-                                (make_loc number i)
-                                (opt_from_to ~opt line since (i-1)) [];
-                            ReadText ni
-                        | s -> s
+                        if not !escaping then (
+                            match state with
+                            | ReadCommand (since, opt) ->
+                                Printer.start_command t.t_printer
+                                    (make_loc number i)
+                                    (opt_from_to ~opt line since (i-1)) [];
+                                ReadText ni
+                            | ReadArgs (since, cmd, args, opt) ->
+                                let the_args =
+                                    (opt_from_to ~opt line since (i-1))
+                                    :: args in
+                                Printer.start_command t.t_printer
+                                    (make_loc number i) cmd (List.rev the_args);
+                                ReadText ni
+                            | s -> s
+                        ) else
+                            state
                     in
                     (ni, nstate)
                 | '}' ->
@@ -138,23 +159,42 @@ functor (Printer: Sig.PRINTER) -> struct
                         | ReadArgs (since, cmd, args, opt) ->
                             let the_args =
                                 (opt_from_to ~opt line since (i-1)) :: args in
-                            let another_arg =
-                                if ni <> l then
-                                    S.get line ni = '{' else false in
-                            if another_arg then (
-                                ReadArgs (ni + 1, cmd, the_args, None)
-                            ) else (
+                            if not !escaping then (
                                 Printer.start_command t.t_printer
                                     (make_loc number i) cmd (List.rev the_args);
                                 ReadText ni
+                            ) else (
+                                state
                             )
                     in
                     (ni, nstate)
+                | ' ' | '\t' | '\n' | '\r' ->
+                    let ni = i + 1 in
+                    let nstate =
+                        if not !escaping then (
+                            match state with
+                            | ReadCommand (since, opt) ->
+                                ReadArgs (
+                                    ni, opt_from_to ~opt line since (i-1),
+                                    [], None)
+                            | ReadArgs (since, cmd, args, opt) ->
+                                let the_args =
+                                    (opt_from_to ~opt line since (i-1))
+                                    :: args in
+                                ReadArgs (ni, cmd, the_args, None)
+                            | s -> s
+                        ) else (
+                            state
+                        )
+                    in
+                    (* Whitespace, is there a '\' before ? *)
+                    (ni, nstate) 
                     (* end command *)
                 | _ ->
                     (* characters *)
                     (i + 1, state)
-                end
+                in
+                loop nexts
             ) else (
                 (* EOL *)
                 let next_state =
