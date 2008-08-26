@@ -11,11 +11,11 @@ sd \|\|\|\| \\\\\|
 s \{fd\} }
 
 
-{verbatim{end_token}{option2}
+{verbatim end_token option2}
 That's {verbatim} {}, {{}
 {end_token}
 
-{verbatim{}{option2}{option3}}
+{verbatim _ option2 option3}
 That's {verbatim} again {}, {{}
 {endverbatim} # the default end_token
 

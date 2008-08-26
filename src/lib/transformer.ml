@@ -209,36 +209,18 @@ functor (Printer: Sig.PRINTER) -> struct
                 (* start with defaults *)
                 (* warning if more data after *)
                 Some (verb_default_end, []) 
-            | '{' ->
+            | ' ' | '\t' ->
                 begin try
-                    let next_cbra =
-                        S.index_from line (l_pattern + 1) '}' in
-                    let end_token =
-                        if next_cbra = l_pattern + 1 then
-                            verb_default_end
-                        else 
-                            ~% "{%s}"
-                                (sub_i line (l_pattern + 1) (next_cbra - 1))
+                    let next_cbra = S.index_from line (l_pattern + 1) '}' in
+                    let args_string = sub_i line (l_pattern + 1) next_cbra in
+                    let args = split_str args_string in
+                    let end_token, actual_args =
+                        match args with
+                        | [] -> (verb_default_end, [])
+                        | "_" :: t -> (verb_default_end, t)
+                        | h :: t -> (~% "{%s}" h,t)
                     in
-                    let args =
-                        let rec parse_args cur_char acc = 
-                            let another_arg =
-                                if cur_char <> l_line
-                                then S.get line cur_char = '{' else false
-                            in
-                            if another_arg then (
-                                let next = S.index_from line cur_char '}' in
-                                let arg =
-                                    sub_i line (cur_char + 1) (next - 1) in
-                                (* print_string (~% "Arg: %s\n" arg); *)
-                                parse_args (next + 1) (arg :: acc)
-                            ) else
-                                acc
-                        in
-                        parse_args (next_cbra + 1) []
-                    in
-                    (* print_string (~% "End tok: %s\n" end_token); *)
-                    Some (end_token, args)
+                    Some (end_token, actual_args)
                 with
                 Not_found -> None
                 end
