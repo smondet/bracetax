@@ -5,7 +5,7 @@
 #
 
 {header:
-    Volontarly Ignored text
+    Voluntary Ignored text
     {title:Test 01}
     {authors:{link{http://sebmdt.googlepages.com}Sebastien Mondet}}
     {subtitle:On Mon, 25 Aug 2008 12:18:45 +0800}
