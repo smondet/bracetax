@@ -221,8 +221,7 @@ functor (Printer: Sig.PRINTER) -> struct
                         | h :: t -> (~% "{%s}" h,t)
                     in
                     Some (end_token, actual_args)
-                with
-                Not_found -> None
+                with Not_found -> None
                 end
             | _ ->
                     (* warning ? *)
