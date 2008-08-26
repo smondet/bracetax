@@ -36,9 +36,42 @@ functor (Printer: Sig.PRINTER) -> struct
     (* Substring with indexes *)
     let sub_i s i j = S.sub s i (j - i + 1)
     (* Substring from 'since' to the end *)
-    let sub_end s since =
-        let l = S.length s in S.sub s since (l - since)
+    let sub_end s since = let l = S.length s in S.sub s since (l - since)
 
+    let split_str str = (
+        let l = S.length str in
+        let escaping = ref false in
+        let escaping_next = ref false in
+        let res = ref [] in
+        let buf = Buffer.create 64 in
+        let new_split () =
+            let s = Buffer.contents buf in
+            if s <> "" then (
+                res := s :: !res;
+                Buffer.reset buf;
+            );
+        in
+        for i = 0 to l - 1 do
+            escaping := !escaping_next;
+            escaping_next := false;
+            begin match S.get str i with
+            | '\\' ->
+                if not !escaping then
+                    escaping_next := true
+                else
+                    Buffer.add_char buf '\\'
+            | ' ' ->
+                if !escaping then (
+                    Buffer.add_char buf ' '
+                ) else (
+                    new_split ();
+                );
+            | c -> Buffer.add_char buf c
+            end;
+        done;
+        new_split ();
+        List.rev !res
+    )
 
     let debug s i state  = (
         if true then (
@@ -69,106 +102,91 @@ functor (Printer: Sig.PRINTER) -> struct
                 (make_loc number last)
                 (opt_from_to ?add_space line since last)
         in
+        let handle_read_text i since = function
+            | '#' ->
+                flush_text since (i - 1);
+                Printer.handle_comment_line t.t_printer
+                    (make_loc number i) (sub_end line (i+1));
+                (l, ReadText l)
+            | '{' ->
+                flush_text since (i - 1);
+                (i + 1, ReadCommand (i + 1, None))
+            | '}' ->
+                flush_text since (i - 1);
+                Printer.stop_command t.t_printer (make_loc number i);
+                (i + 1, ReadText (i + 1))
+            | '\n' ->
+                if since <> i then (
+                    flush_text since (i - 1);
+                ) else (
+                    Printer.handle_text t.t_printer (make_loc number i) " ";
+                );
+                (4242, ReadText 0)
+            | _ -> (* characters *) (i + 1, ReadText since)
+        in
         let escaping = ref false in
         let escaping_next = ref false in
+        let split_and_start t loc str =
+            let l = split_str str in
+            Printer.start_command t.t_printer loc (List.hd l) (List.tl l);
+        in
+        let handle_read_command i since opt = function
+            | '\\' ->
+                if not !escaping then escaping_next := true;
+                (i + 1, ReadCommand (since, opt))
+            | '|' ->
+                if not !escaping then (
+                    split_and_start t (make_loc number i)
+                        (opt_from_to ~opt line since (i-1));
+                    (i + 1, ReadText (i + 1))
+                ) else (
+                    (i + 1, ReadCommand (since, opt))
+                )
+            | '}' ->
+                let ni = i + 1 in
+                let nstate =
+                    if since = i then (* it's a '}' command *)
+                        ReadCommand (since, opt)
+                    else (
+                        if not !escaping then (
+                            let loc = (make_loc number i) in
+                            split_and_start t loc
+                                (opt_from_to ~opt line since (i-1));
+                                Printer.stop_command t.t_printer loc;
+                            ReadText ni
+                        ) else (
+                            ReadCommand (since, opt)
+                        )
+                    )
+                in
+                (ni, nstate)
+            | '\n' ->
+                (4242, ReadCommand (0,
+                    Some (opt_from_to ~add_space:true ~opt line since (l-1))))
+            | _ -> (* characters *) (i + 1, ReadCommand (since, opt))
+        in
         let rec loop (i, state) =
             if i < l then (
                 debug line i state;
                 escaping := !escaping_next;
                 escaping_next := false;
-                let nexts = match S.get line i with
-                | '\\' ->
-                    let ni = i + 1 in
-                    let nstate =
-                        match state with
-                        | ReadCommand (since, opt) as rc ->
-                            if not !escaping then escaping_next := true;
-                            rc
-                        | s -> s
-                    in
-                    (ni, nstate)
-                | '#' ->
-                    begin match state with
-                    | ReadText since ->
-                        flush_text since (i - 1);
-                        Printer.handle_comment_line t.t_printer
-                            (make_loc number i) (sub_end line (i+1));
-                        (l, ReadText l)
-                    | s -> (i+1, s)
-                    end
-                | '{' ->
-                    let ni = i + 1 in
-                    let nstate =
-                        match state with
-                        | ReadText since ->
-                            flush_text since (i - 1);
-                            ReadCommand (ni, None)
-                        | s -> s
-                    in
-                    (ni, nstate)
-                | '|' ->
-                    let ni = i + 1 in
-                    let nstate =
-                        if not !escaping then (
-                            match state with
-                            | ReadCommand (since, opt) ->
-                                (* TODO split command *)
-                                Printer.start_command t.t_printer
-                                    (make_loc number i)
-                                    (opt_from_to ~opt line since (i-1)) [];
-                                (* Printer.start_command t.t_printer *)
-                            (* (make_loc number i) cmd (List.rev the_args); *)
-                                ReadText ni
-                            | s -> s
-                        ) else
-                            state
-                    in
-                    (ni, nstate)
-                | '}' ->
-                    let ni = i + 1 in
-                    let nstate =
-                        match state with
-                        | ReadText since ->
-                            flush_text since (i - 1);
-                            Printer.stop_command t.t_printer
-                                (make_loc number i);
-                            ReadText ni
-                        | ReadCommand (since, opt) as st ->
-                            if since = i then (* it's a '}' command *)
-                                st
-                            else (
-                                (* TODO split command *)
-                                Printer.start_command t.t_printer
-                                    (make_loc number i)
-                                    (opt_from_to ~opt line since (i-1)) [];
-                                Printer.stop_command t.t_printer
-                                    (make_loc number i);
-                                ReadText ni
-                            )
-                    in
-                    (ni, nstate)
-                | _ ->
-                    (* characters *)
-                    (i + 1, state)
-                in
-                loop nexts
-            ) else (
-                (* EOL *)
+                let the_char = S.get line i in
                 let next_state =
-                    let add_space = 
-                        true (* '\n' is a white space => we put ' ' *) in
                     match state with
                     | ReadText since ->
-                        if since <> i then (
-                            flush_text since (i - 1);
-                        ) else (
-                            Printer.handle_text t.t_printer
-                                (make_loc number i) " ";
-                        );
-                        ReadText 0
-                    | ReadCommand (since, opt) ->
-                        ReadCommand (0,
-                            Some (opt_from_to ~add_space ~opt line since (l-1)))
+                        handle_read_text i since the_char
+                    | ReadCommand (since, opts) ->
+                        handle_read_command i since opts the_char
+                in
+                loop next_state
+            ) else (
+                (* EOL *)
+                let _, next_state =
+                    match state with
+                    | ReadText since ->
+                        handle_read_text i since '\n'
+                    | ReadCommand (since, opts) ->
+                        handle_read_command i since opts '\n'
                 in
                 next_state
             )

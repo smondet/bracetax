@@ -4,46 +4,26 @@ Some text {i|italics} and # comments...
 {b|bold} {i|italo{b|bold}}
 # More comments...
 {t|type-writer text}
-A sharp: {#} A Command {cmd arg1 arg\\2 arg\ 3 a\|aa| The lkj fdg# comment
+A sharp: {#} A {{}Command{}} {cmd arg1    arg\\2 arg\ 3 a\|aa| The lkj fdg# comment
 }
+{cmd fssf
+sd \|\|\|\| \\\\\|
+s \{fd\} }
 
-## 
-## 
-## {lkdsjf sd fsda sdk:unknown command}
-## 
-## {unterminated comand
-## }
-## {kjhsdf df
-## gfds}
-## 
-## {begin cmd arg}
-## This is
-## {end}
-## equivalent to
-## {cmd arg:That}
-## 
-## {comant achg  bouh}
-## {comant achg bouh{ }sitcked:With some text}
-## 
-## {comant{a
-## hg}{bds
-## ouh}With
-## 
-## some text}
-## 
-## {verbatim end_token option2}
-## That's {verbatim} {}, {{}
-## {end_token}
-## 
-## {verbatim {} option2 option3}
-## That's {verbatim} again {}, {{}
-## {endverbatim} # the default end_token
-## 
-## {verbatim}
-## That's {it:still} {verbatim} {}, {{}
-## {endverbatim} # the default end_token
-## 
-## 
-## 
-## 
-## {no reason to pass that to the printer !
+
+{verbatim{end_token}{option2}
+That's {verbatim} {}, {{}
+{end_token}
+
+{verbatim{}{option2}{option3}}
+That's {verbatim} again {}, {{}
+{endverbatim} # the default end_token
+
+{verbatim}
+That's {it:still} {verbatim} {}, {{}
+{endverbatim} # the default end_token
+
+
+
+
+{no reason to pass that to the printer !
