@@ -29,6 +29,8 @@ module Stack = struct
         | `title
         | `authors
         | `subtitle
+        | `table of int * string option
+        | `cell of bool * int * [`right | `center | `left | `default]
     ]
 
     type t = environment list ref
@@ -117,6 +119,40 @@ module Names = struct
     let is_authors  = (=) "authors"
     let is_subtitle = (=) "subtitle"
 
+    let is_table = (=) "table"
+    let table_args =
+        let default = 1 in
+        let parse_int i = try int_of_string i with e -> default in
+        function
+        | [] -> (default, None)
+        | [s] -> (parse_int s, None)
+        | s :: o :: t -> (parse_int s, Some o)
+
+    let is_cell = (=) "c"
+    let cell_args args =
+        let head = ref false in
+        let cols = ref 1 in
+        let alig = ref `default in
+        let rec parse_str str =
+            if str = "" then ()
+            else (
+                try Scanf.sscanf str "%d%s" (fun c s -> cols := c; parse_str s)
+                with
+                e ->
+                    begin match str.[0] with
+                    | 'h' -> head := true;
+                    | 'r' -> alig := `right;
+                    | 'l' -> alig := `left;
+                    | 'c' -> alig := `center;
+                    | _   -> ()
+                    end;
+                    parse_str (String.sub str 1 (String.length str - 1));
+            )
+        in
+        if args <> [] then (
+            parse_str (List.hd args);
+        );
+        (!head, !cols, !alig)
 end
 
 
@@ -169,4 +205,6 @@ let env_to_string (e:Stack.environment) = (
     | `title                     -> spr "title   "      
     | `authors                   -> spr "authors "        
     | `subtitle                  -> spr "subtitle"         
+    | `table _                   ->     "table"
+    | `cell _                    ->     "cell"
 )
