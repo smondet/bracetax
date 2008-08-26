@@ -22,18 +22,13 @@ functor (Printer: Sig.PRINTER) -> struct
 
     type parser_state =
         | ReadText of int
-        | ReadCommand of int * string option (* the current read name *)
-        | ReadArgs of int * string * string list * string option
-        (* ReadArgs (since, cmd_name, arg_list, current_arg *)
+        | ReadCommand of int * string option (* the current read command *)
 
     let string_of_state =
-        let sl l = (~% "L%d" (List.length l)) in
         let so = function None -> "_" | Some s -> s in
         function
         | ReadText o -> ~% "ReadText:%d" o
         | ReadCommand (i, o) -> ~% "ReadCommand:%d:%s" i (so o)
-        | ReadArgs (i,c,l,Some o) -> ~% "ReadArgs:%d:%s:%s:%s" i (sl l) c o
-        | ReadArgs (i,c,l, None) -> ~% "ReadArgs:%d:%s:%s:_" i (sl l) c
 
 
     module S = String (* to be able to swicth easily *)
@@ -89,9 +84,6 @@ functor (Printer: Sig.PRINTER) -> struct
                         | ReadCommand (since, opt) as rc ->
                             if not !escaping then escaping_next := true;
                             rc
-                        | ReadArgs (since, cmd, args, opt) as ra ->
-                            if not !escaping then escaping_next := true;
-                            ra
                         | s -> s
                     in
                     (ni, nstate)
@@ -120,16 +112,12 @@ functor (Printer: Sig.PRINTER) -> struct
                         if not !escaping then (
                             match state with
                             | ReadCommand (since, opt) ->
+                                (* TODO split command *)
                                 Printer.start_command t.t_printer
                                     (make_loc number i)
                                     (opt_from_to ~opt line since (i-1)) [];
-                                ReadText ni
-                            | ReadArgs (since, cmd, args, opt) ->
-                                let the_args =
-                                    (opt_from_to ~opt line since (i-1))
-                                    :: args in
-                                Printer.start_command t.t_printer
-                                    (make_loc number i) cmd (List.rev the_args);
+                                (* Printer.start_command t.t_printer *)
+                            (* (make_loc number i) cmd (List.rev the_args); *)
                                 ReadText ni
                             | s -> s
                         ) else
@@ -149,6 +137,7 @@ functor (Printer: Sig.PRINTER) -> struct
                             if since = i then (* it's a '}' command *)
                                 st
                             else (
+                                (* TODO split command *)
                                 Printer.start_command t.t_printer
                                     (make_loc number i)
                                     (opt_from_to ~opt line since (i-1)) [];
@@ -156,40 +145,8 @@ functor (Printer: Sig.PRINTER) -> struct
                                     (make_loc number i);
                                 ReadText ni
                             )
-                        | ReadArgs (since, cmd, args, opt) ->
-                            let the_args =
-                                (opt_from_to ~opt line since (i-1)) :: args in
-                            if not !escaping then (
-                                Printer.start_command t.t_printer
-                                    (make_loc number i) cmd (List.rev the_args);
-                                ReadText ni
-                            ) else (
-                                state
-                            )
                     in
                     (ni, nstate)
-                | ' ' | '\t' | '\n' | '\r' ->
-                    let ni = i + 1 in
-                    let nstate =
-                        if not !escaping then (
-                            match state with
-                            | ReadCommand (since, opt) ->
-                                ReadArgs (
-                                    ni, opt_from_to ~opt line since (i-1),
-                                    [], None)
-                            | ReadArgs (since, cmd, args, opt) ->
-                                let the_args =
-                                    (opt_from_to ~opt line since (i-1))
-                                    :: args in
-                                ReadArgs (ni, cmd, the_args, None)
-                            | s -> s
-                        ) else (
-                            state
-                        )
-                    in
-                    (* Whitespace, is there a '\' before ? *)
-                    (ni, nstate) 
-                    (* end command *)
                 | _ ->
                     (* characters *)
                     (i + 1, state)
@@ -212,9 +169,6 @@ functor (Printer: Sig.PRINTER) -> struct
                     | ReadCommand (since, opt) ->
                         ReadCommand (0,
                             Some (opt_from_to ~add_space ~opt line since (l-1)))
-                    | ReadArgs (since, cmd_name, arg_list, opt) ->
-                        ReadArgs (0, cmd_name, arg_list,
-                            Some (opt_from_to ~add_space ~opt line since (l-1))) 
                 in
                 next_state
             )
