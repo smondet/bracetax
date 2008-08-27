@@ -355,7 +355,7 @@ let handle_text t location line = (
         let debug = debugstr t location "Text" in
         let pcdata = sanitize_pcdata line in
         if location.Signatures.s_line > t.current_line then (
-            t.write (~% "%s%s\n" debug pcdata);
+            t.write (~% "%s%s" debug pcdata);
             t.current_line <- location.Signatures.s_line;
         ) else (
             t.write (~% "%s%s" debug pcdata);
