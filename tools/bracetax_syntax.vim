@@ -9,8 +9,8 @@
 
 " Verbatim regions (TODO: repair...)
 :syn region bracetaxVerbatim start="\(^{verbatim{}\_.*$\)\@<=" end="^\({endverbatim}\)\@="
-:syn region bracetaxVerbatim start="\(^{verbatim}$\)\@<=" end="^\({endverbatim}\)\@="
-:syn region bracetaxVerbatim start="\(^{verbatim{\z(\w\+\)}.*$\)\@<=" end="\(^{\z1}\)\@="
+:syn region bracetaxVerbatim start="\(^{verbatim}$\)\@<=" end="^\({endverbatim}\)\@=" contains=bracetaxSpecialChar,bracetaxKnown,bracetaxCommand
+:syn region bracetaxVerbatim start="\(^{verbatim \z(\w\+\) .*$\)\@<=" end="\(^{\z1}\)\@=" contains=bracetaxSpecialChar,bracetaxKnown,bracetaxCommand
 
 
 " Commands
