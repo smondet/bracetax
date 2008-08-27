@@ -4,10 +4,23 @@ type location = {
     s_line: int;
     s_char: int;
 }
+type write_fun = string -> unit
+type writer = {
+    w_write: write_fun;
+    w_warn: write_fun;
+    w_error: write_fun;
+}
+let make_writer ~write ~warn ~error = (
+    {
+        w_write = write;
+        w_warn = warn;
+        w_error = error;
+    }
+)
 
 module type PRINTER = sig
     type t
-    val create: write:(string -> unit) -> t
+    val create: writer:writer -> t
     val handle_comment_line: t -> location -> string -> unit
     val handle_text: t -> location -> string -> unit
     val start_command: t -> location -> string -> string list -> unit
@@ -22,7 +35,7 @@ end
 
 module type TRANSFORMER = sig
     type t
-    val create: read:(unit -> string option) -> write:(string -> unit) -> t
+    val create: read:(unit -> string option) -> writer:writer -> t
     val do_transformation: t -> unit
 end
 

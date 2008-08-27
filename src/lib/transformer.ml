@@ -10,8 +10,10 @@ functor (Printer: Sig.PRINTER) -> struct
         t_read: unit -> string option;
         t_write: string -> unit;
     }
-    let create ~read ~write = {
-        t_printer = Printer.create ~write; t_read = read; t_write = write;
+    let create ~read ~writer = {
+        t_printer = Printer.create ~writer;
+        t_read = read;
+        t_write = writer.Sig.w_write;
     }
 
     let make_loc l c = {Sig.s_line = l; s_char = c;}

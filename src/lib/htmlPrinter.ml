@@ -7,21 +7,29 @@ type t = {
     mutable started_text: bool;
     mutable inside_header:bool;
     mutable current_table: Commands.Table.table option;
+    warn: string -> unit;
+    error: string -> unit;
 }
 module CS = Commands.Stack
 
 let (~%) = Printf.sprintf
 let p = print_string
 
-let create ~write = {
-    stack = CS.empty ();
-    write = write;
-    write_mem = write;
-    current_line = 1;
-    started_text = false;
-    inside_header = false;
-    current_table = None;
-}
+let create ~writer =  (
+    let module S = Signatures in
+    let write = writer.S.w_write in
+    {
+        stack = CS.empty ();
+        write = write;
+        write_mem = write;
+        current_line = 1;
+        started_text = false;
+        inside_header = false;
+        current_table = None;
+        warn = writer.S.w_warn;
+        error = writer.S.w_error;
+    }
+)
 
 let strstat s = (~% "[%d:%d]" s.Signatures.s_line s.Signatures.s_char)
 let debugstr t s msg = 

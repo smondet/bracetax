@@ -4,7 +4,7 @@ let p = print_string
 module DummyPrinter = struct
     type t = int
 
-    let create ~write = 0
+    let create ~writer = 0
 
     let strstat s = (~% "[%d:%d]" s.Signatures.s_line s.Signatures.s_char)
     let head = "####"
@@ -29,6 +29,13 @@ module DummyPrinter = struct
 
     let enter_verbatim t location args = ()
     let exit_verbatim t location = ()
+
+    let dummy_writer = {
+        Signatures.w_write = (fun s -> ());
+        Signatures.w_warn = (fun s -> ());
+        Signatures.w_error = (fun s -> ());
+    }
+
 end
 module Options = struct
 
@@ -82,15 +89,20 @@ let () = (
     if dbg then (
         let module DummyTransformer = Transformer.Make(DummyPrinter) in
         let t =
-            DummyTransformer.create ~write:(fun s -> ()) ~read:(read_line_opt i)
+            DummyTransformer.create
+                ~writer:DummyPrinter.dummy_writer ~read:(read_line_opt i)
         in
         DummyTransformer.do_transformation t;
         p (~% "DEBUG Done;\n");
     ) else (
         let module HtmlTransformer = Transformer.Make(HtmlPrinter) in
         let write = output_string o in
+        let writer =
+            let warn = prerr_string in
+            let error = prerr_string in
+            Signatures.make_writer ~write ~warn ~error in
         let read = read_line_opt i in
-        let t = HtmlTransformer.create ~write ~read in
+        let t = HtmlTransformer.create ~writer ~read in
         if !Options.header_footer then
             write (HtmlPrinter.header ~comment:"Generated with BraceTax" ());
         HtmlTransformer.do_transformation t;
