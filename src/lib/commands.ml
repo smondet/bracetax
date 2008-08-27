@@ -1,6 +1,5 @@
 
 let (~%) = Printf.sprintf
-let p = print_string
 
 
 module Stack = struct
@@ -249,12 +248,12 @@ module Table = struct
         } in
         (table, `table (col_nb, label), write table)
     )
-    let cell_start tab args = (
+    let cell_start ~warn tab args = (
         let head, cnb, align = Names.cell_args args in
         let def_cell = `cell (head, cnb, align) in
         begin match tab.current_cell with
         | Some c -> 
-            p (~% "Warning: no use for a cell inside a cell !\n");
+            warn (~% "Warning: no use for a cell inside a cell !\n");
             def_cell
         | None ->
             let cell_t = {
@@ -268,13 +267,13 @@ module Table = struct
         end
     )
 
-    let cell_stop tab = (
+    let cell_stop ~warn tab = (
         begin match tab.current_cell with
         | Some c -> 
             tab.cells <- c :: tab.cells;
             tab.current_cell <- None;
         | None ->
-            p "Should not be there... unless you already know you shouldn't \
+            warn "Should not be there... unless you already know you shouldn't \
                 cells put in cells...\n";
         end
     )

@@ -199,12 +199,12 @@ let cell_start t args = (
     | None ->
         t.warn (~% "Warning: no use for a cell here !\n");
         def_cell
-    | Some tab -> Commands.Table.cell_start tab args
+    | Some tab -> Commands.Table.cell_start ~warn:t.warn tab args
 )
 let cell_stop t env = (
     match t.current_table with
     | None -> t.warn (~% "Warning: still no use for a cell here !\n");
-    | Some tab -> Commands.Table.cell_stop tab
+    | Some tab -> Commands.Table.cell_stop ~warn:t.warn tab
 )
 
 
