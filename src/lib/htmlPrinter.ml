@@ -32,7 +32,10 @@ let debugstr t s msg =
         ""
 
 let sanitize_comments line =
-    Escape.replace_string ~src:line ~find:"-->" ~replace_with:"XXX"
+    let patterns = [('<', "LT"); ('>', "GT"); ('&', "AMP"); ('-', "DASH")] in
+    Escape.replace_chars ~src:line ~patterns
+    (* let src = Escape.replace_string ~src:line ~find:"-->" ~replace_with:"XXX" in *)
+    (* Escape.replace_string ~src ~find:"<!--" ~replace_with:"XXXX" *)
 
 let sanitize_pcdata line =
     let patterns = [('<', "&lt;"); ('>', "&gt;"); ('&', "&amp;")] in
@@ -59,7 +62,7 @@ let quotation_open_close a = (
 )
 
 let list_start =
-    function `itemize -> "<ul>\n" | `numbered -> "<ol>\n"
+    function `itemize -> "\n<ul>\n" | `numbered -> "\n<ol>\n"
 let list_item = 
     function `itemize -> "</li>\n<li>" | `numbered -> "</li>\n<li>"
 let list_firstitem = 
@@ -68,11 +71,14 @@ let list_stop =
     function `itemize -> "</li>\n</ul>\n" | `numbered -> "</li>\n</ol>\n"
 
 let section_start n l =
-    let lsan = sanitize_xml_attribute l in
-    ~% "<h%d><a name=\"%s\" id=\"%s\">" (n + 1) lsan lsan
+    let lsan =
+        match sanitize_xml_attribute l with
+        | "" -> "" | s -> ~% "name=\"%s\" id=\"%s\"" s s
+    in
+    ~% "</p>\n<h%d><a %s>" (n + 1) lsan
 
 let section_stop n l =
-    ~% "</a></h%d>\n" (n + 1)
+    ~% "</a></h%d>\n<p>" (n + 1)
 
 let link_start printer args = (
     match args with
@@ -96,15 +102,20 @@ let image_start t args = (
         | `h h -> (~% "height=\"%d\"" h)) opts in
         String.concat " " strs
     in
-    let sansrc = sanitize_xml_attribute src in
+    let sansrc =
+        match sanitize_xml_attribute src with
+        "" -> "http://IMAGEWITHNOSOURCE" | s -> s in
+    let sanlbl =
+        match sanitize_xml_attribute lbl with 
+        | "" -> "" | s -> ~% "id=\"%s\" " s in
     t.write (~%
-        "<div class=\"figure\"><a href=\"%s\">\
-        <img src=\"%s\" %s id=\"%s\" /></a><br/>"
-        sansrc sansrc opts_str (sanitize_xml_attribute lbl)
+        "</p>\n<div class=\"figure\">\n  <a href=\"%s\">\
+        \n    <img src=\"%s\" %s %s alt=\"%s\"/>\n  </a><br/>\n"
+        sansrc sansrc opts_str sanlbl sansrc
     );
     `image (src, opts, lbl)
 )
-let image_stop = "</div>"
+let image_stop = "</div><p>"
 
 let header_start t = (
     t.inside_header <- true; 
@@ -137,7 +148,7 @@ let print_table write table = (
         | None -> ""
         | Some s -> (~% "id=\"%s\"" (sanitize_xml_attribute s))
     in
-    write (~% "<table border=\"1\" %s >\n" lbl_str);
+    write (~% "</p><table border=\"1\" %s >\n" lbl_str);
     write (~% "<caption>%s</caption>\n<tr>" (Buffer.contents table.CT.caption));
     let rec write_cells cells count =
         match cells with
@@ -162,7 +173,7 @@ let print_table write table = (
             write_cells t (count + c.CT.cols_used)
     in
     write_cells (List.rev table.CT.cells) 0;
-    write "</tr></table>\n"
+    write "</tr></table><p>\n"
 )
 
 let table_stop t = (
@@ -359,14 +370,14 @@ let terminate t location = (
 
 let enter_verbatim t location args = (
     CS.push t.stack (`verbatim args);
-    t.write "<pre>\n";
+    t.write "</p><pre>\n";
     t.current_line <- location.Signatures.s_line;
 )
 let exit_verbatim t location = (
     let env =  (CS.pop t.stack) in
     match env with
     | Some (`verbatim _) ->
-        t.write "</pre>\n";
+        t.write "</pre><p>\n";
         t.current_line <- location.Signatures.s_line;
     | _ ->
         (* warning ? error ? anyway, *)
@@ -385,7 +396,7 @@ let header ?(title="") ?(comment="") () = (
     ~% "<!DOCTYPE html
     PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
     \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
-    <html>
+    <html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">
     <!-- %s -->
     <head>
     <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />
