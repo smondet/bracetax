@@ -216,7 +216,8 @@ functor (Printer: Sig.PRINTER) -> struct
             | ' ' | '\t' ->
                 begin try
                     let next_cbra = S.index_from line (l_pattern + 1) '}' in
-                    let args_string = sub_i line (l_pattern + 1) next_cbra in
+                    let args_string =
+                        sub_i line (l_pattern + 1) (next_cbra - 1) in
                     let args = split_str args_string in
                     let end_token, actual_args =
                         match args with

@@ -23,9 +23,9 @@ main.byte -i README.brtx -o README.html
 {endverbatim}
 
 Generate this file with XHTML header and footer:
-{verbatim}
+{verbatim e}
 main.byte -i README.brtx -o README.html -doc
-{endverbatim}
+{e}
 
 Transform any string:
 {verbatim}
