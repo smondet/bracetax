@@ -88,7 +88,7 @@ Some text with {i|commands},
 {c c| c} will be {c l|L} {c r|r} in
 {c l3| All the line...} the caption
 }
-Another Table {q es|{utf 0x42}}, {q es }:
+Another Table:
 {begin table }{c|bouh} {c|bah} {c|boh}{end}
 
 

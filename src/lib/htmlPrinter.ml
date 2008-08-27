@@ -1,25 +1,12 @@
-type cell = {
-    is_head: bool;
-    cols_used: int;
-    align: [`right | `center | `left | `default];
-    cell_text: Buffer.t;
-}
-type table = {
-    col_nb: int;
-    label: string option;
-    mutable cells: cell list;
-    mutable current_cell: cell option;
-    caption: Buffer.t;
-    write_of_t: string -> unit;
-}
 
 type t = {
     stack: Commands.Stack.t;
     mutable write: string -> unit;
+    write_mem: string -> unit;
     mutable current_line: int;
     mutable started_text: bool;
     mutable inside_header:bool;
-    mutable current_table: table option;
+    mutable current_table: Commands.Table.table option;
 }
 module CS = Commands.Stack
 
@@ -29,6 +16,7 @@ let p = print_string
 let create ~write = {
     stack = CS.empty ();
     write = write;
+    write_mem = write;
     current_line = 1;
     started_text = false;
     inside_header = false;
@@ -135,68 +123,54 @@ let authors_stop = "</div>\n"
 let subtitle_start = "  <div class=\"subtitle\">"
 let subtitle_stop = "</div>\n"
 
-let table_write table str = (
-    let the_buffer =
-        match table.current_cell with
-        | None -> table.caption
-        | Some c -> c.cell_text
-    in
-    Buffer.add_string the_buffer str;
-)
 let table_start t args = (
     (* http://www.topxml.com/xhtml/articles/xhtml_tables/ *)
-    let col_nb, label = Commands.Names.table_args args in
-    let table = {
-        col_nb = col_nb;
-        label = label;
-        cells = [];
-        current_cell = None;
-        caption = Buffer.create 64;
-        write_of_t = t.write;
-    } in
+    let table, to_stack, new_write = Commands.Table.start args in
     t.current_table <- Some table;
-    t.write <- table_write table;
-    `table (col_nb, label)
+    t.write <- new_write;
+    to_stack
 )
 let print_table write table = (
+    let module CT = Commands.Table in
     let lbl_str =
-        match table.label with
+        match table.CT.label with
         | None -> ""
         | Some s -> (~% "id=\"%s\"" (sanitize_xml_attribute s))
     in
     write (~% "<table border=\"1\" %s >\n" lbl_str);
-    write (~% "<caption>%s</caption>\n<tr>" (Buffer.contents table.caption));
+    write (~% "<caption>%s</caption>\n<tr>" (Buffer.contents table.CT.caption));
     let rec write_cells cells count =
         match cells with
         | [] -> (* fill the gap + warning *)
             ()
         | c :: t ->
-            if count <> 0 && count mod table.col_nb = 0 then (
+            if count <> 0 && count mod table.CT.col_nb = 0 then (
                 write "</tr>\n<tr>"
             );
-            let typ_of_cell = if c.is_head then "h" else "d" in
+            let typ_of_cell = if c.CT.is_head then "h" else "d" in
             let alignement =
-                match c.align with
+                match c.CT.align with
                 | `right -> "class=\"rightalign\" style=\"text-align:right;\""
                 | `center -> "class=\"centeralign\" style=\"text-align:center;\""
                 | `left -> "class=\"leftalign\" style=\"text-align:left;\""
                 | `default -> ""
             in
             write (~% "<t%s colspan=\"%d\" %s >%s</t%s>"
-                typ_of_cell c.cols_used alignement
-                (Buffer.contents c.cell_text)
+                typ_of_cell c.CT.cols_used alignement
+                (Buffer.contents c.CT.cell_text)
                 typ_of_cell);
-            write_cells t (count + c.cols_used)
+            write_cells t (count + c.CT.cols_used)
     in
-    write_cells (List.rev table.cells) 0;
+    write_cells (List.rev table.CT.cells) 0;
     write "</tr></table>\n"
 )
+
 let table_stop t = (
     match t.current_table with
     | None -> failwith "Why am I here ??? no table to end."
     | Some tab ->
-        p (~% "End of table: %s\n" (Buffer.contents tab.caption));
-        t.write <- tab.write_of_t;
+        (* p (~% "End of table: %s\n" (Buffer.contents tab.caption)); *)
+        t.write <- t.write_mem;
         t.current_table <- None;
         print_table t.write tab;
 )
@@ -207,35 +181,12 @@ let cell_start t args = (
     | None ->
         p (~% "Warning: no use for a cell here !\n");
         def_cell
-    | Some tab ->
-        begin match tab.current_cell with
-        | Some c -> 
-            p (~% "Warning: no use for a cell inside a cell !\n");
-            def_cell
-        | None ->
-            let cell_t = {
-                is_head= head;
-                cols_used = cnb;
-                align = align;
-                cell_text = Buffer.create 64;
-            } in
-            tab.current_cell <- Some cell_t;
-            def_cell
-        end
-            
+    | Some tab -> Commands.Table.cell_start tab args
 )
 let cell_stop t env = (
     match t.current_table with
     | None -> p (~% "Warning: still no use for a cell here !\n");
-    | Some tab ->
-        begin match tab.current_cell with
-        | Some c -> 
-            tab.cells <- c :: tab.cells;
-            tab.current_cell <- None;
-        | None ->
-            p "Should not be there... unless you already know you shouldn't \
-                cells put in cells...\n";
-        end
+    | Some tab -> Commands.Table.cell_stop tab
 )
 
 

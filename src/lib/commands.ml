@@ -1,4 +1,8 @@
 
+let (~%) = Printf.sprintf
+let p = print_string
+
+
 module Stack = struct
     type environment = [
         | `cmd_end
@@ -208,3 +212,73 @@ let env_to_string (e:Stack.environment) = (
     | `table _                   ->     "table"
     | `cell _                    ->     "cell"
 )
+
+module Table = struct
+    type cell = {
+        is_head: bool;
+        cols_used: int;
+        align: [`right | `center | `left | `default];
+        cell_text: Buffer.t;
+    }
+
+    type table = {
+        col_nb: int;
+        label: string option;
+        mutable cells: cell list;
+        mutable current_cell: cell option;
+        caption: Buffer.t;
+    }
+
+    let write table str = (
+        let the_buffer =
+            match table.current_cell with
+            | None -> table.caption
+            | Some c -> c.cell_text
+        in
+        Buffer.add_string the_buffer str;
+    )
+    
+    let start args = (
+        let col_nb, label = Names.table_args args in
+        let table = {
+            col_nb = col_nb;
+            label = label;
+            cells = [];
+            current_cell = None;
+            caption = Buffer.create 64;
+        } in
+        (table, `table (col_nb, label), write table)
+    )
+    let cell_start tab args = (
+        let head, cnb, align = Names.cell_args args in
+        let def_cell = `cell (head, cnb, align) in
+        begin match tab.current_cell with
+        | Some c -> 
+            p (~% "Warning: no use for a cell inside a cell !\n");
+            def_cell
+        | None ->
+            let cell_t = {
+                is_head= head;
+                cols_used = cnb;
+                align = align;
+                cell_text = Buffer.create 64;
+            } in
+            tab.current_cell <- Some cell_t;
+            def_cell
+        end
+    )
+
+    let cell_stop tab = (
+        begin match tab.current_cell with
+        | Some c -> 
+            tab.cells <- c :: tab.cells;
+            tab.current_cell <- None;
+        | None ->
+            p "Should not be there... unless you already know you shouldn't \
+                cells put in cells...\n";
+        end
+    )
+
+
+
+end
