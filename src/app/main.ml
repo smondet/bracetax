@@ -30,33 +30,65 @@ module DummyPrinter = struct
     let enter_verbatim t location args = ()
     let exit_verbatim t location = ()
 end
+module Options = struct
+
+    (* let arg_set ref v = Arg.Unit (fun () -> ref := v) *)
+
+    let output_html = ref true
+    let input_stream = ref stdin
+    let output_stream = ref stdout
+    let debug = ref false
+
+    let options = Arg.align [
+        ("-html", Arg.Set output_html, ~% " The output format (now only HTML)");
+        ("-debug", Arg.Set debug, " Debug mode");
+        (
+            "-i",
+            Arg.String (fun s -> input_stream := open_in s), 
+            "<file> input file (default is standard input)"
+        );
+        (
+            "-o",
+            Arg.String (fun s -> output_stream := open_out s), 
+            "<file> output file (default is standard output)"
+        );
+
+    ]
+    let short_usage =
+        ~% "usage: %s [-i file] [-o file] [-help]" Sys.argv.(0)
+    let anon_fun s =
+        prerr_string (~% "Warning argument %s is ignored\n" s)
+
+    let get () =
+        Arg.parse options anon_fun short_usage;
+        (!output_html, !debug, !input_stream, !output_stream)
+
+
+end
+
+let read_line_opt i () = try Some (input_line i) with e -> None
+
 
 let () = (
-    if Sys.argv.(1) = "-debug" then (
+    let _, dbg, i, o = Options.get () in
+    if dbg then (
         let module DummyTransformer = Transformer.Make(DummyPrinter) in
-        let o = open_in Sys.argv.(2) in
         let t =
             DummyTransformer.create
                 ~write:(fun s -> ())
-                ~read:(fun () -> 
-                    try Some (input_line o) 
-                    with e -> None
-                ) in
+                ~read:(read_line_opt i) in
         DummyTransformer.do_transformation t;
-        close_in o;
-        p (~% "Done;\n")
+        p (~% "DEBUG Done;\n");
     ) else (
         let module HtmlTransformer = Transformer.Make(HtmlPrinter) in
-        let o = open_in Sys.argv.(1) in
-        let oout = open_out Sys.argv.(2) in
         let t =
             HtmlTransformer.create
-                ~write:(output_string oout )
-                ~read:(fun () -> try Some (input_line o) with e -> None)
+                ~write:(output_string o )
+                ~read:(read_line_opt i)
         in
         HtmlTransformer.do_transformation t;
-        close_in o;
-        close_out oout;
-    )
+    );
+    close_in i;
+    close_out o;
 )
 
