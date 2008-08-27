@@ -38,10 +38,12 @@ module Options = struct
     let input_stream = ref stdin
     let output_stream = ref stdout
     let debug = ref false
+    let header_footer = ref false
 
     let options = Arg.align [
         ("-html", Arg.Set output_html, ~% " The output format (now only HTML)");
         ("-debug", Arg.Set debug, " Debug mode");
+        ("-doc", Arg.Set header_footer, "output a complete document");
         (
             "-i",
             Arg.String (fun s -> input_stream := open_in s), 
@@ -81,12 +83,14 @@ let () = (
         p (~% "DEBUG Done;\n");
     ) else (
         let module HtmlTransformer = Transformer.Make(HtmlPrinter) in
-        let t =
-            HtmlTransformer.create
-                ~write:(output_string o )
-                ~read:(read_line_opt i)
-        in
+        let write = output_string o in
+        let read = read_line_opt i in
+        let t = HtmlTransformer.create ~write ~read in
+        if !Options.header_footer then
+            write (HtmlPrinter.header ~comment:"Generated with BraceTax" ());
         HtmlTransformer.do_transformation t;
+        if !Options.header_footer then
+            write (HtmlPrinter.footer ());
     );
     close_in i;
     close_out o;

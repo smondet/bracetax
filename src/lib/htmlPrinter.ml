@@ -379,4 +379,19 @@ let handle_verbatim_line t location line = (
     t.current_line <- location.Signatures.s_line;
 )
 
+(* ==== Directly exported functions ==== *)
+
+let header ?(title="") ?(comment="") () = (
+    ~% "<!DOCTYPE html
+    PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
+    \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
+    <html>
+    <!-- %s -->
+    <head>
+    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />
+    <title>%s</title>
+    </head>
+    <body>" (sanitize_comments comment) (sanitize_pcdata title)
+)
+let footer () = "</body>\n</html>\n"
 
