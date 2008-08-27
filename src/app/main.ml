@@ -73,12 +73,17 @@ let read_line_opt i () = try Some (input_line i) with e -> None
 
 let () = (
     let _, dbg, i, o = Options.get () in
+    Sys.catch_break true;
+    at_exit (fun () -> 
+        close_in i;
+        flush o;
+        close_out o;
+    );
     if dbg then (
         let module DummyTransformer = Transformer.Make(DummyPrinter) in
         let t =
-            DummyTransformer.create
-                ~write:(fun s -> ())
-                ~read:(read_line_opt i) in
+            DummyTransformer.create ~write:(fun s -> ()) ~read:(read_line_opt i)
+        in
         DummyTransformer.do_transformation t;
         p (~% "DEBUG Done;\n");
     ) else (
@@ -92,7 +97,7 @@ let () = (
         if !Options.header_footer then
             write (HtmlPrinter.footer ());
     );
-    close_in i;
-    close_out o;
+    (* close_in i; *)
+    (* close_out o; *)
 )
 
