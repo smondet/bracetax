@@ -75,17 +75,17 @@ An image: {image
     200,200
     |With width and height}
 
-{b|Lucy}:
-{image
-    http://www.scifisite.net/images/weeklyactress/Lucy_Liu.jpg
-    200
-    lucy
-    |And her caption...}{p}
+#{b|Lucy}:
+#{image
+#    http://www.scifisite.net/images/weeklyactress/Lucy_Liu.jpg
+#    200
+#    lucy
+#    |And her caption...}{p}
 
 {table 3  the_table|
 Some text with {i|commands},
-{c|one cell} which {c h2| A header on 2 cols} 
-{c c| right aligned} will be {c l|L} {c r|r} in
+{c|one cell} which {c h2| A long header on 2 cols} 
+{c c| c} will be {c l|L} {c r|r} in
 {c l3| All the line...} the caption
 }
 Another Table {q es|{utf 0x42}}, {q es }:

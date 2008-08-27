@@ -175,8 +175,15 @@ let print_table write table = (
                 write "</tr>\n<tr>"
             );
             let typ_of_cell = if c.is_head then "h" else "d" in
-            write (~% "<t%s colspan=\"%d\" >%s</t%s>"
-                typ_of_cell c.cols_used
+            let alignement =
+                match c.align with
+                | `right -> "class=\"rightalign\" style=\"text-align:right;\""
+                | `center -> "class=\"centeralign\" style=\"text-align:center;\""
+                | `left -> "class=\"leftalign\" style=\"text-align:left;\""
+                | `default -> ""
+            in
+            write (~% "<t%s colspan=\"%d\" %s >%s</t%s>"
+                typ_of_cell c.cols_used alignement
                 (Buffer.contents c.cell_text)
                 typ_of_cell);
             write_cells t (count + c.cols_used)
