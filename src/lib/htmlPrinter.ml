@@ -13,7 +13,6 @@ type t = {
 module CS = Commands.Stack
 
 let (~%) = Printf.sprintf
-let p = print_string
 
 let create ~writer =  (
     let module S = Signatures in
@@ -198,13 +197,13 @@ let cell_start t args = (
     let def_cell = `cell (head, cnb, align) in
     match t.current_table with
     | None ->
-        p (~% "Warning: no use for a cell here !\n");
+        t.warn (~% "Warning: no use for a cell here !\n");
         def_cell
     | Some tab -> Commands.Table.cell_start tab args
 )
 let cell_stop t env = (
     match t.current_table with
-    | None -> p (~% "Warning: still no use for a cell here !\n");
+    | None -> t.warn (~% "Warning: still no use for a cell here !\n");
     | Some tab -> Commands.Table.cell_stop tab
 )
 
@@ -222,7 +221,7 @@ let start_environment ?(is_begin=false) t location name args = (
         | s when C.is_mono_space s       -> t.write "<tt>" ; `mono_space
         | s when C.is_superscript s      -> t.write "<sup>"; `superscript
         | s when C.is_subscript s        -> t.write "<sub>"; `subscript
-        | s when (C.is_end s)           -> p "push end\n"; `cmd_end
+        | s when (C.is_end s)           -> `cmd_end
         | s when C.is_list s             ->
             let style, other_args, waiting =
                 match args with
@@ -230,7 +229,7 @@ let start_environment ?(is_begin=false) t location name args = (
                 | h :: t -> (C.list_style h, t, ref true) in
             t.write (list_start style);
             `list (style, other_args, waiting)
-        | s when C.is_item s -> p "push item"; `item
+        | s when C.is_item s -> `item
         | s when C.is_section s -> 
             let level, label = C.section_params args in
             t.write (section_start level label);
@@ -243,12 +242,12 @@ let start_environment ?(is_begin=false) t location name args = (
         | s when C.is_authors s -> t.write authors_start; `authors
         | s when C.is_table s -> table_start t args
         | s when C.is_cell s -> cell_start t args
-        | s -> p (~% "unknown: %s\n" s); `unknown (s, args)
+        | s -> t.warn (~% "unknown: %s\n" s); `unknown (s, args)
     in
     let the_cmd =
         if C.is_begin name then (
             match args with
-            | [] -> p "Lonely begin !!"; (`cmd_begin ("", []))
+            | [] -> t.warn "Lonely begin ??!!"; (`cmd_begin ("", []))
             | h :: t -> (`cmd_begin (h, t))
         ) else (
             cmd name args
@@ -264,7 +263,7 @@ let start_environment ?(is_begin=false) t location name args = (
 (* ==== PRINTER module type's functions ==== *)
 
 let start_command t location name args = (
-    p (~% "Command: \"%s\"(%s)\n" name (String.concat ", " args));
+    (* p (~% "Command: \"%s\"(%s)\n" name (String.concat ", " args)); *)
     match Commands.non_env_cmd_of_name name args with
     | `unknown (name, args) -> start_environment t location name args
     | cmd -> CS.push t.stack cmd
@@ -275,16 +274,16 @@ let stop_command t location = (
         | `cmd_end ->
             begin match CS.pop t.stack with
             | Some (`cmd_inside benv) ->
-                p (~% "{end} %s\n" (Commands.env_to_string benv));
+                (* p (~% "{end} %s\n" (Commands.env_to_string benv)); *)
                 out_of_env benv
             | Some c ->
-                p (~% "Warning {end} does not end a {begin...} but %s\n"
+                t.warn (~% "Warning {end} does not end a {begin...} but %s\n"
                     (Commands.env_to_string c));
                 CS.push t.stack c;
-            | None -> p (~% "Nothing to {end} there !!\n")
+            | None -> t.warn (~% "Nothing to {end} there !!\n")
             end
         | `cmd_begin (nam, args) ->
-            p (~% "cmd begin %s(%s)\n" nam (String.concat ", " args));
+            (* p (~% "cmd begin %s(%s)\n" nam (String.concat ", " args)); *)
             start_environment ~is_begin:true t location nam args;
         | `paragraph -> t.write "</p>\n<p>" (* TODO: unstack and restack ? *)
         | `new_line -> t.write "<br/>\n"
@@ -311,10 +310,10 @@ let stop_command t location = (
                     t.write (list_item style);
                 );
             | Some c ->
-                p (~% "Warning {item} is not just under list but %s\n"
+                t.warn (~% "Warning {item} is not just under list but %s\n"
                     (Commands.env_to_string c));
                 CS.push t.stack c;
-            | None -> p (~% "Warning {item}... nothing to itemize !\n")
+            | None -> t.warn (~% "Warning {item}... nothing to itemize !\n")
             end
         | `section (level, label) ->
             t.write (section_stop level label);
@@ -326,7 +325,7 @@ let stop_command t location = (
         | `authors -> t.write authors_stop;
         | `table _ -> table_stop t
         | `cell _ as c -> cell_stop t c
-        | s -> p (~% "Unknown command... %s\n" (Commands.env_to_string s)); ()
+        | s -> t.warn (~% "Unknown command... %s\n" (Commands.env_to_string s));
     in
     match CS.pop t.stack with
     | Some env -> out_of_env env

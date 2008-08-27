@@ -1,7 +1,6 @@
 module Sig = Signatures
 
 let (~%) = Printf.sprintf
-let p = print_string
 
 module FunctorMake =
 functor (Printer: Sig.PRINTER) -> struct
@@ -9,11 +8,13 @@ functor (Printer: Sig.PRINTER) -> struct
         t_printer: Printer.t;
         t_read: unit -> string option;
         t_write: string -> unit;
+        t_warn: string -> unit;
     }
     let create ~read ~writer = {
         t_printer = Printer.create ~writer;
         t_read = read;
         t_write = writer.Sig.w_write;
+        t_warn = writer.Sig.w_warn;
     }
 
     let make_loc l c = {Sig.s_line = l; s_char = c;}
@@ -75,16 +76,17 @@ functor (Printer: Sig.PRINTER) -> struct
         List.rev !res
     )
 
-    let debug s i state  = (
-        if true then (
+    let debug t s i state  = (
+        if false then (
             let l = S.length s in
             try
-                Printf.eprintf "---[State: %s] \"%s[%s]%s\"    (%d)\n%!"
-                     (string_of_state state)
-                     (S.sub s 0 i)
-                     (S.sub s i 1)
-                     (S.sub s (i + 1) (l - i - 1))
-                     i
+                t.t_warn (~%
+                    "---[State: %s] \"%s[%s]%s\"    (%d)\n%!"
+                    (string_of_state state)
+                    (S.sub s 0 i)
+                    (S.sub s i 1)
+                    (S.sub s (i + 1) (l - i - 1))
+                    i)
             with
             e -> ()
         );
@@ -169,7 +171,7 @@ functor (Printer: Sig.PRINTER) -> struct
         in
         let rec loop (i, state) =
             if i < l then (
-                debug line i state;
+                debug t line i state;
                 escaping := !escaping_next;
                 escaping_next := false;
                 let the_char = S.get line i in
