@@ -121,7 +121,7 @@ functor (Printer: Sig.PRINTER) -> struct
                 (i + 1, ReadText (i + 1))
             | '\n' ->
                 if since <> i then (
-                    flush_text since (i - 1);
+                    flush_text ~add_space:true since (i - 1);
                 ) else (
                     Printer.handle_text t.t_printer (make_loc number i) " ";
                 );
