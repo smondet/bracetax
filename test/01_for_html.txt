@@ -57,7 +57,8 @@ bla bla
 A {link http://sebmdt.googlepages.com|link to seb}...{br}
 
 And to a {link http://www.google.com/search?q=wikipedia+%3C+%3E+%26%26&ie=utf-8&oe=utf-8&aq=t&rls=org.mozilla:en-US:official&client=firefox-a|complex google search}. {br}
-{link|empty link} ({i|useless} ?) {link local:2nd_h3|To the {i|antoher H3}}
+{link|empty link}, {link local:2nd_h3|To the {i|antoher H3}}
+No contents: {link http://sebmdt.googlepages.com}, Totally empty: {link}.
 {p}
 An image: {image|No params}{p}
 

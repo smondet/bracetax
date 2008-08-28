@@ -1,6 +1,51 @@
 
 let (~%) = Printf.sprintf
 
+module Link = struct
+
+    type kind = [`local | `generic]
+    type t = {
+        kind: kind;
+        linkto: string option;
+        other_args: string list;
+        contents: Buffer.t;
+    }
+
+    let get_kind name = (
+        let l = String.length name in
+        if l >= 6 then
+            if String.sub name 0 6 = "local:" then (
+                (`local, String.sub name 6 (l - 6))
+            ) else
+                (`generic, name)
+        else 
+            (`generic, name)
+    )
+    let create ?(kind=`generic) ?(linkto) ?(other_args=[]) () = {
+        kind = kind; linkto = linkto;
+        other_args = other_args; contents = Buffer.create 42;
+    }
+
+    let start args = (
+        let l =
+            match args with
+            | link :: other_args ->
+                let kind, linkto = get_kind link in
+                create ~kind ~linkto ~other_args ()
+            | [] -> create ()
+        in
+        (`link l, Buffer.add_string l.contents)
+    )
+    let stop link = (
+        let str =
+            match Buffer.contents link.contents with 
+            | "" -> None
+            | s -> Some s
+        in
+        (link.kind, link.linkto, str)
+    )
+
+end
 
 module Stack = struct
     type environment = [
@@ -26,7 +71,7 @@ module Stack = struct
         | `list of [`itemize | `numbered ] * string list * bool ref
         | `item
         | `section of int * string
-        | `link of string * string list
+        | `link of Link.t
         | `image of string * [`w of int | `h of int ] list * string
         | `header
         | `title
@@ -94,13 +139,6 @@ module Names = struct
         | n :: l :: q -> (level n, l)
 
     let is_link = (=) "link"
-    let is_local name =
-        let l = String.length name in
-        if l >= 6 then
-            if String.sub name 0 6 = "local:" then (
-                (true, String.sub name 6 (l - 6))
-            ) else (false, name)
-        else (false, name)
 
     let is_image = (=) "image"
     let image_params =
@@ -202,7 +240,7 @@ let env_to_string (e:Stack.environment) = (
     | `list l                    -> spr "list                   "
     | `item                      -> spr "item                   "
     | `section (n, l)            -> spr "section %d  %s     " n l
-    | `link    (n, l)            -> spr "link to %s        " n 
+    | `link l                    -> spr "link          "
     | `image (src, _,_)          -> spr "image %s" src
     | `header                    -> spr "header  "       
     | `title                     -> spr "title   "      

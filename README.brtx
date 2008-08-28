@@ -186,6 +186,13 @@ There's a {link http://www.vim.org|Vim} syntax file.
 {e}
 (don't forget the {t|http://} because {q|{t|www.any-site.bouh}} can be
 interpreted as a {t|./} link)
+{p}
+A link may not have contents:
+{verbatim e}
+{link http://sebmdt.googlepages.com}
+{e}
+Will give:
+{link http://sebmdt.googlepages.com}
 
 {section 4|Figures}
 

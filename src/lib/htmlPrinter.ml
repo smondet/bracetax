@@ -87,17 +87,22 @@ let section_start n l =
 let section_stop n l =
     ~% "</a></h%d>\n<p>" (n + 1)
 
-let link_start printer args = (
-    match args with
-    | linkto :: t ->
-        let is_local, link = Commands.Names.is_local linkto in
-        let href =
-            if is_local then ~% "#%s" (link) else linkto in
-        printer.write (~% "<a href=\"%s\">" (sanitize_xml_attribute href));
-        `link (href, t)
-    | [] -> 
-        printer.write (~% "<a>");
-        `link ("", [])
+let link_start t args = (
+    let link, new_write = Commands.Link.start args in
+    t.write <- new_write;
+    link
+)
+let link_stop t l = (
+    t.write <- t.write_mem;
+    let kind, target, text = Commands.Link.stop l in
+    let target_str = 
+        (match target with Some s -> s | None -> "#") in
+    t.write (
+        ~% "<a href=\"%s%s\">%s</a>" 
+            (match kind with `local -> "#" | `generic -> "")
+            (sanitize_xml_attribute target_str)
+            (match text with Some s -> s | None -> sanitize_pcdata target_str)
+    );
 )
 
 let image_start t args = (
@@ -317,7 +322,7 @@ let stop_command t location = (
             end
         | `section (level, label) ->
             t.write (section_stop level label);
-        | `link _ -> t.write "</a>";
+        | `link l -> link_stop t l;
         | `image _ -> t.write image_stop;
         | `header ->  t.write (header_stop t);
         | `title -> t.write title_stop;
