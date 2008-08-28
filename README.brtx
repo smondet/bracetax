@@ -61,8 +61,139 @@ Between the {t|{{}} and the {t||}, it's the command mode:
         the braces (excepts for the {t|{{}{{}{}}} and {t|{{}{}}{}}} commands)
 {end}
 A command can have no arguments and no text, {i|e.g.} {t|{{}br{}}}
+{p}
+And for long blocs: {begin t}{{}cmd arg|Some text{}}{end}
+is equivalent to {begin t}{{}begin cmd arg{}}Some text{{}end{}}{end}
+{p}
+Non-parsed ({i|i.e. {q|code}}) blocs have a 
+{link local:sec_verbatim|special syntax}
 
 {section 3|Examples}
+
+{section 4|Comments}
+
+{verbatim e}
+Text # Comments...
+{cmd arg|
+    Text # Also comments...
+}
+{cmd # NOT COMMENTS !!! | Text }
+{e}
+
+{section 4|Characters}
+
+{verbatim e}
+Those are {{}, {}}, {#}, Unbreakable->{~}<-space, and {utf 0x42}, {utf 339}.
+{e}
+Those are {{}, {}}, {#}, Unbreakable->{~}<-space, and {utf 0x42}, {utf 339}.
+
+{section 4|Header}
+
+To have a title bloc in you document:
+{verbatim e}
+{begin header}
+    Ignored text !!
+    {title|Bracetax}
+    {authors|{link http://sebmdt.googlepages.com|Sebastien Mondet}}
+    {subtitle|A simple syntax for wikis and more...}
+{end}
+{e}
+
+{section 4 sec_verbatim|Non parsed blocs}
+
+The default case:
+{verbatim e}
+{verbatim}
+My free    form {{ } {|} c
+  code
+{endverbatim}
+{e}
+
+But you can set the {i|end tag}:
+{verbatim e}
+{verbatim AnotherEndTag}
+ Still Free
+ form
+with:
+{endverbatim}
+inside the bloc
+{AnotherEndTag}
+{e}
+
+{section 4|Formating}
+
+{verbatim e}
+{i|italic}, {b|bold}, {i|italo{b|bold}}, {t|mono-spaced}, super{sup|script},
+sub{sub|script}
+{e}
+{i|italic}, {b|bold}, {i|italo{b|bold}}, {t|mono-spaced}, super{sup|script},
+sub{sub|script}
+
+{section 4|Quoting}
+
+{verbatim e}
+Quotes: {q|default}, {q '|single}, {q es|españolas}, {q fr|françaises},
+{q en|English}, {q de|Deutsch} and {q brout|unknown is default}
+{e}
+Quotes: {q|default}, {q '|single}, {q es|españolas}, {q fr|françaises},
+{q en|English}, {q de|Deutsch} and {q brout|unknown is default}
+
+{section 4|Paragraphs and line-breaks}
+
+Paragraph: {t|{{}p{}}}, Line-break: {t|{{}br{}}}
+
+{section 4|Sections}
+
+The syntax is:
+{verbatim e}
+{section level label|Title of the section}
+{e}
+The {t|level} is an integer: 1, 2, 3 or 4 (default is 1){br}
+The {t|label} is a string for local {link local:sec_links|links}/references.
+
+{section 4|Lists}
+
+A list can be {t|item} (default) or {t|enum}, a new item begins with
+{t|{{}item{}}}:
+{verbatim e}
+{begin list enum}
+  {item} The one
+  {item} Two
+  {item} Three
+    {list item|{item} inside {item} more}
+  {item} Four
+{end}
+{e}
+{begin list  enum }
+  {item} The one
+  {item} Two
+  {item} Three
+    {list item|{item} inside {item} more}
+  {item} Four
+{end}
+
+{section 4 sec_links|Links}
+
+Local links:
+{verbatim e}
+The {t|label} is a string for local {link local:sec_links|links}/references.
+...
+{section 4 sec_links|Links}
+{e}
+Other:
+{verbatim e}
+There's a {link http://www.vim.org|Vim} syntax file.
+{e}
+(don't forget the {t|http://} because {q|{t|www.any-site.bouh}} can be
+interpreted as a {t|./} link)
+
+{section 4|Figures}
+
+TODO
+
+{section 4|Tables}
+
+TODO
 
 {section 1|Tools}
 
