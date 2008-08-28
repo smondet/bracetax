@@ -198,7 +198,7 @@ let table_stop t = (
         print_table t.write tab;
 )
 let cell_start t args = (
-    let head, cnb, align = Commands.Names.cell_args args in
+    let head, cnb, align = Commands.Table.cell_args args in
     let def_cell = `cell (head, cnb, align) in
     match t.current_table with
     | None ->

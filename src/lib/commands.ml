@@ -161,39 +161,8 @@ module Names = struct
     let is_subtitle = (=) "subtitle"
 
     let is_table = (=) "table"
-    let table_args =
-        let default = 1 in
-        let parse_int i = try int_of_string i with e -> default in
-        function
-        | [] -> (default, None)
-        | [s] -> (parse_int s, None)
-        | s :: o :: t -> (parse_int s, Some o)
 
     let is_cell = (=) "c"
-    let cell_args args =
-        let head = ref false in
-        let cols = ref 1 in
-        let alig = ref `default in
-        let rec parse_str str =
-            if str = "" then ()
-            else (
-                try Scanf.sscanf str "%d%s" (fun c s -> cols := c; parse_str s)
-                with
-                e ->
-                    begin match str.[0] with
-                    | 'h' -> head := true;
-                    | 'r' -> alig := `right;
-                    | 'l' -> alig := `left;
-                    | 'c' -> alig := `center;
-                    | _   -> ()
-                    end;
-                    parse_str (String.sub str 1 (String.length str - 1));
-            )
-        in
-        if args <> [] then (
-            parse_str (List.hd args);
-        );
-        (!head, !cols, !alig)
 end
 
 
@@ -266,6 +235,39 @@ module Table = struct
         caption: Buffer.t;
     }
 
+    let table_args =
+        let default = 1 in
+        let parse_int i = try int_of_string i with e -> default in
+        function
+        | [] -> (default, None)
+        | [s] -> (parse_int s, None)
+        | s :: o :: t -> (parse_int s, Some o)
+
+    let cell_args args =
+        let head = ref false in
+        let cols = ref 1 in
+        let alig = ref `default in
+        let rec parse_str str =
+            if str = "" then ()
+            else (
+                try Scanf.sscanf str "%d%s" (fun c s -> cols := c; parse_str s)
+                with
+                e ->
+                    begin match str.[0] with
+                    | 'h' -> head := true;
+                    | 'r' -> alig := `right;
+                    | 'l' -> alig := `left;
+                    | 'c' -> alig := `center;
+                    | _   -> ()
+                    end;
+                    parse_str (String.sub str 1 (String.length str - 1));
+            )
+        in
+        if args <> [] then (
+            parse_str (List.hd args);
+        );
+        (!head, !cols, !alig)
+
     let write table str = (
         let the_buffer =
             match table.current_cell with
@@ -276,7 +278,7 @@ module Table = struct
     )
     
     let start args = (
-        let col_nb, label = Names.table_args args in
+        let col_nb, label = table_args args in
         let table = {
             col_nb = col_nb;
             label = label;
@@ -287,7 +289,7 @@ module Table = struct
         (table, `table (col_nb, label), write table)
     )
     let cell_start ~warn tab args = (
-        let head, cnb, align = Names.cell_args args in
+        let head, cnb, align = cell_args args in
         let def_cell = `cell (head, cnb, align) in
         begin match tab.current_cell with
         | Some c -> 
