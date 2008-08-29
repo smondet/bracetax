@@ -404,7 +404,14 @@ let handle_verbatim_line t location line = (
 
 (* ==== Directly exported functions ==== *)
 
-let header ?(title="") ?(comment="") () = (
+let header ?(title="") ?(comment="") ?stylesheet_link () = (
+    let css_str =
+        match stylesheet_link with
+        | None -> ""
+        | Some f ->
+            ~% "<link rel=\"stylesheet\"  type=\"text/css\" href=\"%s\" />\n"
+                (sanitize_xml_attribute f)
+    in
     ~% "<!DOCTYPE html
     PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
     \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
@@ -412,9 +419,9 @@ let header ?(title="") ?(comment="") () = (
     <!-- %s -->
     <head>
     <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />
-    <title>%s</title>
+    %s<title>%s</title>
     </head>
-    <body>" (sanitize_comments comment) (sanitize_pcdata title)
+    <body>" (sanitize_comments comment) css_str (sanitize_pcdata title)
 )
 let footer () = "</body>\n</html>\n"
 

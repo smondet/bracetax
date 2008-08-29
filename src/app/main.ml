@@ -46,6 +46,7 @@ module Options = struct
     let output_stream = ref stdout
     let debug = ref false
     let header_footer = ref false
+    let stylesheet_link = ref None
 
     let options = Arg.align [
         ("-html", Arg.Set output_html, ~% " The output format (now only HTML)");
@@ -60,6 +61,11 @@ module Options = struct
             "-o",
             Arg.String (fun s -> output_stream := open_out s), 
             "<file> output file (default is standard output)"
+        );
+        (
+            "-link-stylesheet",
+            Arg.String (fun s -> stylesheet_link := Some s),
+            "<url> link to a stylesheet (CSS for XHTML), needs -doc"
         );
 
     ]
@@ -104,7 +110,10 @@ let () = (
         let read = read_line_opt i in
         let t = HtmlTransformer.create ~writer ~read in
         if !Options.header_footer then
-            write (HtmlPrinter.header ~comment:"Generated with BraceTax" ());
+            write (HtmlPrinter.header
+                ~comment:"Generated with BraceTax" ()
+                ?stylesheet_link:!Options.stylesheet_link
+            );
         HtmlTransformer.do_transformation t;
         if !Options.header_footer then
             write (HtmlPrinter.footer ());
