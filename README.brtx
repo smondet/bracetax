@@ -67,6 +67,9 @@ is equivalent to {begin t}{{}begin cmd arg{}}Some text{{}end{}}{end}
 {p}
 Non-parsed ({i|i.e. {q|code}}) blocs have a 
 {link local:sec_verbatim|special syntax}
+{p}
+For each command the arguments can be considered optional (they have default
+values).
 
 {section 3|Examples}
 
@@ -196,7 +199,25 @@ Will give:
 
 {section 4|Figures}
 
-TODO
+The syntax for images is:
+{verbatim e}
+{image <src> <w or w,h> <label>|Caption text}
+{e}
+
+For example {link local:img_brackets|this image}:
+{verbatim e}
+{image
+    http://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Brackets.svg/145px-Brackets.svg.png
+    40
+    img_brackets
+    |The bracket characters, from {link http://wikipedia.org|wikipedia}}
+{e}
+{image
+    http://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Brackets.svg/145px-Brackets.svg.png
+    40
+    img_brackets
+    |The bracket characters, from {link http://wikipedia.org|wikipedia}}
+
 
 {section 4|Tables}
 
