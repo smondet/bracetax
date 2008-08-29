@@ -58,7 +58,7 @@ Between the {t|{{}} and the {t||}, it's the command mode:
     {item} {t|'\ '} escapes the space (used as argument separator)
     {item} {t|'\|'} escapes the pipe (used as command/text separator)
     {item} {t|'\{{}'} and {t|'\{}}'} escape
-        the braces (excepts for the {t|{{}{{}{}}} and {t|{{}{}}{}}} commands)
+        the braces (except for the {t|{{}{{}{}}} and {t|{{}{}}{}}} commands)
 {end}
 A command can have no arguments and no text, {i|e.g.} {t|{{}br{}}}
 {p}
