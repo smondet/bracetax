@@ -221,11 +221,41 @@ For example {link local:img_brackets|this image}:
 
 {section 4|Tables}
 
-TODO
+For table we have two commands, the {t|table}:
+{verbatim e}
+{table <nb of columns> <label>|Caption and cells} 
+{e}
+and the cell:
+{verbatim e}
+{c <format>|content}
+{e}
+The {t|<format>} is the alignment ('l', 'r' or 'c'), the number of columns occupied, and the optional {q|is header ?} ('h'), in any order.
+
+Example:
+
+{verbatim e}
+{table 3  tab_example|
+    Some text with {i|commands},
+    {c|The first cell} which {c h2|A long header cell on 2 columns} 
+    {c c| center} will be {c l|left} {c r|right} in
+    {c l3|All the last row...} the caption
+}
+{e}
+{table 3  tab_example|
+    Some text with {i|commands},
+    {c|The first cell} which {c h2|A long header cell on 2 columns} 
+    {c c| center} will be {c l|left} {c r|right} in
+    {c l3|All the last row...} the caption
+}
+{p}
+{b|Note:} The alignment doesn't seem to be in XHTML, so we use a {b|{t|style}}
+attribute {i|and} a {b|{t|class}} attribute ({i|e.g.}
+{t|<td{~}class="centeralign"{~}style="text-align:center;">}).
 
 {section 1|Tools}
 
-There's a {link http://www.vim.org|Vim} syntax file.
+There's a {link http://www.vim.org|Vim} syntax file (the {t|verbatim} blocs are
+still to do).
 
 
 
