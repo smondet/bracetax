@@ -1,0 +1,51 @@
+
+body {
+	background-color: white;
+	color: black;
+	font-family: sans-serif;
+	position: relative;
+	left: 10%;
+	width: 80%;
+	font-size: 12px;
+}
+/*p {
+	position: relative;
+	left: 5%;
+	width: 90%;
+}*/
+/* h1, h2, h3 {
+	position: relative;
+}*/
+h1 {
+	font-size: 4em;
+}
+h2 { font-size: 3em; }
+h3 { font-size: 2.5em; }
+h4 { font-size: 2.1em; }
+h5 { font-size: 1.5em; }
+
+code, pre {
+	font-family: monospace;
+	letter-spacing: 1px;
+}
+pre {
+	border: dashed;
+	border-width: thin;
+	position: relative;
+    background-color: #eeeeee;
+	/*left: 10%;
+	width: 80%;
+	padding-bottom: 1em;*/
+}
+
+div.figure {
+    /*float: right; */
+    width: auto;
+    border: thin silver solid;
+    margin: 0.5em;
+    padding: 0.5em;
+    text-align: center;
+    font-style: italic;
+    text-indent: 0;
+}
+
