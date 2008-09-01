@@ -36,16 +36,19 @@ pre {
 }
 
 div.figure {
-    /*float: right; */
+    /* float: right; */
     text-align: center;
-    text-indent: 0;
-    width: auto;
-    border: thin silver solid;
+    /* text-indent: 10%; */
+    /* width: auto; */
+    /* border: thin silver solid; */
+    /* float: center; */
     margin: 0.5em;
     padding: 0.5em;
 }
 
 table {
+    margin-left:auto;
+    margin-right:auto;
     border-collapse: collapse
 }
 caption {
