@@ -6,16 +6,17 @@ body {
 	position: relative;
 	left: 10%;
 	width: 80%;
+    text-align: justify;
 	/*font-size: 12px;*/
 }
 
 div.header {
     text-align: center;
 }
-h1 {           font-size: 350%; }
+h1 {           font-size: 350%; font-variant: small-caps}
 div.authors {  font-size: 200%; }
 div.subtitle { font-size: 200%; }
-h2 {           font-size: 250%; }
+h2 {           font-size: 250%; border-bottom: 1px solid #000;}
 h3 {           font-size: 210%; }
 h4 {           font-size: 180%; }
 h5 {           font-size: 150%; }
@@ -59,4 +60,31 @@ td, th {
 	/*left: 3%;*/
 }
 
+h1 { 
+    counter-reset: section;
+}
 
+h2:before { content: counter(section) ". "; }
+ 
+h2 {
+    counter-reset: subsection;
+    counter-reset: subsubsection;
+    counter-increment: section;
+}
+ 
+h3:before {
+    content: counter(section) "." counter(subsection) ". " ;
+}
+ 
+h3 {
+    counter-increment: subsection;
+    counter-reset: subsubsection;
+}
+
+h4:before {
+    content: counter(section) "." counter(subsection) "." counter(subsubsection) ". ";
+}
+ 
+h4 {
+    counter-increment: subsubsection;
+}
