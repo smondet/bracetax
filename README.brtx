@@ -252,7 +252,7 @@ Example:
 attribute {i|and} a {b|{t|class}} attribute ({i|e.g.}
 {t|<td{~}class="centeralign"{~}style="text-align:center;">}).
 
-{section 1|Tools}
+{section 1 sec_tools|Tools}
 
 There's a {link http://www.vim.org|Vim} syntax file (the {t|verbatim} blocs are
 still to do).
