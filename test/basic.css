@@ -4,8 +4,8 @@ body {
 	color: black;
 	/*font-family: sans-serif;*/
 	position: relative;
-	left: 10%;
-	width: 80%;
+	left: 15%;
+	width: 70%;
     text-align: justify;
 	/*font-size: 12px;*/
 }
@@ -13,9 +13,9 @@ body {
 div.header {
     text-align: center;
 }
-h1 {           font-size: 350%; font-variant: small-caps}
-div.authors {  font-size: 200%; }
-div.subtitle { font-size: 200%; }
+h1 {           font-size: 350%; font-variant: small-caps; }
+div.authors {  font-size: 200%; 	line-height: 200%; }
+div.subtitle { font-size: 200%; font-style: italic; }
 h2 {           font-size: 250%; border-bottom: 1px solid #000;}
 h3 {           font-size: 210%; }
 h4 {           font-size: 180%; }
@@ -31,9 +31,9 @@ pre {
     border-color: #dddddd;
 	position: relative;
     background-color: #eeeeee;
-	left: 3%;
-	/*width: 80%;
-	padding-bottom: 1em;*/
+	left: 5%;
+	width: 90%;
+	/*padding-bottom: 1em;*/
 }
 
 div.figure {
@@ -67,9 +67,9 @@ h1 {
 h2:before { content: counter(section) ". "; }
  
 h2 {
-    counter-reset: subsection;
     counter-reset: subsubsection;
     counter-increment: section;
+    counter-reset: subsection;
 }
  
 h3:before {
