@@ -1,0 +1,7 @@
+
+{begin i} All that is italic with a bad end }
+
+{b|and that is bold {end}
+
+That's normal.
+
