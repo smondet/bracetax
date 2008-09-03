@@ -330,6 +330,9 @@ let stop_command t location = (
         | `authors -> t.write authors_stop;
         | `table _ -> table_stop t
         | `cell _ as c -> cell_stop t c
+        | `cmd_inside c ->
+            t.warn (~% "Warning: a '}' is trying to terminate a {begin %s\n"
+                (Commands.env_to_string c));
         | s -> t.warn (~% "Unknown command... %s\n" (Commands.env_to_string s));
     in
     match CS.pop t.stack with
