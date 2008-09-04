@@ -82,10 +82,10 @@ let section_start n l =
         match sanitize_xml_attribute l with
         | "" -> "" | s -> ~% "name=\"%s\" id=\"%s\"" s s
     in
-    ~% "</p>\n<h%d><a %s>" (n + 1) lsan
+    ~% "</div>\n<h%d><a %s>" (n + 1) lsan
 
 let section_stop n l =
-    ~% "</a></h%d>\n<p>" (n + 1)
+    ~% "</a></h%d>\n<div class=\"p\">" (n + 1)
 
 let link_start t args = (
     let link, new_write = Commands.Link.start args in
@@ -121,22 +121,22 @@ let image_start t args = (
         match sanitize_xml_attribute lbl with 
         | "" -> "" | s -> ~% "id=\"%s\" " s in
     t.write (~%
-        "</p>\n<div class=\"figure\">\n  <a href=\"%s\">\
+        "\n<div class=\"figure\">\n  <a href=\"%s\">\
         \n    <img src=\"%s\" %s %s alt=\"%s\"/>\n  </a><br/>\n"
         sansrc sansrc opts_str sanlbl sansrc
     );
     `image (src, opts, lbl)
 )
-let image_stop = "</div><p>"
+let image_stop = "</div>"
 
 let header_start t = (
     t.inside_header <- true; 
-    ~% "%s\n<div class=\"header\">\n" (if t.started_text then "</p>" else "")
+    ~% "%s\n<div class=\"header\">\n" (if t.started_text then "</div>" else "")
 )
 let header_stop t = (
     t.inside_header <- false;
     t.started_text <- true; (* we put the <p> *)
-    "</div> <!-- END HEADER -->\n<p>\n"
+    "</div> <!-- END HEADER -->\n<div class=\"p\">\n"
 )
 
 let title_start = "\n  <h1>"
@@ -160,7 +160,7 @@ let print_table write table = (
         | None -> ""
         | Some s -> (~% "id=\"%s\"" (sanitize_xml_attribute s))
     in
-    write (~% "</p><table border=\"1\" %s >\n" lbl_str);
+    write (~% "<table border=\"1\" %s >\n" lbl_str);
     write (~% "<caption>%s</caption>\n<tr>" (Buffer.contents table.CT.caption));
     let rec write_cells cells count =
         match cells with
@@ -185,7 +185,7 @@ let print_table write table = (
             write_cells t (count + c.CT.cols_used)
     in
     write_cells (List.rev table.CT.cells) 0;
-    write "</tr></table><p>\n"
+    write "</tr></table>\n"
 )
 
 let table_stop t = (
@@ -290,7 +290,7 @@ let stop_command t location = (
         | `cmd_begin (nam, args) ->
             (* p (~% "cmd begin %s(%s)\n" nam (String.concat ", " args)); *)
             start_environment ~is_begin:true t location nam args;
-        | `paragraph -> t.write "</p>\n<p>" (* TODO: unstack and restack ? *)
+        | `paragraph -> t.write "</div>\n<div class=\"p\">"
         | `new_line -> t.write "<br/>\n"
         | `non_break_space -> t.write "&nbsp;"
         | `open_brace -> t.write "{"
@@ -353,7 +353,7 @@ let handle_text t location line = (
         not (Escape.is_white_space line)
     then (
         t.started_text <- true;
-        t.write "<p>";
+        t.write "<div class=\"p\">";
     );
         
     if 
@@ -380,19 +380,19 @@ let handle_text t location line = (
 )
 
 let terminate t location = (
-    t.write "</p>\n";
+    t.write "</div>\n";
 ) 
 
 let enter_verbatim t location args = (
     CS.push t.stack (`verbatim args);
-    t.write "</p><pre>\n";
+    t.write "<pre>\n";
     t.current_line <- location.Signatures.s_line;
 )
 let exit_verbatim t location = (
     let env =  (CS.pop t.stack) in
     match env with
     | Some (`verbatim _) ->
-        t.write "</pre><p>\n";
+        t.write "</pre>\n";
         t.current_line <- location.Signatures.s_line;
     | _ ->
         (* warning ? error ? anyway, *)
