@@ -75,6 +75,7 @@ values).
 
 {section 4|Comments}
 
+Only possible in Text mode:
 {verbatim e}
 Text # Comments...
 {cmd arg|
@@ -85,6 +86,7 @@ Text # Comments...
 
 {section 4|Characters}
 
+Example:
 {verbatim e}
 Those are {{}, {}}, {#}, Unbreakable->{~}<-space, and {utf 0x42}, {utf 339}.
 {e}
@@ -125,6 +127,7 @@ inside the bloc
 
 {section 4|Formating}
 
+Some basic formatting:
 {verbatim e}
 {i|italic}, {b|bold}, {i|italo{b|bold}}, {t|mono-spaced}, super{sup|script},
 sub{sub|script}

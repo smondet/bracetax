@@ -10,6 +10,13 @@ body {
 	/*font-size: 12px;*/
 }
 
+div.p {
+    padding-bottom: 0em;
+    /* The debug border: */
+    /* border: thin silver solid; */
+}
+div.p + div.p { padding-top: 1.5em; }
+
 div.header {
     text-align: center;
 }
@@ -17,9 +24,9 @@ h1 {           font-size: 350%; font-variant: small-caps; }
 div.authors {  font-size: 200%; 	line-height: 200%; }
 div.subtitle { font-size: 200%; font-style: italic; }
 h2 {           font-size: 250%; border-bottom: 1px solid #000;}
-h3 {           font-size: 210%; }
-h4 {           font-size: 180%; }
-h5 {           font-size: 150%; }
+h3 {           font-size: 210%; padding-top: 0.1em;padding-bottom: 0.05em;}
+h4 {           font-size: 180%; padding-top: 0.1em;padding-bottom: 0.05em;}
+h5 {           font-size: 150%; padding-top: 0.1em;padding-bottom: 0.05em;}
 
 code, pre {
 	font-family: monospace;
@@ -34,6 +41,13 @@ pre {
 	left: 5%;
 	width: 90%;
 	/*padding-bottom: 1em;*/
+}
+
+ul, ol {
+    padding-top: 0em;
+    padding-bottom: 0em;
+    /* The debug border: */
+    /* border: thin silver solid; */
 }
 
 div.figure {
