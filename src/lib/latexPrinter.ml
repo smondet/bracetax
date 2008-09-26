@@ -34,6 +34,25 @@ let debugstr t s msg =
     else
         ""
 
+let sanitize_comments line = line
+    (* let patterns = [('<', "LT"); ('>', "GT"); ('&', "AMP"); ('-', "DASH")] in *)
+    (* Escape.replace_chars ~src:line ~patterns *)
+
+let sanitize_text line =
+    let patterns = [
+        ('$' , "\\$" );
+        ('&' , "\\&" );
+        ('%' , "\\%" );
+        ('#' , "\\#" );
+        ('{' , "\\{" );
+        ('}' , "\\}" );
+        ('_' , "\\_" );
+        ('\\', "\textbackslash" );
+        ('^' , "\textasciicircum" );
+        ('~' , "\textasciitilde" );
+    ] in
+    Escape.replace_chars ~src:line ~patterns
+
     
 (* TO help with compilation, the DummyPrinter: *)
 let head = "####"
