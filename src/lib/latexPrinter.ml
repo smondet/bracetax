@@ -58,10 +58,8 @@ let handle_text t location line = (
 
     if ((not t.inside_header)) ||
         (t.inside_header && (CS.head t.stack <> Some `header)) then (
-
-        let debug = debugstr t location "Text" in
         let data = sanitize_text line in
-        t.write (~% "%s%s\n" debug data);
+        t.write (~% "%s" data);
     ) else (
         if
             CS.head t.stack = Some `header
@@ -73,12 +71,32 @@ let handle_text t location line = (
     )
 )
 
+let handle_comment_line t location line = (
+    t.write (~% "%%%s %s-->\n"
+        (debugstr t location "Comment") (sanitize_comments line));
+)
+
+let enter_verbatim t location args = (
+    CS.push t.stack (`verbatim args);
+    t.write "\n\\begin{verbatim}\n";
+)
+let exit_verbatim t location = (
+    let env =  (CS.pop t.stack) in
+    match env with
+    | Some (`verbatim _) ->
+        t.write "\\end{verbatim}\n";
+    | _ ->
+        (* warning ? error ? anyway, *)
+        failwith "Shouldn't be there, Parser's fault ?";
+)
+let handle_verbatim_line t location line = (
+    t.write (~% "%s\n" line);
+)
+
 
 (* TO help with compilation, the DummyPrinter: *)
 let head = "####"
 
-let handle_comment_line t location line =
-    p (~% "%s%s[comment] \"%s\"\n" head (strstat location) line)
 
 let start_command t location name args =
     p (~% "%s%s[start %s(%s)]\n" head (strstat location)
@@ -90,16 +108,5 @@ let stop_command t location =
 let terminate t location = 
     p (~% "%s%s[This is the end...]\n" head (strstat location))
 
-let handle_verbatim_line t location line =
-    p (~% "%s%s[verbatim] %s\n" head (strstat location) line)
-
-let enter_verbatim t location args = ()
-let exit_verbatim t location = ()
-
-let dummy_writer = {
-    Signatures.w_write = (fun s -> ());
-    Signatures.w_warn = (fun s -> ());
-    Signatures.w_error = (fun s -> ());
-}
 
 
