@@ -35,8 +35,6 @@ let debugstr t s msg =
         ""
 
 let sanitize_comments line = line
-    (* let patterns = [('<', "LT"); ('>', "GT"); ('&', "AMP"); ('-', "DASH")] in *)
-    (* Escape.replace_chars ~src:line ~patterns *)
 
 let sanitize_text line = (
     let patterns = [
@@ -53,6 +51,8 @@ let sanitize_text line = (
     ] in
     Escape.replace_chars ~src:line ~patterns
 )
+
+(* ==== PRINTER module type's functions ==== *)
 
 let handle_text t location line = (
 
@@ -93,20 +93,17 @@ let handle_verbatim_line t location line = (
     t.write (~% "%s\n" line);
 )
 
+let terminate t location = ()
 
 (* TO help with compilation, the DummyPrinter: *)
-let head = "####"
-
 
 let start_command t location name args =
-    p (~% "%s%s[start %s(%s)]\n" head (strstat location)
+    p (~% "%%%s[start %s(%s)]\n" (strstat location)
     name (String.concat ", " args))
 
 let stop_command t location = 
-    p (~% "%s%s[stop]\n" head (strstat location))
+    p (~% "%%%s[stop]\n" (strstat location))
 
-let terminate t location = 
-    p (~% "%s%s[This is the end...]\n" head (strstat location))
 
 
 
