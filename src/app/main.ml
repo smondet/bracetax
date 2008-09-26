@@ -41,7 +41,8 @@ module Options = struct
 
     (* let arg_set ref v = Arg.Unit (fun () -> ref := v) *)
 
-    let output_html = ref true
+    type output_format = [ `HTML | `LaTeX ]
+    let output_format = ref (`HTML:output_format)
     let input_stream = ref stdin
     let output_stream = ref stdout
     let debug = ref false
@@ -49,7 +50,10 @@ module Options = struct
     let stylesheet_link = ref None
 
     let options = Arg.align [
-        ("-html", Arg.Set output_html, ~% " The output format (now only HTML)");
+        ("-html", Arg.Unit (fun () -> output_format := `HTML),
+            ~% " Output HTML format (default)");
+        ("-latex", Arg.Unit (fun () -> output_format := `LaTeX),
+            ~% " Output LaTeX format");
         ("-debug", Arg.Set debug, " Debug mode");
         ("-doc", Arg.Set header_footer, "output a complete document");
         (
@@ -76,7 +80,7 @@ module Options = struct
 
     let get () =
         Arg.parse options anon_fun short_usage;
-        (!output_html, !debug, !input_stream, !output_stream)
+        (!output_format, !debug, !input_stream, !output_stream)
 
 
 end
@@ -85,7 +89,7 @@ let read_line_opt i () = try Some (input_line i) with e -> None
 
 
 let () = (
-    let _, dbg, i, o = Options.get () in
+    let to_do, dbg, i, o = Options.get () in
     Sys.catch_break true;
     at_exit (fun () -> 
         close_in i;
@@ -108,15 +112,22 @@ let () = (
             let error = prerr_string in
             Signatures.make_writer ~write ~warn ~error in
         let read = read_line_opt i in
-        let t = HtmlTransformer.create ~writer ~read in
-        if !Options.header_footer then
-            write (HtmlPrinter.header
-                ~comment:"Generated with BraceTax" ()
-                ?stylesheet_link:!Options.stylesheet_link
-            );
-        HtmlTransformer.do_transformation t;
-        if !Options.header_footer then
-            write (HtmlPrinter.footer ());
+        begin match to_do with
+        | `HTML ->
+                let t = HtmlTransformer.create ~writer ~read in
+                if !Options.header_footer then
+                    write (HtmlPrinter.header
+                    ~comment:"Generated with BraceTax" ()
+                    ?stylesheet_link:!Options.stylesheet_link
+                    );
+                    HtmlTransformer.do_transformation t;
+                    if !Options.header_footer then
+                        write (HtmlPrinter.footer ());
+        | `LaTeX ->
+                let module LatexTransformer = Transformer.Make(LatexPrinter) in
+                let t = LatexTransformer.create ~writer ~read in
+                ignore t;
+        end;
     );
     (* close_in i; *)
     (* close_out o; *)
