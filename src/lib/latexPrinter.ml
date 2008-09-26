@@ -38,7 +38,7 @@ let sanitize_comments line = line
     (* let patterns = [('<', "LT"); ('>', "GT"); ('&', "AMP"); ('-', "DASH")] in *)
     (* Escape.replace_chars ~src:line ~patterns *)
 
-let sanitize_text line =
+let sanitize_text line = (
     let patterns = [
         ('$' , "\\$" );
         ('&' , "\\&" );
@@ -47,20 +47,38 @@ let sanitize_text line =
         ('{' , "\\{" );
         ('}' , "\\}" );
         ('_' , "\\_" );
-        ('\\', "\textbackslash" );
-        ('^' , "\textasciicircum" );
-        ('~' , "\textasciitilde" );
+        ('\\', "\\textbackslash" );
+        ('^' , "\\textasciicircum" );
+        ('~' , "\\textasciitilde" );
     ] in
     Escape.replace_chars ~src:line ~patterns
+)
 
-    
+let handle_text t location line = (
+
+    if ((not t.inside_header)) ||
+        (t.inside_header && (CS.head t.stack <> Some `header)) then (
+
+        let debug = debugstr t location "Text" in
+        let data = sanitize_text line in
+        t.write (~% "%s%s\n" debug data);
+    ) else (
+        if
+            CS.head t.stack = Some `header
+            && (not (Escape.is_white_space line))
+        then (
+            t.write (~% "%%%%IGNORED TEXT: %s" (sanitize_comments line));
+        );
+
+    )
+)
+
+
 (* TO help with compilation, the DummyPrinter: *)
 let head = "####"
 
 let handle_comment_line t location line =
     p (~% "%s%s[comment] \"%s\"\n" head (strstat location) line)
-let handle_text t location line =
-    p (~% "%s%s[text] \"%s\"\n" head (strstat location) line)
 
 let start_command t location name args =
     p (~% "%s%s[start %s(%s)]\n" head (strstat location)

@@ -117,16 +117,16 @@ let () = (
                 let t = HtmlTransformer.create ~writer ~read in
                 if !Options.header_footer then
                     write (HtmlPrinter.header
-                    ~comment:"Generated with BraceTax" ()
-                    ?stylesheet_link:!Options.stylesheet_link
+                        ~comment:"Generated with BraceTax" ()
+                        ?stylesheet_link:!Options.stylesheet_link
                     );
-                    HtmlTransformer.do_transformation t;
-                    if !Options.header_footer then
-                        write (HtmlPrinter.footer ());
+                HtmlTransformer.do_transformation t;
+                if !Options.header_footer then
+                    write (HtmlPrinter.footer ());
         | `LaTeX ->
                 let module LatexTransformer = Transformer.Make(LatexPrinter) in
                 let t = LatexTransformer.create ~writer ~read in
-                ignore t;
+                LatexTransformer.do_transformation t;
         end;
     );
     (* close_in i; *)
