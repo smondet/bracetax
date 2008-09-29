@@ -207,19 +207,21 @@ The syntax for images is:
 {image <src> <w or w,h> <label>|Caption text}
 {e}
 
-For example {link local:img_brackets|this image}:
+For example {link local:img:foundbyfind|this image}:
 {verbatim e}
 {image
-    http://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Brackets.svg/145px-Brackets.svg.png
-    40
-    img_brackets
-    |The bracket characters, from {link http://wikipedia.org|wikipedia}}
+    found_image.png
+    150
+    img:foundbyfind
+    |An image found by {tt|find /usr/share -name "*.png" | head -n 1}
+}
 {e}
 {image
-    http://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Brackets.svg/145px-Brackets.svg.png
-    40
-    img_brackets
-    |The bracket characters, from {link http://wikipedia.org|wikipedia}}
+    found_image.png
+    150
+    img:foundbyfind
+    |An image found by {t|find /usr/share -name "*.png" | head -n 1}
+}
 
 
 {section 4|Tables}
