@@ -96,6 +96,57 @@ let handle_verbatim_line t location line = (
 let terminate t location = ()
 
 let start_environment ?(is_begin=false) t location name args = (
+    let module C = Commands.Names in
+    let cmd name args =
+        match name with
+        (*| s when C.is_quotation s        ->*)
+            (*let op, clo = quotation_open_close args in*)
+            (*t.write op;*)
+            (*`quotation (op, clo)*)
+        | s when C.is_italic s      -> t.write "{\\it{}"  ; `italic
+        | s when C.is_bold s        -> t.write "{\\bf{}"  ; `bold
+        | s when C.is_mono_space s  -> t.write "\\texttt{" ; `mono_space
+        | s when C.is_superscript s -> t.write ""; `superscript
+        | s when C.is_subscript s   -> t.write ""; `subscript
+        | s when (C.is_end s)           -> `cmd_end
+    (*    | s when C.is_list s             ->
+            let style, other_args, waiting =
+                match args with
+                | [] -> (`itemize, [], ref true)
+                | h :: t -> (C.list_style h, t, ref true) in
+            t.write (list_start style);
+            `list (style, other_args, waiting)
+        | s when C.is_item s -> `item
+        | s when C.is_section s -> 
+            let level, label = C.section_params args in
+            t.write (section_start level label);
+            `section (level, label)
+        | s when C.is_link s -> (link_start t args)
+        | s when C.is_image s -> image_start t args
+        | s when C.is_header s -> t.write (header_start t); `header
+        | s when C.is_title s -> t.write title_start; `title
+        | s when C.is_subtitle s -> t.write subtitle_start; `subtitle
+        | s when C.is_authors s -> t.write authors_start; `authors
+        | s when C.is_table s -> table_start t args
+        | s when C.is_cell s -> cell_start t args
+        *)
+        | s -> t.warn (~% "unknown: %s\n" s); `unknown (s, args)
+    in
+    let the_cmd =
+        if C.is_begin name then (
+            match args with
+            | [] -> t.warn "Lonely begin ??!!"; (`cmd_begin ("", []))
+            | h :: t -> (`cmd_begin (h, t))
+        ) else (
+            cmd name args
+        )
+    in
+    if is_begin then (
+        CS.push t.stack (`cmd_inside the_cmd);
+    ) else (
+        CS.push t.stack the_cmd;
+    );
+
 )
 
 let start_command t location name args = (
@@ -133,9 +184,9 @@ let stop_command t location = (
         | `sharp -> t.write "\\#"
         | (`utf8_char i) -> t.write (~% "%% (TODO) UTF:0x%x\n" i)
         | (`quotation (op, clo)) -> t.write clo
-        | `italic       ->  t.write ""  
-        | `bold         ->  t.write ""  
-        | `mono_space   ->  t.write "" 
+        | `italic       ->  t.write "}"  
+        | `bold         ->  t.write "}"  
+        | `mono_space   ->  t.write "}" 
         | `superscript  ->  t.write ""
         | `subscript    ->  t.write ""
         | `list (style, _, r) -> t.write "" (*(list_stop style)*)
