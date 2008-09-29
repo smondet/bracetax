@@ -111,6 +111,19 @@ let link_stop t l = (
 )
 
 
+let quotation_open_close a = (
+    let default = ("``", "''") in
+    try
+        match List.hd a with
+        | "'"  -> ("`", "'")
+        | "en" -> ("``", "''")
+        | "fr" -> ("«~", "~»")
+        | "de" -> ("„", "''")
+        | "es" -> ("«", "»")
+        | s    ->  default
+    with
+    | e -> default
+)
 
 (* ==== PRINTER module type's functions ==== *)
 
@@ -159,10 +172,10 @@ let start_environment ?(is_begin=false) t location name args = (
     let module C = Commands.Names in
     let cmd name args =
         match name with
-        (*| s when C.is_quotation s        ->*)
-            (*let op, clo = quotation_open_close args in*)
-            (*t.write op;*)
-            (*`quotation (op, clo)*)
+        | s when C.is_quotation s        ->
+            let op, clo = quotation_open_close args in
+            t.write op;
+            `quotation (op, clo)
         | s when C.is_italic s      -> t.write "{\\it{}"  ; `italic
         | s when C.is_bold s        -> t.write "{\\bf{}"  ; `bold
         | s when C.is_mono_space s  -> t.write "\\texttt{" ; `mono_space
