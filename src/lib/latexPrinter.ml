@@ -52,6 +52,26 @@ let sanitize_text line = (
     Escape.replace_chars ~src:line ~patterns
 )
 
+
+
+let section_start n l =
+    let section = 
+        match n with
+        | 4 -> "paragraph"
+        | 3 -> "subsubsection"
+        | 2 -> "subsection"
+        | 1 | _ -> "section"
+    in
+    ~% "\n\\%s{" section
+
+let section_stop n l = (
+    let lsan = match l with | "" -> "" | s -> ~% "\\label{%s}" s in
+    ~% "}\n%s\n" lsan
+)
+
+
+
+
 (* ==== PRINTER module type's functions ==== *)
 
 let handle_text t location line = (
@@ -117,11 +137,12 @@ let start_environment ?(is_begin=false) t location name args = (
             t.write (list_start style);
             `list (style, other_args, waiting)
         | s when C.is_item s -> `item
+        *)
         | s when C.is_section s -> 
             let level, label = C.section_params args in
             t.write (section_start level label);
             `section (level, label)
-        | s when C.is_link s -> (link_start t args)
+        (*| s when C.is_link s -> (link_start t args)
         | s when C.is_image s -> image_start t args
         | s when C.is_header s -> t.write (header_start t); `header
         | s when C.is_title s -> t.write title_start; `title
@@ -206,8 +227,7 @@ let stop_command t location = (
                 CS.push t.stack c;
             | None -> t.warn (~% "Warning {item}... nothing to itemize !\n")
             end
-        | `section (level, label) ->
-            t.write ""(*(section_stop level label)*);
+        | `section (level, label) -> t.write (section_stop level label);
         | `link l -> ()(*link_stop t l*);
         | `image _ -> t.write ""(*image_stop*);
         | `header ->  t.write ""(*(header_stop t)*);
