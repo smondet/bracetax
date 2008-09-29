@@ -126,7 +126,14 @@ let () = (
         | `LaTeX ->
                 let module LatexTransformer = Transformer.Make(LatexPrinter) in
                 let t = LatexTransformer.create ~writer ~read in
+                if !Options.header_footer then
+                    write (LatexPrinter.header
+                        ~comment:"Generated with BraceTax" ()
+                        ?stylesheet_link:!Options.stylesheet_link
+                    );
                 LatexTransformer.do_transformation t;
+                if !Options.header_footer then
+                    write (LatexPrinter.footer ());
         end;
     );
     (* close_in i; *)

@@ -95,15 +95,107 @@ let handle_verbatim_line t location line = (
 
 let terminate t location = ()
 
-(* TO help with compilation, the DummyPrinter: *)
+let start_environment ?(is_begin=false) t location name args = (
+)
 
-let start_command t location name args =
+let start_command t location name args = (
     p (~% "%%%s[start %s(%s)]\n" (strstat location)
-    name (String.concat ", " args))
+    name (String.concat ", " args));
+    match Commands.non_env_cmd_of_name name args with
+    | `unknown (name, args) -> start_environment t location name args
+    | cmd -> CS.push t.stack cmd
+)
 
-let stop_command t location = 
-    p (~% "%%%s[stop]\n" (strstat location))
+
+let stop_command t location = (
+    p (~% "%%%s[stop]\n" (strstat location));
+    let rec out_of_env env =
+        match env with
+        | `cmd_end ->
+            begin match CS.pop t.stack with
+            | Some (`cmd_inside benv) ->
+                (* p (~% "{end} %s\n" (Commands.env_to_string benv)); *)
+                out_of_env benv
+            | Some c ->
+                t.warn (~% "Warning {end} does not end a {begin...} but %s\n"
+                    (Commands.env_to_string c));
+                CS.push t.stack c;
+            | None -> t.warn (~% "Nothing to {end} there !!\n")
+            end
+        | `cmd_begin (nam, args) ->
+            (* p (~% "cmd begin %s(%s)\n" nam (String.concat ", " args)); *)
+            start_environment ~is_begin:true t location nam args;
+        | `paragraph -> t.write "\n\\par\n"
+        | `new_line -> t.write "\\\n"
+        | `non_break_space -> t.write "~"
+        | `open_brace -> t.write "\\{"
+        | `close_brace -> t.write "\\}"
+        | `sharp -> t.write "\\#"
+        | (`utf8_char i) -> t.write (~% "%% (TODO) UTF:0x%x\n" i)
+        | (`quotation (op, clo)) -> t.write clo
+        | `italic       ->  t.write ""  
+        | `bold         ->  t.write ""  
+        | `mono_space   ->  t.write "" 
+        | `superscript  ->  t.write ""
+        | `subscript    ->  t.write ""
+        | `list (style, _, r) -> t.write "" (*(list_stop style)*)
+        | `item ->
+            begin match CS.head t.stack with
+            | Some (`list (style, _, r))
+            | Some (`cmd_inside (`list (style, _, r))) ->
+                if !r then (
+                    t.write "" (*(list_firstitem style)*);
+                    r := false;
+                ) else (
+                    t.write ""(*(list_item style)*);
+                );
+            | Some c ->
+                t.warn (~% "Warning {item} is not just under list but %s\n"
+                    (Commands.env_to_string c));
+                CS.push t.stack c;
+            | None -> t.warn (~% "Warning {item}... nothing to itemize !\n")
+            end
+        | `section (level, label) ->
+            t.write ""(*(section_stop level label)*);
+        | `link l -> ()(*link_stop t l*);
+        | `image _ -> t.write ""(*image_stop*);
+        | `header ->  t.write ""(*(header_stop t)*);
+        | `title -> t.write ""(*title_stop*);
+        | `subtitle -> t.write ""(*subtitle_stop*);
+        | `authors -> t.write ""(*authors_stop*);
+        | `table _ -> ()(*table_stop t*)
+        | `cell _ -> ()(*cell_stop t c*)
+        | `cmd_inside c ->
+            t.warn (~% "Warning: a '}' is trying to terminate a {begin %s\n"
+                (Commands.env_to_string c));
+        | s -> t.warn (~% "Unknown command... %s\n" (Commands.env_to_string s));
+    in
+    match CS.pop t.stack with
+    | Some env -> out_of_env env
+    | None -> ()
+)
 
 
+(* ==== Directly exported functions ==== *)
 
+let header ?(title="") ?(comment="") ?stylesheet_link () = (
+    let package_str =
+        match stylesheet_link with
+        | None -> ""
+        | Some f -> ~% "\\usepackage{%s}" f
+    in
+    ~% "\
+    \\documentclass[a4,10pt]{article}\n\
+    \\usepackage[T1]{fontenc}\n\
+    \\usepackage[english]{babel}\n\
+    \\usepackage{ucs}\n\
+    \\usepackage[utf8]{inputenc}\n\
+    %%%s\n\
+    %s\n\
+    \n\
+    \\begin{document}\n\
+    \n\
+    " (sanitize_comments comment) package_str
+)
+let footer () = "\n\\end{document}\n"
 
