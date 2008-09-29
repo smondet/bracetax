@@ -51,9 +51,25 @@ let sanitize_text line = (
     ] in
     Escape.replace_chars ~src:line ~patterns
 )
+let sanitize_nontext line = (
+    let patterns = [
+        ('$' , "" );
+        ('&' , "" );
+        ('%' , "" );
+        ('#' , "" );
+        ('{' , "" );
+        ('}' , "" );
+        ('_' , "" );
+        ('\\', "" );
+        ('^' , "" );
+        ('~' , "" );
+    ] in
+    Escape.replace_chars ~src:line ~patterns
+)
 
 
 
+(* Sections *)
 let section_start n l =
     let section = 
         match n with
@@ -65,10 +81,34 @@ let section_start n l =
     ~% "\n\\%s{" section
 
 let section_stop n l = (
-    let lsan = match l with | "" -> "" | s -> ~% "\\label{%s}" s in
+    let lsan =
+        match l with | "" -> "" | s -> ~% "\\label{%s}" (sanitize_nontext s) in
     ~% "}\n%s\n" lsan
 )
 
+(* Links *)
+let link_start t args = (
+    let link, new_write = Commands.Link.start args in
+    t.write <- new_write;
+    link
+)
+let link_stop t l = (
+    t.write <- t.write_mem;
+    let kind, target, text = Commands.Link.stop l in
+    let target_str = 
+        sanitize_nontext (match target with Some s -> s | None -> "notarget") in
+    t.write (
+        match kind with
+        | `local ->
+            (match text with
+            | Some s ->  ~% "%s (\\ref{%s})" (sanitize_nontext s) target_str
+            | None ->  ~% "\\ref{%s}" target_str)
+        | _ ->
+            ~% "\\href{%s}{%s}" 
+            (target_str)
+            (match text with Some s -> sanitize_nontext s | None -> target_str)
+    );
+)
 
 
 
@@ -142,8 +182,8 @@ let start_environment ?(is_begin=false) t location name args = (
             let level, label = C.section_params args in
             t.write (section_start level label);
             `section (level, label)
-        (*| s when C.is_link s -> (link_start t args)
-        | s when C.is_image s -> image_start t args
+        | s when C.is_link s -> (link_start t args)
+        (*| s when C.is_image s -> image_start t args
         | s when C.is_header s -> t.write (header_start t); `header
         | s when C.is_title s -> t.write title_start; `title
         | s when C.is_subtitle s -> t.write subtitle_start; `subtitle
@@ -228,7 +268,7 @@ let stop_command t location = (
             | None -> t.warn (~% "Warning {item}... nothing to itemize !\n")
             end
         | `section (level, label) -> t.write (section_stop level label);
-        | `link l -> ()(*link_stop t l*);
+        | `link l -> link_stop t l;
         | `image _ -> t.write ""(*image_stop*);
         | `header ->  t.write ""(*(header_stop t)*);
         | `title -> t.write ""(*title_stop*);
@@ -257,16 +297,46 @@ let header ?(title="") ?(comment="") ?stylesheet_link () = (
     in
     ~% "\
     \\documentclass[a4,10pt]{article}\n\
+    \n\
+    \\clubpenalty=10000\n\
+    \\widowpenalty=10000\n\
+    \n\
     \\usepackage[T1]{fontenc}\n\
     \\usepackage[english]{babel}\n\
     \\usepackage{ucs}\n\
     \\usepackage[utf8]{inputenc}\n\
+    \\usepackage[                         \n\
+        bookmarks         = true,         \n\
+        bookmarksnumbered = true,         \n\
+        colorlinks        = true,         \n\
+    ]{hyperref}                           \n\
+    \\usepackage{color}\n\
+    \\definecolor{webred}{rgb}{0.3,0,0}\n\
+    \\definecolor{webblue}{rgb}{0.3,0.3,0.3}\n\
+    \\definecolor{blurl}{rgb}{0,0,0.8}\n\
+    \\hypersetup{\n\
+    linkcolor         = webred, %%black\n\
+    citecolor         = webred, %%black\n\
+    urlcolor          = blurl , %%black\n\
+    linkbordercolor   = {1 1 1},\n\
+    citebordercolor   = {1 1 1},\n\
+    urlbordercolor    = {1 1 1},\n\
+    pdfauthor   = {},\n\
+    pdftitle    = {%s},\n\
+    pdfsubject  = {},\n\
+    pdfkeywords = {},\n\
+    pdfcreator  = {Bracetax and PDFLaTeX},\n\
+    pdfproducer = {Bracetax and PDFLaTeX}}\n\
+    \n\
+    \\usepackage[pdftex]{graphicx}\n\
+    \\DeclareGraphicsExtensions{.jpg,.mps,.pdf,.png}\n\
+    \n\
     %%%s\n\
     %s\n\
     \n\
     \\begin{document}\n\
     \n\
-    " (sanitize_comments comment) package_str
+    " title (sanitize_comments comment) package_str
 )
 let footer () = "\n\\end{document}\n"
 
