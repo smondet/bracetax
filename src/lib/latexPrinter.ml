@@ -145,6 +145,34 @@ let subtitle_start = "\\date{"
 let subtitle_stop = "}\n"
 
 
+(* Images *)
+let image_start t args = (
+    let src, opts, lbl = Commands.Names.image_params args in
+    let opts_str =
+        if opts <> [] then 
+            let strs =List.map (function
+                | `w w -> (~% "width=%dpt"  w)
+                | `h h -> (~% "height=%dpt" h)) opts in
+            "[" ^ (String.concat "," strs) ^ "]"
+        else
+            ""
+    in
+    let sansrc = match src with "" -> "IMAGEWITHNOSOURCE" | s -> s in
+    let sanlbl =
+        match sanitize_nontext lbl with 
+        | "" -> "" | s -> ~% "\\label{%s}" s in
+    t.write (~% "\n\
+        \\begin{figure}[htcb]\n\
+        \  \\centering\n\
+        \  \\includegraphics%s{%s}\n\
+        \  \\caption{%s"
+        opts_str sansrc sanlbl
+    );
+    `image (src, opts, lbl)
+)
+let image_stop = "}\n\\end{figure}\n"
+
+
 
 
 (* ==== PRINTER module type's functions ==== *)
@@ -218,7 +246,7 @@ let start_environment ?(is_begin=false) t location name args = (
             t.write (section_start level label);
             `section (level, label)
         | s when C.is_link s -> (link_start t args)
-        (*| s when C.is_image s -> image_start t args*)
+        | s when C.is_image s -> image_start t args
         | s when C.is_header s -> t.write (header_start t); `header
         | s when C.is_title s -> t.write title_start; `title
         | s when C.is_subtitle s -> t.write subtitle_start; `subtitle
@@ -305,7 +333,7 @@ let stop_command t location = (
             end
         | `section (level, label) -> t.write (section_stop level label);
         | `link l -> link_stop t l;
-        | `image _ -> t.write ""(*image_stop*);
+        | `image _ -> t.write image_stop;
         | `header ->  t.write (header_stop t);
         | `title -> t.write title_stop;
         | `subtitle -> t.write subtitle_stop;
