@@ -172,6 +172,97 @@ let image_start t args = (
 )
 let image_stop = "}\n\\end{figure}\n"
 
+(* Tables *)
+let table_start t args = (
+    let table, to_stack, new_write = Commands.Table.start args in
+    t.current_table <- Some table;
+    t.write <- new_write;
+    to_stack
+)
+let print_table write table = (
+    let module CT = Commands.Table in
+    let lbl_str =
+        match table.CT.label with
+        | None -> ""
+        | Some s -> (~% "\\label{%s}" (sanitize_nontext s))
+    in
+    let table_format = 
+        let rec make acc = function
+            | 0 -> acc
+            | n -> make ("c" :: acc) (n - 1)
+        in
+        "|" ^ (String.concat "|" (make [] table.CT.col_nb)) ^ "|"
+    in
+    write (~% "\n\
+        \\begin{table}[htcb]\n\
+        \  \\begin{center}\n\
+        \    \\begin{tabular}{%s}\n\
+        \    \\hline " table_format
+    );
+    let rec write_cells cells count =
+        match cells with
+        | [] -> (* fill the gap + warning *)
+            ()
+        | c :: t ->
+            if count <> 0 then (
+                if count mod table.CT.col_nb = 0 then (
+                    write "\\\\\n      \\hline "
+                ) else (
+                    write " & "
+                );
+            );
+            let text = (Buffer.contents c.CT.cell_text) in
+            let typ_of_cell =
+                if c.CT.is_head then ~% "\\textbf{%s}" text else text in
+            let alignement =
+                match c.CT.align with
+                | `right -> "\\flushright"
+                | `center -> "\\center"
+                | `left -> "\\flushleft"
+                | `default -> ""
+            in
+            let multicol = 
+                if c.CT.cols_used <> 1 then
+                    (~% "\\multicolumn{%d}{|c|}{%s}" c.CT.cols_used typ_of_cell)
+                else
+                    typ_of_cell
+            in
+            write (~% "%s %s" ""(*TODO alignement*) multicol);
+            write_cells t (count + c.CT.cols_used)
+    in
+    write_cells (List.rev table.CT.cells) 0;
+    write (~% "\\\\\n    \\hline\n\
+        \  \\end{tabular}\n\
+        \  \\end{center}\n\
+        \  \\caption{%s%s}\n\
+        \\end{table}\n" (Buffer.contents table.CT.caption) lbl_str);
+
+)
+
+let table_stop t = (
+    match t.current_table with
+    | None -> failwith "Why am I here ??? no table to end."
+    | Some tab ->
+        (* p (~% "End of table: %s\n" (Buffer.contents tab.caption)); *)
+        t.write <- t.write_mem;
+        t.current_table <- None;
+        print_table t.write tab;
+)
+let cell_start t args = (
+    let head, cnb, align = Commands.Table.cell_args args in
+    let def_cell = `cell (head, cnb, align) in
+    match t.current_table with
+    | None ->
+        t.warn (~% "Warning: no use for a cell here !\n");
+        def_cell
+    | Some tab -> Commands.Table.cell_start ~warn:t.warn tab args
+)
+let cell_stop t env = (
+    match t.current_table with
+    | None -> t.warn (~% "Warning: still no use for a cell here !\n");
+    | Some tab -> Commands.Table.cell_stop ~warn:t.warn tab
+)
+
 
 
 
@@ -251,10 +342,8 @@ let start_environment ?(is_begin=false) t location name args = (
         | s when C.is_title s -> t.write title_start; `title
         | s when C.is_subtitle s -> t.write subtitle_start; `subtitle
         | s when C.is_authors s -> t.write authors_start; `authors
-        (*
         | s when C.is_table s -> table_start t args
         | s when C.is_cell s -> cell_start t args
-        *)
         | s -> t.warn (~% "unknown: %s\n" s); `unknown (s, args)
     in
     let the_cmd =
@@ -338,8 +427,8 @@ let stop_command t location = (
         | `title -> t.write title_stop;
         | `subtitle -> t.write subtitle_stop;
         | `authors -> t.write authors_stop;
-        | `table _ -> ()(*table_stop t*)
-        | `cell _ -> ()(*cell_stop t c*)
+        | `table _ -> table_stop t
+        | `cell _ as c -> cell_stop t c
         | `cmd_inside c ->
             t.warn (~% "Warning: a '}' is trying to terminate a {begin %s\n"
                 (Commands.env_to_string c));
