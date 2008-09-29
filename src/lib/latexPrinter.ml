@@ -118,8 +118,8 @@ let quotation_open_close a = (
         | "'"  -> ("`", "'")
         | "en" -> ("``", "''")
         | "fr" -> ("«~", "~»")
-        | "de" -> ("„", "''")
-        | "es" -> ("«", "»")
+        | "de" -> ("\\unichar{8222}", "\\unichar{8220}")
+        | "es" -> ("\\unichar{171}", "\\unichar{187}")
         | s    ->  default
     with
     | e -> default
@@ -256,7 +256,7 @@ let stop_command t location = (
         | `open_brace -> t.write "\\{"
         | `close_brace -> t.write "\\}"
         | `sharp -> t.write "\\#"
-        | (`utf8_char i) -> t.write (~% "%% (TODO) UTF:0x%x\n" i)
+        | (`utf8_char i) -> t.write (~% "\\unichar{%d}" i)
         | (`quotation (op, clo)) -> t.write clo
         | `italic       ->  t.write "}"  
         | `bold         ->  t.write "}"  
