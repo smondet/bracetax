@@ -55,7 +55,7 @@ module Options = struct
         ("-latex", Arg.Unit (fun () -> output_format := `LaTeX),
             ~% " Output LaTeX format");
         ("-debug", Arg.Set debug, " Debug mode");
-        ("-doc", Arg.Set header_footer, "output a complete document");
+        ("-doc", Arg.Set header_footer, " Output a complete document");
         (
             "-i",
             Arg.String (fun s -> input_stream := open_in s), 
