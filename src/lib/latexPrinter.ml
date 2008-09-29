@@ -106,8 +106,8 @@ let start_environment ?(is_begin=false) t location name args = (
         | s when C.is_italic s      -> t.write "{\\it{}"  ; `italic
         | s when C.is_bold s        -> t.write "{\\bf{}"  ; `bold
         | s when C.is_mono_space s  -> t.write "\\texttt{" ; `mono_space
-        | s when C.is_superscript s -> t.write ""; `superscript
-        | s when C.is_subscript s   -> t.write ""; `subscript
+        | s when C.is_superscript s -> t.write "$^{\\textrm{"; `superscript
+        | s when C.is_subscript s   -> t.write "$_{\\textrm{"; `subscript
         | s when (C.is_end s)           -> `cmd_end
     (*    | s when C.is_list s             ->
             let style, other_args, waiting =
@@ -187,8 +187,8 @@ let stop_command t location = (
         | `italic       ->  t.write "}"  
         | `bold         ->  t.write "}"  
         | `mono_space   ->  t.write "}" 
-        | `superscript  ->  t.write ""
-        | `subscript    ->  t.write ""
+        | `superscript  ->  t.write "}}$"
+        | `subscript    ->  t.write "}}$"
         | `list (style, _, r) -> t.write "" (*(list_stop style)*)
         | `item ->
             begin match CS.head t.stack with
