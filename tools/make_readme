@@ -13,6 +13,11 @@ cp test/basic.css gendoc/
 gvim -f tools/make_readme -c 'colorscheme murphy' -c 'sy on' -c TOhtml -c w -c qa
 mv tools/make_readme.html gendoc/
 
+bracetax -doc -latex -i README.brtx -o gendoc/README_latex.tex
+cd gendoc
+pdflatex README_latex && pdflatex README_latex
+cd ..
+
 echo "
 {header|
     {title|Bracetax's README}
@@ -24,6 +29,7 @@ Here we have:
     {item} The {link README.brtx|source} ({t|README.brtx})
     {item} The {link README_raw.html|generated HTML}
     {item} The {link README_css.html|generated HTML with a CSS}
+    {item} The {link README_latex.pdf|generated PDF from LaTeX export}
     {item} The {link README.brtx.html|coloured source} (by Vim, c.f. 
         {link README_css.html#sec_tools|Tools})
     {item} The {link make_readme.html|script} that generated this page
