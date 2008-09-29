@@ -111,6 +111,7 @@ let link_stop t l = (
 )
 
 
+(* Quotations *)
 let quotation_open_close a = (
     let default = ("``", "''") in
     try
@@ -124,6 +125,27 @@ let quotation_open_close a = (
     with
     | e -> default
 )
+
+
+(* Header: *)
+let header_start t = (
+    t.inside_header <- true; 
+    ~% "%% HEADER:\n"
+)
+let header_stop t = (
+    t.inside_header <- false;
+    "\\maketitle\n\n\n"
+)
+
+let title_start = "\\title{"
+let title_stop = "}\n"
+let authors_start = "\\author{"
+let authors_stop = "}\n"
+let subtitle_start = "\\date{"
+let subtitle_stop = "}\n"
+
+
+
 
 (* ==== PRINTER module type's functions ==== *)
 
@@ -196,11 +218,12 @@ let start_environment ?(is_begin=false) t location name args = (
             t.write (section_start level label);
             `section (level, label)
         | s when C.is_link s -> (link_start t args)
-        (*| s when C.is_image s -> image_start t args
+        (*| s when C.is_image s -> image_start t args*)
         | s when C.is_header s -> t.write (header_start t); `header
         | s when C.is_title s -> t.write title_start; `title
         | s when C.is_subtitle s -> t.write subtitle_start; `subtitle
         | s when C.is_authors s -> t.write authors_start; `authors
+        (*
         | s when C.is_table s -> table_start t args
         | s when C.is_cell s -> cell_start t args
         *)
@@ -283,10 +306,10 @@ let stop_command t location = (
         | `section (level, label) -> t.write (section_stop level label);
         | `link l -> link_stop t l;
         | `image _ -> t.write ""(*image_stop*);
-        | `header ->  t.write ""(*(header_stop t)*);
-        | `title -> t.write ""(*title_stop*);
-        | `subtitle -> t.write ""(*subtitle_stop*);
-        | `authors -> t.write ""(*authors_stop*);
+        | `header ->  t.write (header_stop t);
+        | `title -> t.write title_stop;
+        | `subtitle -> t.write subtitle_stop;
+        | `authors -> t.write authors_stop;
         | `table _ -> ()(*table_stop t*)
         | `cell _ -> ()(*cell_stop t c*)
         | `cmd_inside c ->
