@@ -212,23 +212,22 @@ let print_table write table = (
                 );
             );
             let text = (Buffer.contents c.CT.cell_text) in
-            let typ_of_cell =
+            let text_with_type =
                 if c.CT.is_head then ~% "\\textbf{%s}" text else text in
-            let alignement =
+            let alignment =
                 match c.CT.align with
-                | `right -> "\\flushright"
-                | `center -> "\\center"
-                | `left -> "\\flushleft"
-                | `default -> ""
+                | `right -> "r"
+                | `center -> "c"
+                | `left -> "l"
+                | `default -> "c"
             in
             let multicol = 
-                if c.CT.cols_used <> 1 then
-                    (~% "\\multicolumn{%d}{|c|}{%s}" c.CT.cols_used typ_of_cell)
-                else
-                    typ_of_cell
+                (~% "\\multicolumn{%d}{|%s|}{%s}"
+                    c.CT.cols_used alignment text_with_type)
             in
-            write (~% "%s %s" ""(*TODO alignement*) multicol);
-            write_cells t (count + c.CT.cols_used)
+            (*write (~% "%s %s" ""[>TODO alignement<] multicol);*)
+            write multicol;
+            write_cells t (count + c.CT.cols_used);
     in
     write_cells (List.rev table.CT.cells) 0;
     write (~% "\\\\\n    \\hline\n\
