@@ -263,6 +263,16 @@ let cell_stop t env = (
 )
 
 
+(* Lists *)
+let list_start = function
+    | `itemize -> "\n\\begin{itemize}\n"
+    | `numbered -> "\n\\begin{enumerate}\n"
+let list_item = function _ -> "\\item "
+let list_firstitem = function _ -> "\\item "
+let list_stop = function
+    | `itemize -> "\n\\end{itemize}\n"
+    | `numbered -> "\n\\end{enumerate}\n"
+
 
 
 (* ==== PRINTER module type's functions ==== *)
@@ -322,7 +332,7 @@ let start_environment ?(is_begin=false) t location name args = (
         | s when C.is_superscript s -> t.write "$^{\\textrm{"; `superscript
         | s when C.is_subscript s   -> t.write "$_{\\textrm{"; `subscript
         | s when (C.is_end s)           -> `cmd_end
-    (*    | s when C.is_list s             ->
+        | s when C.is_list s             ->
             let style, other_args, waiting =
                 match args with
                 | [] -> (`itemize, [], ref true)
@@ -330,7 +340,6 @@ let start_environment ?(is_begin=false) t location name args = (
             t.write (list_start style);
             `list (style, other_args, waiting)
         | s when C.is_item s -> `item
-        *)
         | s when C.is_section s -> 
             let level, label = C.section_params args in
             t.write (section_start level label);
@@ -402,16 +411,16 @@ let stop_command t location = (
         | `mono_space   ->  t.write "}" 
         | `superscript  ->  t.write "}}$"
         | `subscript    ->  t.write "}}$"
-        | `list (style, _, r) -> t.write "" (*(list_stop style)*)
+        | `list (style, _, r) -> t.write (list_stop style)
         | `item ->
             begin match CS.head t.stack with
             | Some (`list (style, _, r))
             | Some (`cmd_inside (`list (style, _, r))) ->
                 if !r then (
-                    t.write "" (*(list_firstitem style)*);
+                    t.write (list_firstitem style);
                     r := false;
                 ) else (
-                    t.write ""(*(list_item style)*);
+                    t.write (list_item style);
                 );
             | Some c ->
                 t.warn (~% "Warning {item} is not just under list but %s\n"
@@ -464,8 +473,7 @@ let header ?(title="") ?(comment="") ?stylesheet_link () = (
     ]{hyperref}                           \n\
     \\usepackage{color}\n\
     \\definecolor{webred}{rgb}{0.3,0,0}\n\
-    \\definecolor{webblue}{rgb}{0.3,0.3,0.3}\n\
-    \\definecolor{blurl}{rgb}{0,0,0.8}\n\
+    \\definecolor{blurl}{rgb}{0,0,0.3}\n\
     \\hypersetup{\n\
     linkcolor         = webred, %%black\n\
     citecolor         = webred, %%black\n\
