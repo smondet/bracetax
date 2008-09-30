@@ -242,6 +242,8 @@ Example:
 {table 3  tab_example|
     Some text with {i|commands},
     {c|The first cell} which {c h2|A long header cell on 2 columns} 
+    {c| Normal cell} {c|Normal {i|with} {b|some} {t|markup}}
+        {c|{list|{item} Lists {item} won't {item} work} in LaTeX}
     {c c| center} will be {c l|left} {c r|right} in
     {c l3|All the last row...} the caption
 }
@@ -249,13 +251,15 @@ Example:
 {table 3  tab_example|
     Some text with {i|commands},
     {c|The first cell} which {c h2|A long header cell on 2 columns} 
+    {c| Normal cell} {c|Normal {i|with} {b|some} {t|markup}}
+        {c|{list|{item} Lists {item} won't {item} work} in LaTeX}
     {c c| center} will be {c l|left} {c r|right} in
     {c l3|All the last row...} the caption
 }
 {p}
 {b|Note:} The alignment doesn't seem to be in XHTML, so we use a {b|{t|style}}
 attribute {i|and} a {b|{t|class}} attribute ({i|e.g.}
-{t|<td{~}class="centeralign"{~}style="text-align:center;">}).
+{t|<td class="centeralign" style="text-align:center;">}).
 
 {section 1 sec_tools|Tools}
 
