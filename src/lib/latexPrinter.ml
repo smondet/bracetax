@@ -267,8 +267,7 @@ let cell_stop t env = (
 let list_start = function
     | `itemize -> "\n\\begin{itemize}\n"
     | `numbered -> "\n\\begin{enumerate}\n"
-let list_item = function _ -> "\\item "
-let list_firstitem = function _ -> "\\item "
+let list_item = "\\item "
 let list_stop = function
     | `itemize -> "\n\\end{itemize}\n"
     | `numbered -> "\n\\end{enumerate}\n"
@@ -414,14 +413,9 @@ let stop_command t location = (
         | `list (style, _, r) -> t.write (list_stop style)
         | `item ->
             begin match CS.head t.stack with
-            | Some (`list (style, _, r))
-            | Some (`cmd_inside (`list (style, _, r))) ->
-                if !r then (
-                    t.write (list_firstitem style);
-                    r := false;
-                ) else (
-                    t.write (list_item style);
-                );
+            | Some (`list (style, _, _))
+            | Some (`cmd_inside (`list (style, _, _))) ->
+                t.write list_item;
             | Some c ->
                 t.warn (~% "Warning {item} is not just under list but %s\n"
                     (Commands.env_to_string c));
