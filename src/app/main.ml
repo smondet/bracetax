@@ -1,3 +1,5 @@
+let version_string = "0.1"
+
 let (~%) = Printf.sprintf
 let p = print_string
 
@@ -48,6 +50,7 @@ module Options = struct
     let debug = ref false
     let header_footer = ref false
     let stylesheet_link = ref None
+    let print_version = ref false
 
     let options = Arg.align [
         ("-html", Arg.Unit (fun () -> output_format := `HTML),
@@ -56,6 +59,7 @@ module Options = struct
             ~% " Output LaTeX format");
         ("-debug", Arg.Set debug, " Debug mode");
         ("-doc", Arg.Set header_footer, " Output a complete document");
+        ("-version", Arg.Set print_version, " Print version and exit");
         (
             "-i",
             Arg.String (fun s -> input_stream := open_in s), 
@@ -80,7 +84,10 @@ module Options = struct
 
     let get () =
         Arg.parse options anon_fun short_usage;
-        (!output_format, !debug, !input_stream, !output_stream)
+        if !print_version then
+            `print_version
+        else
+            (`process (!output_format, !debug, !input_stream, !output_stream))
 
 
 end
@@ -89,7 +96,13 @@ let read_line_opt i () = try Some (input_line i) with e -> None
 
 
 let () = (
-    let to_do, dbg, i, o = Options.get () in
+    let to_do, dbg, i, o =
+        match Options.get () with 
+        | `process something -> something
+        | `print_version ->
+            p (~% "Bracetax %s\n" version_string);
+            exit 0;
+    in
     Sys.catch_break true;
     at_exit (fun () -> 
         close_in i;
@@ -136,7 +149,5 @@ let () = (
                     write (LatexPrinter.footer ());
         end;
     );
-    (* close_in i; *)
-    (* close_out o; *)
 )
 

@@ -24,11 +24,13 @@ usage: /home/seb/bin/bracetax [-i file] [-o file] [-help]
   -latex                 Output LaTeX format
   -debug                 Debug mode
   -doc                   Output a complete document
+  -version               Print version and exit
   -i <file>              input file (default is standard input)
   -o <file>              output file (default is standard output)
   -link-stylesheet <url> link to a stylesheet (CSS for XHTML), needs -doc
   -help                  Display this list of options
   --help                 Display this list of options
+
 {e}
 
 {section 2|Examples}
