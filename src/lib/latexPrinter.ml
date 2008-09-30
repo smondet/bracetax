@@ -397,7 +397,7 @@ let stop_command t location = (
         | `cmd_begin (nam, args) ->
             (* p (~% "cmd begin %s(%s)\n" nam (String.concat ", " args)); *)
             start_environment ~is_begin:true t location nam args;
-        | `paragraph -> t.write "\n\\par\n"
+        | `paragraph -> t.write "\\par\n"
         | `new_line -> t.write "\\\n"
         | `non_break_space -> t.write "~"
         | `open_brace -> t.write "\\{"
