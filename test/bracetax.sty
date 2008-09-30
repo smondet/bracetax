@@ -1,4 +1,11 @@
 
+\ProvidesPackage{bracetax}
+
+% From:
+%% http://dcwww.camd.dtu.dk/~schiotz/comp/LatexTips/LatexTips.html
+%% http://www.terminally-incoherent.com/blog/2007/09/19/latex-squeezing-the-vertical-white-space/
+%% http://www.eng.cam.ac.uk/help/tpl/textprocessing/teTeX/latex/latex2e-html/ltx-86.html#lencmd
+
 \hypersetup{
 pdfauthor   = {Sebastien Mondet},
 pdftitle    = {Bracetax: README},
@@ -7,18 +14,37 @@ pdfkeywords = {},
 pdfcreator  = {Bracetax and PDFLaTeX},
 pdfproducer = {Bracetax and PDFLaTeX}}
 
+\usepackage[left=2cm,right=2cm]{geometry}
+
 \renewcommand{\paragraph}{\@startsection{paragraph}{4}{\z@}%
              {2.25ex \@plus 1ex \@minus .2ex}%
              {1em}%
              {\normalfont\normalsize\bfseries}}
 
-% Modification of margins:
-\addtolength{\voffset}{-1cm}
-\addtolength{\textheight}{1cm}
-\addtolength{\textwidth}{1cm}
-
 \renewcommand{\familydefault}{cmss}
 \renewcommand{\baselinestretch}{0.8}
 
+\setlength{\parindent}{0em}
+\addtolength{\parskip}{1em}
 
+%\usepackage{times} 
+\usepackage[small,compact]{titlesec}
+\usepackage[small,it]{caption}
+
+\setlength{\topsep}{0pt}
+\setlength{\itemsep}{0pt}
+
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{5pt}
+\setlength{\headsep}{0pt}
+\setlength{\topskip}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\topsep}{0pt}
+\setlength{\partopsep}{0pt}
+
+
+%\usepackage[compact]{titlesec}
+%\titlespacing{\section}{0pt}{*0}{*0}
+%\titlespacing{\subsection}{0pt}{*0}{*0}
+%\titlespacing{\subsubsection}{0pt}{*0}{*0}
 
