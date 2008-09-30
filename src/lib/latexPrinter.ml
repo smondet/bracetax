@@ -457,7 +457,7 @@ let header ?(title="") ?(comment="") ?stylesheet_link () = (
         | Some f -> ~% "\\usepackage{%s}" f
     in
     ~% "\
-    \\documentclass[a4,10pt]{article}\n\
+    \\documentclass[a4paper,10pt]{article}\n\
     \n\
     \\clubpenalty=10000\n\
     \\widowpenalty=10000\n\
@@ -465,7 +465,7 @@ let header ?(title="") ?(comment="") ?stylesheet_link () = (
     \\usepackage[T1]{fontenc}\n\
     \\usepackage[english]{babel}\n\
     \\usepackage{ucs}\n\
-    \\usepackage[utf8]{inputenc}\n\
+    \\usepackage[utf8x,utf8]{inputenc}\n\
     \\usepackage[                         \n\
         bookmarks         = true,         \n\
         bookmarksnumbered = true,         \n\
