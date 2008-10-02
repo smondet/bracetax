@@ -1,4 +1,12 @@
 
+#
+# This file documents Bracetax... a little.
+#
+# It is also used as demo for the transformer, using the script
+# tools/make_readme.
+#
+
+
 {header|
     {title|Bracetax}
     {authors|{link http://sebmdt.googlepages.com|Sebastien Mondet}}
@@ -17,6 +25,7 @@ And then copy {t|main.native} somewhere in your {t|$PATH} as {t|bracetax}.
 
 {section 2|Options}
 
+Please report to:
 {verbatim e}
  $ bracetax -help
 usage: /home/seb/bin/bracetax [-i file] [-o file] [-help]
@@ -30,7 +39,6 @@ usage: /home/seb/bin/bracetax [-i file] [-o file] [-help]
   -link-stylesheet <url> link to a stylesheet (CSS for XHTML), needs -doc
   -help                  Display this list of options
   --help                 Display this list of options
-
 {e}
 
 {section 2|Examples}
