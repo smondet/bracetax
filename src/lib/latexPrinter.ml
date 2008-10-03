@@ -287,7 +287,7 @@ let handle_text t location line = (
             CS.head t.stack = Some `header
             && (not (Escape.is_white_space line))
         then (
-            t.write (~% "%%%%IGNORED TEXT: %s" (sanitize_comments line));
+            t.write (~% "%%%%IGNORED TEXT: %s\n" (sanitize_comments line));
         );
 
     )
