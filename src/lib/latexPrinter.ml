@@ -294,7 +294,7 @@ let handle_text t location line = (
 )
 
 let handle_comment_line t location line = (
-    t.write (~% "%%%s %s-->\n"
+    t.write (~% "%%%s %s\n"
         (debugstr t location "Comment") (sanitize_comments line));
 )
 
