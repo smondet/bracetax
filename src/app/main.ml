@@ -8,7 +8,8 @@ module DummyPrinter = struct
 
     let create ~writer = 0
 
-    let strstat s = (~% "[%d:%d]" s.Signatures.s_line s.Signatures.s_char)
+    let strstat s =
+        (~% "[%d:%d]" s.Bracetax.Signatures.s_line s.Bracetax.Signatures.s_char)
     let head = "####"
     
     let handle_comment_line t location line =
@@ -33,9 +34,9 @@ module DummyPrinter = struct
     let exit_verbatim t location = ()
 
     let dummy_writer = {
-        Signatures.w_write = (fun s -> ());
-        Signatures.w_warn = (fun s -> ());
-        Signatures.w_error = (fun s -> ());
+        Bracetax.Signatures.w_write = (fun s -> ());
+        Bracetax.Signatures.w_warn = (fun s -> ());
+        Bracetax.Signatures.w_error = (fun s -> ());
     }
 
 end
@@ -110,7 +111,7 @@ let () = (
         close_out o;
     );
     if dbg then (
-        let module DummyTransformer = Transformer.Make(DummyPrinter) in
+        let module DummyTransformer = Bracetax.Transformer.Make(DummyPrinter) in
         let t =
             DummyTransformer.create
                 ~writer:DummyPrinter.dummy_writer ~read:(read_line_opt i)
@@ -118,35 +119,37 @@ let () = (
         DummyTransformer.do_transformation t;
         p (~% "DEBUG Done;\n");
     ) else (
-        let module HtmlTransformer = Transformer.Make(HtmlPrinter) in
+        let module HtmlTransformer =
+            Bracetax.Transformer.Make(Bracetax.HtmlPrinter) in
         let write = output_string o in
         let writer =
             let warn = prerr_string in
             let error = prerr_string in
-            Signatures.make_writer ~write ~warn ~error in
+            Bracetax.Signatures.make_writer ~write ~warn ~error in
         let read = read_line_opt i in
         begin match to_do with
         | `HTML ->
                 let t = HtmlTransformer.create ~writer ~read in
                 if !Options.header_footer then
-                    write (HtmlPrinter.header
+                    write (Bracetax.HtmlPrinter.header
                         ~comment:"Generated with BraceTax" ()
                         ?stylesheet_link:!Options.stylesheet_link
                     );
                 HtmlTransformer.do_transformation t;
                 if !Options.header_footer then
-                    write (HtmlPrinter.footer ());
+                    write (Bracetax.HtmlPrinter.footer ());
         | `LaTeX ->
-                let module LatexTransformer = Transformer.Make(LatexPrinter) in
+                let module LatexTransformer =
+                    Bracetax.Transformer.Make(Bracetax.LatexPrinter) in
                 let t = LatexTransformer.create ~writer ~read in
                 if !Options.header_footer then
-                    write (LatexPrinter.header
+                    write (Bracetax.LatexPrinter.header
                         ~comment:"Generated with BraceTax" ()
                         ?stylesheet_link:!Options.stylesheet_link
                     );
                 LatexTransformer.do_transformation t;
                 if !Options.header_footer then
-                    write (LatexPrinter.footer ());
+                    write (Bracetax.LatexPrinter.footer ());
         end;
     );
 )
