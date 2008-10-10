@@ -23,7 +23,7 @@
 " :syn match bracetaxCommand "{\_.\{-}\(|\|}\)" contains=bracetaxSpecialChar,bracetaxKnown
 :syn region bracetaxCommand keepend start="{" skip="\\|\|\\}" end="\(|\|}\)" contains=bracetaxSpecialChar,bracetaxKnown
 
-:syn match bracetaxKnown "\({\|{begin\s\)\@<=\<\(c\|q\|i\|b\|t\|sup\|sub\|section\|link\|list\|utf\|image\|table\|header\|title\|subtitle\|authors\)\>"
+:syn match bracetaxKnown "\({\|{begin\s\)\@<=\<\(c\|q\|i\|b\|t\|sup\|sub\|section\|link\|list\|utf\|image\|table\|header\|title\|subtitle\|authors\|note\)\>"
 :syn match bracetaxSimple "{\(p\|br\|#\|{\|}\|\~\|item\)}" contains=bracetaxSpecialChar
 
 " Setting colorization:

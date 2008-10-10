@@ -375,6 +375,7 @@ let start_environment ?(is_begin=false) t location name args = (
         | s when C.is_authors s -> t.write authors_start; `authors
         | s when C.is_table s -> table_start t args
         | s when C.is_cell s -> cell_start t args
+        | s when C.is_note s -> t.write "\\footnote{" ; `note
         | s -> t.warn (~% "unknown: %s\n" s); `unknown (s, args)
     in
     let the_cmd =
@@ -455,6 +456,7 @@ let stop_command t location = (
         | `authors -> t.write authors_stop;
         | `table _ -> table_stop t
         | `cell _ as c -> cell_stop t c
+        | `note -> t.write "}"
         | `cmd_inside c ->
             t.warn (~% "Warning: a '}' is trying to terminate a {begin %s\n"
                 (Commands.env_to_string c));

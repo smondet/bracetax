@@ -7,8 +7,9 @@
 
 
 {section 1|A one}
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean ornare nunc in
-lorem. In tempor, mi in gravida vulputate, purus enim bibendum nulla, a
+Lorem ipsum dolor {note|sit amet, consectetuer adipiscing elit.}
+Aenean ornare nunc in
+lorem. In tempor{note|mi in gravida vulputate}, purus enim bibendum nulla, a
 imperdiet odio diam et diam. Donec quis purus non arcu vestibulum faucibus.
 Donec condimentum, nulla ut pretium tincidunt, augue est venenatis arcu, id
 sodales libero dui quis nisi. Nullam eu tortor. Nunc ipsum ligula, iaculis

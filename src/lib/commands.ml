@@ -103,6 +103,7 @@ module Stack = struct
         | `subtitle
         | `table of int * string option
         | `cell of bool * int * [`right | `center | `left | `default]
+        | `note
     ]
 
     type t = environment list ref
@@ -187,6 +188,9 @@ module Names = struct
     let is_table = (=) "table"
 
     let is_cell = (=) "c"
+
+    let is_note = (=) "note"
+
 end
 
 
@@ -241,6 +245,7 @@ let env_to_string (e:Stack.environment) = (
     | `subtitle                  -> spr "subtitle"         
     | `table _                   ->     "table"
     | `cell _                    ->     "cell"
+    | `note                      ->     "note"
 )
 
 module Table = struct

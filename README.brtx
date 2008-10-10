@@ -302,6 +302,15 @@ Example:
 attribute {i|and} a {b|{t|class}} attribute ({i|e.g.}
 {t|<td class="centeralign" style="text-align:center;">}).
 
+{section 4|Notes}
+
+Notes are {t|\footnote}'s{note|In LaTeX} or {i|sidenotes}{note|In XHTML... with
+a CSS}
+{verbatim e}
+Notes are {t|\footnote}'s{note|In LaTeX}
+{e}
+
+
 {section 1 sec_tools|Tools}
 
 There's a {link http://www.vim.org|Vim} syntax file (the {t|verbatim} blocs are

@@ -40,6 +40,7 @@ pre {
     background-color: #eeeeee;
 	left: 5%;
 	width: 90%;
+    clear: both;
 	/*padding-bottom: 1em;*/
 }
 
@@ -73,9 +74,33 @@ td, th {
     padding: 0.3em;
 	/*left: 3%;*/
 }
+/*
+small.note {
+    left: 0;
+    margin-left: -170px;
+    margin-right: 0;
+}*/
+small.notebegin { counter-increment: footnote; }
+small.noteend:before {  content: counter(footnote) }
+small.note:before {  content: counter(footnote) ": " }
+
+small.note {
+    /*margin-right: -170px;*/
+    /*position: absolute;*/
+    /*position: float;*/
+    float:right;
+    clear: right;
+    /*right: 0;*/
+    width: 150px;
+    border: thin silver solid;
+    margin: 0.1em;
+    padding: 0.1em;
+}
+
 
 h1 { 
     counter-reset: section;
+    counter-reset:footnote;
 }
 
 h2:before { content: counter(section) ". "; }
