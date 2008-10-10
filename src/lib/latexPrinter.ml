@@ -69,9 +69,9 @@ let sanitize_text line = (
         ('{' , "\\{" );
         ('}' , "\\}" );
         ('_' , "\\_" );
-        ('\\', "\\textbackslash" );
-        ('^' , "\\textasciicircum" );
-        ('~' , "\\textasciitilde" );
+        ('\\', "\\textbackslash{}" );
+        ('^' , "\\textasciicircum{}" );
+        ('~' , "\\textasciitilde{}" );
     ] in
     Escape.replace_chars ~src:line ~patterns
 )
