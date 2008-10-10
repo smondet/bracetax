@@ -2,7 +2,7 @@
 
 build ()
 {
-    ocamlbuild -I src/app -I src/lib  src/app/main.byte
+    ocamlbuild -I src/app -I src/lib  src/app/main.byte bracetax.cma
     ln -s main.byte bracetax
 }
 echo_help ()
