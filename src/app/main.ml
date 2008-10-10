@@ -22,10 +22,11 @@
 (*      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR         *)
 (*      OTHER DEALINGS IN THE SOFTWARE.                                       *)
 (******************************************************************************)
-let version_string = "0.1"
 
 let (~%) = Printf.sprintf
 let p = print_string
+
+let version_string = ~% "0.1 (bracetax lib: %s)" Bracetax.Info.version
 
 module DummyPrinter = struct
     type t = int
@@ -76,6 +77,7 @@ module Options = struct
     let header_footer = ref false
     let stylesheet_link = ref None
     let print_version = ref false
+    let print_license = ref false
 
     let options = Arg.align [
         ("-html", Arg.Unit (fun () -> output_format := `HTML),
@@ -85,6 +87,7 @@ module Options = struct
         ("-debug", Arg.Set debug, " Debug mode");
         ("-doc", Arg.Set header_footer, " Output a complete document");
         ("-version", Arg.Set print_version, " Print version and exit");
+        ("-license", Arg.Set print_license, " Print license and exit");
         (
             "-i",
             Arg.String (fun s -> input_stream := open_in s), 
@@ -112,7 +115,11 @@ module Options = struct
         if !print_version then
             `print_version
         else
-            (`process (!output_format, !debug, !input_stream, !output_stream))
+            if !print_license then
+                `print_license
+            else
+                (`process
+                    (!output_format, !debug, !input_stream, !output_stream))
 
 
 end
@@ -126,6 +133,9 @@ let () = (
         | `process something -> something
         | `print_version ->
             p (~% "Bracetax %s\n" version_string);
+            exit 0;
+        | `print_license ->
+            p Bracetax.Info.license;
             exit 0;
     in
     Sys.catch_break true;
