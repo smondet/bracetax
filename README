@@ -1,40 +1,13 @@
 
-A simple syntax for wiki and Co...
+A simple syntax for wikis and more...
 
 BUILD:
-ocamlbuild -I src/app -I src/lib  src/app/main.byte
+  ./mk
 
 
-TODO:
-* A lib:
-    * Parser functor
-    * XHTMLWriter
-    * LaTeX_writer
-* A demo application:
-    * bracetax -html  -i file.brtx -o -
+DOCUMENTATION:
+Launch the generation (needs bracetax and pdflatex in the $PATH):
+  ./mk d
+And open gendoc/index.html
 
-TESTS:
-* use the application
-
-PACKED LIB:
-When time will come (and a good name too), for packing, create a file 
-wonderfull_name.mlpack in scr/lib with the list of modules
-
-SYNTAX (changes along dev):
-
-{cmd arg1 arg2|Parsable text of the command}
-
-{cmd-without-text}
-
-# Comment to the end of the line (only in P-Text)
-
-In P-Text, {{}, {}} {#} are commands.
-
-In args: _ is the empty arg (convention), 
-'\\' escapes '\' 
-'\ ' escapes ' ' 
-?? '\t' '\n' '\r' escape themselves ;-)
-'\|' escapes '|'
-
-Should read {...| at once and then say cmd(arg1, .. , argn)
 
