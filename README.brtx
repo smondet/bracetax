@@ -159,6 +159,8 @@ inside the bloc
 {AnotherEndTag}
 {e}
 
+{link local:sec_plugins|Plugin's} are also based on {i|non-parsed blocks}
+
 {section 4|Formating}
 
 Some basic formatting:
@@ -306,9 +308,37 @@ attribute {i|and} a {b|{t|class}} attribute ({i|e.g.}
 
 Notes are {t|\footnote}'s{note|In LaTeX} or {i|sidenotes}{note|In XHTML... with
 a CSS}
-{verbatim e}
+{verbatim e this_is_brtx_code}
 Notes are {t|\footnote}'s{note|In LaTeX}
 {e}
+
+{section 1 sec_plugins|Post-processing plugin system}
+
+With the {t|verbatim} environment you can also prepare post-processing:
+{verbatim e}
+{verbatim end_tag name_for_the_plugin}
+A   non - parsed    {b|block}
+{end_tag}
+{e}
+Will add {t|verbatimbegin/end} comments, {i|e.g.} for XHTML:
+{verbatim}
+<!--verbatimbegin:name_for_the_plugin -->
+<pre>
+A   non - parsed    {b|block}
+</pre>
+<!--verbatimend:name_for_the_plugin -->
+{endverbatim}
+or for LaTeX:
+{verbatim}
+%verbatimbegin:name_for_the_plugin
+\begin{verbatim}
+A   non - parsed    {b|block}
+\end{verbatim}
+%verbatimend:name_for_the_plugin
+{endverbatim}
+
+
+
 
 
 {section 1 sec_tools|Tools}

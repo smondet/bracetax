@@ -417,14 +417,24 @@ let terminate t location = (
 
 let enter_verbatim t location args = (
     CS.push t.stack (`verbatim args);
+    begin match args with
+    | q :: _ ->
+        t.write (~% "\n<!--verbatimbegin:%s -->\n" (sanitize_comments q))
+    | _ -> ()
+    end;
     t.write "<pre>\n";
     t.current_line <- location.Signatures.s_line;
 )
 let exit_verbatim t location = (
     let env =  (CS.pop t.stack) in
     match env with
-    | Some (`verbatim _) ->
+    | Some (`verbatim args) ->
         t.write "</pre>\n";
+        begin match args with
+        | q :: _ ->
+            t.write (~% "<!--verbatimend:%s -->\n" (sanitize_comments q))
+        | _ -> ()
+        end;
         t.current_line <- location.Signatures.s_line;
     | _ ->
         (* warning ? error ? anyway, *)
