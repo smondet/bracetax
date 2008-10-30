@@ -69,8 +69,8 @@ module Options = struct
 
     (* let arg_set ref v = Arg.Unit (fun () -> ref := v) *)
 
-    type output_format = [ `HTML | `LaTeX ]
-    let output_format = ref (`HTML:output_format)
+    type action_to_do = [ `Brtx2HTML | `Brtx2LaTeX ]
+    let todo = ref (`Brtx2HTML:action_to_do)
     let input_stream = ref stdin
     let output_stream = ref stdout
     let debug = ref false
@@ -80,9 +80,9 @@ module Options = struct
     let print_license = ref false
 
     let options = Arg.align [
-        ("-html", Arg.Unit (fun () -> output_format := `HTML),
+        ("-html", Arg.Unit (fun () -> todo := `Brtx2HTML),
             ~% " Output HTML format (default)");
-        ("-latex", Arg.Unit (fun () -> output_format := `LaTeX),
+        ("-latex", Arg.Unit (fun () -> todo := `Brtx2LaTeX),
             ~% " Output LaTeX format");
         ("-debug", Arg.Set debug, " Debug mode");
         ("-doc", Arg.Set header_footer, " Output a complete document");
@@ -119,7 +119,7 @@ module Options = struct
                 `print_license
             else
                 (`process
-                    (!output_format, !debug, !input_stream, !output_stream))
+                    (!todo, !debug, !input_stream, !output_stream))
 
 
 end
@@ -162,7 +162,7 @@ let () = (
             Bracetax.Signatures.make_writer ~write ~warn ~error in
         let read = read_line_opt i in
         begin match to_do with
-        | `HTML ->
+        | `Brtx2HTML ->
                 let t = HtmlTransformer.create ~writer ~read in
                 if !Options.header_footer then
                     write (Bracetax.HtmlPrinter.header
@@ -172,7 +172,7 @@ let () = (
                 HtmlTransformer.do_transformation t;
                 if !Options.header_footer then
                     write (Bracetax.HtmlPrinter.footer ());
-        | `LaTeX ->
+        | `Brtx2LaTeX ->
                 let module LatexTransformer =
                     Bracetax.Transformer.Make(Bracetax.LatexPrinter) in
                 let t = LatexTransformer.create ~writer ~read in
