@@ -87,6 +87,7 @@ module Stack = struct
         | `new_line
         | `quotation of string * string
         | `non_break_space
+        | `horizontal_ellipsis
         | `open_brace
         | `close_brace
         | `sharp
@@ -132,6 +133,7 @@ module Names = struct
      * *)
 
     let is_non_break_space = (=) "~"
+    let is_ellipsis = (=) "..."
     let is_open_brace = (=) "{"
     let is_close_brace = (=) "}"
     let is_sharp = (=) "#"
@@ -202,6 +204,7 @@ let non_env_cmd_of_name name args = (
         | s when C.is_paragraph s        ->  `paragraph          
         | s when C.is_new_line s         ->  `new_line          
         | s when C.is_non_break_space s  ->  `non_break_space          
+        | s when C.is_ellipsis s  ->  `horizontal_ellipsis          
         | s when C.is_open_brace s       ->  `open_brace          
         | s when C.is_close_brace s      ->  `close_brace          
         | s when C.is_sharp s            ->  `sharp          
@@ -229,6 +232,7 @@ let env_to_string (e:Stack.environment) = (
     | `new_line                  -> spr "new_line               "
     | `quotation (s)             -> spr "quotation (s)          "
     | `non_break_space           -> spr "non_break_space        "
+    | `horizontal_ellipsis       -> spr "horizontal_ellipsis    "
     | `open_brace                -> spr "open_brace             "
     | `close_brace               -> spr "close_brace            "
     | `sharp                     -> spr "sharp                  "

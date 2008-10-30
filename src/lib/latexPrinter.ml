@@ -433,6 +433,7 @@ let stop_command t location = (
         | `paragraph -> t.write "\\par\n"
         | `new_line -> t.write "\\\n"
         | `non_break_space -> t.write "~"
+        | `horizontal_ellipsis -> t.write "\\ldots{}"
         | `open_brace -> t.write "\\{"
         | `close_brace -> t.write "\\}"
         | `sharp -> t.write "\\#"

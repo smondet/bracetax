@@ -324,6 +324,7 @@ let stop_command t location = (
         | `paragraph -> t.write "</div>\n<div class=\"p\">"
         | `new_line -> t.write "<br/>\n"
         | `non_break_space -> t.write "&nbsp;"
+        | `horizontal_ellipsis -> t.write "&hellip;"
         | `open_brace -> t.write "{"
         | `close_brace -> t.write "}"
         | `sharp -> t.write "#"

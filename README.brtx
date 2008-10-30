@@ -122,9 +122,11 @@ Text # Comments...
 
 Example:
 {verbatim e}
-Those are {{}, {}}, {#}, Unbreakable->{~}<-space, and {utf 0x42}, {utf 339}.
+Those are {{}, {}}, {#}, Unbreakable->{~}<-space,
+horizontal{...}ellipsis and {utf 0x42}, {utf 339}.
 {e}
-Those are {{}, {}}, {#}, Unbreakable->{~}<-space, and {utf 0x42}, {utf 339}.
+Those are {{}, {}}, {#}, Unbreakable->{~}<-space,
+horizontal{...}ellipsis and {utf 0x42}, {utf 339}.
 
 {section 4|Header}
 
