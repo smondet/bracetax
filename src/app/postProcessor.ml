@@ -46,16 +46,29 @@ let option_do ~opt ~some ~none = (
     | None -> none ()
 )
 
+let read_two_lines_or_write read write = (
+    begin match read () with
+    | None -> None
+    | Some s ->
+        begin match read () with
+        | None -> write s; None
+        | Some t -> Some (s,t)
+        end
+    end
+)
+
 let process plugouts readline writeline = (
 
     let rec look_for_begin line1 line2 = 
         match begins plugouts line1 line2 with
         | Some po ->
             writeline (po.begin_handler ());
-            let line3, line4 = 
-                "", "" 
-            in
-            look_for_end po line3 line4
+            begin match read_two_lines_or_write
+                readline (fun s -> writeline (po.line_handler s)) with
+            | Some (line3, line4) ->
+                look_for_end po line3 line4
+            | None -> ()
+            end;
         | None ->
             writeline line1;
             option_do ~opt:(readline ())
@@ -65,10 +78,11 @@ let process plugouts readline writeline = (
         match ends po line1 line2 with
         | true ->
             writeline (po.end_handler ());
-            let line3, line4 = 
-                "", "" 
-            in
-            look_for_begin line3 line4
+            begin match read_two_lines_or_write readline writeline with
+            | Some (line3, line4) ->
+                look_for_begin line3 line4
+            | None -> ()
+            end;
         | false ->
             writeline (po.line_handler line1);
             option_do ~opt:(readline ()) ~some:(look_for_end po line2)
