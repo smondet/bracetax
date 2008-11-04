@@ -1,22 +1,19 @@
+let pr = Printf.printf
 
 type plugout = {
     tag: string;
-    match_line_begin: string;
-    match_line_end: string;
-    match_verb_begin: string;
-    match_verb_end: string;
     begin_handler: unit -> string;
     line_handler: string -> string;
     end_handler: unit -> string;
 }
 
 let line_matches_begin tag line = (
-    let latex = "%%verbatimbegin:" ^ tag in
+    let latex = "%verbatimbegin:" ^ tag in
     let html = "<!--verbatimbegin:" ^ tag ^ " -->" in
     (line = latex) || (line = html)
 )
 let line_matches_end tag line = (
-    let latex = "%%verbatimend:" ^ tag in
+    let latex = "%verbatimend:" ^ tag in
     let html = "<!--verbatimend:" ^ tag ^ " -->" in
     (line = latex) || (line = html)
 )
@@ -32,10 +29,19 @@ let line_is_verbatim_end line = (
 )
 
 let begins tags line1 line2 = (
-    None
+    let tag_matches tag =
+        (* pr "Trying: %s Vs \"%s\" and \"%s\"\n" tag line1 line2; *)
+        (line_matches_begin tag line1) && (line_is_verbatim_begin line2) in
+    let rec test_tags =
+        function
+        | [] -> None
+        | a :: b when tag_matches a.tag -> Some a
+        | a :: b -> test_tags b
+    in
+    test_tags tags
 )
 let ends tag line1 line2 = (
-    false
+    (line_matches_end tag.tag line2) && (line_is_verbatim_end line1)
 )
 
 type currrent_state = [ `writing | `read_begin | `read_verbend ]
@@ -73,8 +79,7 @@ let process plugouts readline writeline = (
             writeline line1;
             option_do ~opt:(readline ())
                 ~some:(look_for_begin line2) ~none:(fun () -> writeline line2);
-        and
-    look_for_end po line1 line2 = 
+    and look_for_end po line1 line2 = 
         match ends po line1 line2 with
         | true ->
             writeline (po.end_handler ());
@@ -88,7 +93,22 @@ let process plugouts readline writeline = (
             option_do ~opt:(readline ()) ~some:(look_for_end po line2)
                 ~none:(fun () -> writeline (po.line_handler line2));
     in
-    look_for_begin "" ""
-
+    begin match read_two_lines_or_write readline writeline with
+    | Some (line1, line2) ->
+        look_for_begin line1 line2
+    | None -> ()
+    end;
 )
 
+let latexcode_postpro = {
+    tag = "latexcode";
+    begin_handler = (fun () ->
+        output_string stdout "-------------------------- BEGIN LATEX CODE --------\n";
+        "% Verbatim LaTeX code:"
+    );
+    line_handler = (fun s -> s);
+    end_handler = (fun () ->
+        output_string stdout "-------------------------- END LATEX CODE --------\n";
+        "% End of verbatim LaTeX code"
+    );
+}

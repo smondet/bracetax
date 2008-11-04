@@ -73,7 +73,7 @@ module Options = struct
 
     (* let arg_set ref v = Arg.Unit (fun () -> ref := v) *)
 
-    type action_to_do = [ `Brtx2HTML | `Brtx2LaTeX ]
+    type action_to_do = [ `Brtx2HTML | `Brtx2LaTeX | `PostPro ]
     let todo = ref (`Brtx2HTML:action_to_do)
     let input_stream = ref stdin
     let output_stream = ref stdout
@@ -88,6 +88,8 @@ module Options = struct
             ~% " Output HTML format (default)");
         ("-latex", Arg.Unit (fun () -> todo := `Brtx2LaTeX),
             ~% " Output LaTeX format");
+        ("-postpro", Arg.Unit (fun () -> todo := `PostPro),
+            ~% " Do post-processing");
         ("-debug", Arg.Set debug, " Debug mode");
         ("-doc", Arg.Set header_footer, " Output a complete document");
         ("-version", Arg.Set print_version, " Print version and exit");
@@ -188,6 +190,8 @@ let () = (
                 LatexTransformer.do_transformation t;
                 if !Options.header_footer then
                     write (Bracetax.LatexPrinter.footer ());
+        | `PostPro ->
+            PostProcessor.process [PostProcessor.latexcode_postpro] read (Printf.fprintf o "%s\n")
         end;
     );
 )
