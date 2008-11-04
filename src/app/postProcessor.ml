@@ -40,6 +40,12 @@ let ends tag line1 line2 = (
 
 type currrent_state = [ `writing | `read_begin | `read_verbend ]
 
+let option_do ~opt ~some ~none = (
+    match opt with
+    | Some s -> some s
+    | None -> none ()
+)
+
 let process plugouts readline writeline = (
 
     let rec look_for_begin line1 line2 = 
@@ -52,12 +58,8 @@ let process plugouts readline writeline = (
             look_for_end po line3 line4
         | None ->
             writeline line1;
-            begin match readline () with
-            | Some s -> 
-                look_for_begin line2 s;
-            | None -> 
-                writeline line2;
-            end;
+            option_do ~opt:(readline ())
+                ~some:(look_for_begin line2) ~none:(fun () -> writeline line2);
         and
     look_for_end po line1 line2 = 
         match ends po line1 line2 with
@@ -69,12 +71,8 @@ let process plugouts readline writeline = (
             look_for_begin line3 line4
         | false ->
             writeline (po.line_handler line1);
-            begin match readline () with
-            | Some s -> 
-                look_for_end po line2 s;
-            | None -> 
-                writeline (po.line_handler line2);
-            end;
+            option_do ~opt:(readline ()) ~some:(look_for_end po line2)
+                ~none:(fun () -> writeline (po.line_handler line2));
     in
     look_for_begin "" ""
 
