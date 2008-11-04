@@ -2,8 +2,9 @@
 
 build ()
 {
-    ocamlbuild -I src/app -I src/lib  src/app/main.byte bracetax.cma
-    ln -s main.byte bracetax
+    ocamlbuild -I src/app -I src/lib  src/app/main$1.byte bracetax.cma
+    rm -f bracetax
+    ln -s main$1.byte bracetax
 }
 echo_help ()
 {
@@ -24,6 +25,7 @@ fi
 for todo in $* ; do
     case "$todo" in
         "b" ) build ;;
+        "bg" ) build ".d" ;;
         "t" ) test/do_tests ;;
         "d" ) tools/make_readme ;;
         "c" ) ocamlbuild -clean ; rm -rf _test_results/ gendoc/ ;;
