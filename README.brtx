@@ -317,7 +317,7 @@ Notes are {t|\footnote}'s{note|In LaTeX}
 {section 1 sec_plugins|Post-processing plugin system}
 
 With the {t|verbatim} environment you can also prepare post-processing:
-{verbatim e}
+{verbatim e brtxcode}
 {verbatim end_tag name_for_the_plugin}
 A   non - parsed    {b|block}
 {end_tag}
@@ -332,13 +332,13 @@ A   non - parsed    {b|block}
 {endverbatim}
 or for LaTeX{note|The space between '\' and 'end' is due the impossibility to
 put '{t|\end{{}verbatim{}}}' in a LaTeX {t|verbatim} evironment}:
-{verbatim}
+{verbatim end latexcode}
 %verbatimbegin:name_for_the_plugin
 \begin{verbatim}
 A   non - parsed    {b|block}
 \ end{verbatim}
 %verbatimend:name_for_the_plugin
-{endverbatim}
+{end}
 
 
 
