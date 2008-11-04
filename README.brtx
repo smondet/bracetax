@@ -330,12 +330,13 @@ A   non - parsed    {b|block}
 </pre>
 <!--verbatimend:name_for_the_plugin -->
 {endverbatim}
-or for LaTeX:
+or for LaTeX{note|The space between '\' and 'end' is due the impossibility to
+put '{t|\end{{}verbatim{}}}' in a LaTeX {t|verbatim} evironment}:
 {verbatim}
 %verbatimbegin:name_for_the_plugin
 \begin{verbatim}
 A   non - parsed    {b|block}
-\end{verbatim}
+\ end{verbatim}
 %verbatimend:name_for_the_plugin
 {endverbatim}
 
