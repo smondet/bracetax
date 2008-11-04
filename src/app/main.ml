@@ -66,42 +66,8 @@ module DummyPrinter = struct
 
 end
 
-module PostProcessor = struct
-
-    type plugout = {
-        tag: string;
-        begin_handler: unit -> string;
-        line_handler: string -> string;
-        end_handler: unit -> string;
-    }
-
-    let line_matches_begin tag line = (
-        let latex = "%%verbatimbegin:" ^ tag in
-        let html = "<!--verbatimbegin:" ^ tag ^ " -->" in
-        (line = latex) || (line = html)
-    )
-    let line_matches_end tag line = (
-        let latex = "%%verbatimend:" ^ tag in
-        let html = "<!--verbatimend:" ^ tag ^ " -->" in
-        (line = latex) || (line = html)
-    )
-    let line_is_verbatim_begin line = (
-        let latex = "\\begin{verbatim}" in
-        let html = "<pre>" in
-        (line = latex) || (line = html)
-    )
-    let line_is_verbatim_end line = (
-        let latex = "\\end{verbatim}" in
-        let html = "</pre>" in
-        (line = latex) || (line = html)
-    )
-
-
-
-    let process plugouts readline writeline = (
-    )
-
-end
+(* Used temporary to force intermodules dependency *)
+module PostPro = PostProcessor
 
 module Options = struct
 
