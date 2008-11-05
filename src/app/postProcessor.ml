@@ -2,9 +2,9 @@ let pr = Printf.printf
 
 type plugout = {
     tag: string;
-    begin_handler: unit -> string;
-    line_handler: string -> string;
-    end_handler: unit -> string;
+    begin_handler: unit -> string option;
+    line_handler: string -> string option;
+    end_handler: unit -> string option;
 }
 
 let line_matches_begin tag line = (
@@ -62,15 +62,17 @@ let read_two_lines_or_write read write = (
         end
     end
 )
+let opt_unit_map ~f = function None -> () | Some s -> f s
 
 let process plugouts readline writeline = (
 
+    let f = writeline in (* f for opt_unit_map *)
     let rec look_for_begin line1 line2 = 
         match begins plugouts line1 line2 with
         | Some po ->
-            writeline (po.begin_handler ());
+            opt_unit_map ~f (po.begin_handler ());
             begin match read_two_lines_or_write
-                readline (fun s -> writeline (po.line_handler s)) with
+                readline (fun s -> opt_unit_map ~f (po.line_handler s)) with
             | Some (line3, line4) ->
                 look_for_end po line3 line4
             | None -> ()
@@ -82,16 +84,16 @@ let process plugouts readline writeline = (
     and look_for_end po line1 line2 = 
         match ends po line1 line2 with
         | true ->
-            writeline (po.end_handler ());
+            opt_unit_map ~f (po.end_handler ());
             begin match read_two_lines_or_write readline writeline with
             | Some (line3, line4) ->
                 look_for_begin line3 line4
             | None -> ()
             end;
         | false ->
-            writeline (po.line_handler line1);
+            opt_unit_map ~f (po.line_handler line1);
             option_do ~opt:(readline ()) ~some:(look_for_end po line2)
-                ~none:(fun () -> writeline (po.line_handler line2));
+                ~none:(fun () -> opt_unit_map ~f (po.line_handler line2));
     in
     begin match read_two_lines_or_write readline writeline with
     | Some (line1, line2) ->
@@ -104,22 +106,31 @@ module BuiltIn = struct
 
     type available = [
         | `debug
+        | `inline_latex
     ]
 
-    let debug_postpro = {
-        tag = "debug";
-        begin_handler = (fun () ->
-            "------------ BEGIN DEBUG SECTION --------";
-        );
-        line_handler = (fun s -> "----- " ^ s);
-        end_handler = (fun () ->
-            "------------ END DEBUG SECTION --------";
-        );
+    let debug_postpro = 
+        let pr = Printf.printf in
+        {
+            tag = "debug";
+            begin_handler =
+                (fun () -> pr "------------ BEGIN DEBUG SECTION --------\n"; None);
+            line_handler = (fun s -> pr "----- %s\n" s ; None);
+            end_handler = 
+                (fun () -> pr "------------ END DEBUG SECTION --------\n"; None);
+        }
+    let inlinelatex_postpro =
+        {
+        tag = "latex";
+        begin_handler = (fun () -> Some "% < inline latex >");
+        line_handler = (fun s -> Some s);
+        end_handler = (fun () -> Some "% </ inline latex >");
     }
 
     let postpro_of_variant (v:available) = (
         match v with
         | `debug -> debug_postpro
+        | `inline_latex -> inlinelatex_postpro
     )
 
     let make_list = List.map postpro_of_variant

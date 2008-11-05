@@ -192,7 +192,7 @@ let () = (
                     write (Bracetax.LatexPrinter.footer ());
         | `PostPro ->
             PostProcessor.process
-                (PostProcessor.BuiltIn.make_list [`debug])
+                (PostProcessor.BuiltIn.make_list [`debug; `inline_latex])
                 read (Printf.fprintf o "%s\n")
         end;
     );
