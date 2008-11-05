@@ -191,8 +191,7 @@ let () = (
                 if !Options.header_footer then
                     write (Bracetax.LatexPrinter.footer ());
         | `PostPro ->
-            PostProcessor.process
-                (PostProcessor.BuiltIn.make_list [`debug; `inline_latex])
+            PostProcessor.process PostProcessor.BuiltIn.all
                 read (Printf.fprintf o "%s\n")
         end;
     );

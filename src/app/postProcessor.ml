@@ -107,6 +107,7 @@ module BuiltIn = struct
     type available = [
         | `debug
         | `inline_latex
+        | `inline_html
     ]
 
     let debug_postpro = 
@@ -119,21 +120,38 @@ module BuiltIn = struct
             end_handler = 
                 (fun () -> pr "------------ END DEBUG SECTION --------\n"; None);
         }
-    let inlinelatex_postpro =
-        {
+
+    let inlinelatex_postpro = {
         tag = "latex";
         begin_handler = (fun () -> Some "% < inline latex >");
         line_handler = (fun s -> Some s);
         end_handler = (fun () -> Some "% </ inline latex >");
     }
 
+    let inlinehtml_postpro = {
+        tag = "html";
+        begin_handler = (fun () -> Some "<-- inline html -->");
+        line_handler = (fun s ->
+            let t =
+                Bracetax.Escape.replace_string ~src:s ~find:"&lt;" ~replace_with:"<" in
+            let u =
+                Bracetax.Escape.replace_string ~src:t ~find:"&gt;" ~replace_with:">" in
+            let v =
+                Bracetax.Escape.replace_string ~src:u ~find:"&amp;" ~replace_with:"&" in
+            Some v
+        );
+        end_handler = (fun () -> Some "% <!-- inline html -->");
+    }
+
     let postpro_of_variant (v:available) = (
         match v with
         | `debug -> debug_postpro
         | `inline_latex -> inlinelatex_postpro
+        | `inline_html -> inlinehtml_postpro
     )
 
     let make_list = List.map postpro_of_variant
+    let all = make_list [`debug; `inline_latex; `inline_html]
 
 end
 
