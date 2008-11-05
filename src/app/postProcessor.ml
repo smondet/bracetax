@@ -100,15 +100,29 @@ let process plugouts readline writeline = (
     end;
 )
 
-let latexcode_postpro = {
-    tag = "latexcode";
-    begin_handler = (fun () ->
-        output_string stdout "-------------------------- BEGIN LATEX CODE --------\n";
-        "% Verbatim LaTeX code:"
-    );
-    line_handler = (fun s -> s);
-    end_handler = (fun () ->
-        output_string stdout "-------------------------- END LATEX CODE --------\n";
-        "% End of verbatim LaTeX code"
-    );
-}
+module BuiltIn = struct
+
+    type available = [
+        | `debug
+    ]
+
+    let debug_postpro = {
+        tag = "debug";
+        begin_handler = (fun () ->
+            "------------ BEGIN DEBUG SECTION --------";
+        );
+        line_handler = (fun s -> "----- " ^ s);
+        end_handler = (fun () ->
+            "------------ END DEBUG SECTION --------";
+        );
+    }
+
+    let postpro_of_variant (v:available) = (
+        match v with
+        | `debug -> debug_postpro
+    )
+
+    let make_list = List.map postpro_of_variant
+
+end
+
