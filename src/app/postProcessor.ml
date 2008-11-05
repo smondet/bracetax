@@ -147,16 +147,31 @@ module BuiltIn = struct
         end_handler = (fun () -> Some "<!-- inline html -->");
     }
 
+    let string_of_command cmd = (
+        let o = Unix.open_process_in cmd in
+        let b = Buffer.create 1024 in
+        begin try 
+            while true do Buffer.add_char b (input_char o) done
+        with End_of_file -> () end;
+        Buffer.contents b;
+    )
+
     let feed_process cmd read = (
     )
     let shell_postpro (i_form, o_form) t b l e =
         let mem = ref [] in
         {
             tag = t;
-            begin_handler = (fun () -> mem := [ "result of begin "]; None);
+            begin_handler = (fun () ->
+                mem := []; Some (string_of_command b)
+            );
             (* XXX must unsanitize HTML -> LaTeX *)
             line_handler = (fun s -> mem := ("transfo:" ^ s) :: !mem; None);
-            end_handler = (fun () -> Some (String.concat "\n" (List.rev !mem)));
+            end_handler = (fun () ->
+                let filtered = 
+                    (String.concat "\n" (List.rev !mem)) in
+                Some (filtered ^ (string_of_command e))
+            );
         }
 
     let postpro_of_variant (v:available) = (
