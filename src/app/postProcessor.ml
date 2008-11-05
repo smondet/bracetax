@@ -104,10 +104,13 @@ let process plugouts readline writeline = (
 
 module BuiltIn = struct
 
+    type format_type = [ `LaTeX | `HTML | `Unknown ]
+    type io_format = format_type * format_type
     type available = [
         | `debug
         | `inline_latex
         | `inline_html
+        | `shell of io_format * string * string * string * string
     ]
 
     let debug_postpro = 
@@ -128,30 +131,52 @@ module BuiltIn = struct
         end_handler = (fun () -> Some "% </ inline latex >");
     }
 
+    let unsanitize_html_pre src = (
+        let t = ref src in
+        let module Esc = Bracetax.Escape in
+        t := Esc.replace_string ~src:!t ~find:"&lt;" ~replace_with:"<";
+        t := Esc.replace_string ~src:!t ~find:"&gt;" ~replace_with:">";
+        t := Esc.replace_string ~src:!t ~find:"&amp;" ~replace_with:"&";
+        !t
+    )
+
     let inlinehtml_postpro = {
         tag = "html";
         begin_handler = (fun () -> Some "<-- inline html -->");
-        line_handler = (fun s ->
-            let t =
-                Bracetax.Escape.replace_string ~src:s ~find:"&lt;" ~replace_with:"<" in
-            let u =
-                Bracetax.Escape.replace_string ~src:t ~find:"&gt;" ~replace_with:">" in
-            let v =
-                Bracetax.Escape.replace_string ~src:u ~find:"&amp;" ~replace_with:"&" in
-            Some v
-        );
-        end_handler = (fun () -> Some "% <!-- inline html -->");
+        line_handler = (fun s -> Some (unsanitize_html_pre s));
+        end_handler = (fun () -> Some "<!-- inline html -->");
     }
+
+    let feed_process cmd read = (
+    )
+    let shell_postpro (i_form, o_form) t b l e =
+        let mem = ref [] in
+        {
+            tag = t;
+            begin_handler = (fun () -> mem := [ "result of begin "]; None);
+            (* XXX must unsanitize HTML -> LaTeX *)
+            line_handler = (fun s -> mem := ("transfo:" ^ s) :: !mem; None);
+            end_handler = (fun () -> Some (String.concat "\n" (List.rev !mem)));
+        }
 
     let postpro_of_variant (v:available) = (
         match v with
         | `debug -> debug_postpro
         | `inline_latex -> inlinelatex_postpro
         | `inline_html -> inlinehtml_postpro
+        | `shell (io_form, tag, b, l, e) ->
+            shell_postpro io_form tag b l e
     )
 
     let make_list = List.map postpro_of_variant
-    let all = make_list [`debug; `inline_latex; `inline_html]
+    let all = 
+        make_list [
+            `debug; `inline_latex; `inline_html;
+            `shell ( 
+                (`HTML, `LaTeX),
+                "hevea", "echo '<!-- begin HEVEA -->'",
+                "hevea", "echo '<!-- end HEVEA -->'")
+        ]
 
 end
 
