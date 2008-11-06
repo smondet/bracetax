@@ -208,12 +208,16 @@ module BuiltIn = struct
     }
 
     let shell_postpro (i_form, o_form) t b l e =
+        let rm_last_backslash_n s =
+            let l = String.length s in
+            if s.[l - 1] = '\n' then String.sub s 0 (l - 2) else s
+        in
         let mem = ref [] in
         {
             tag = t;
             begin_handler = (fun () ->
-                (* XXX need to remove last '\n' *)
-                mem := []; Some (Shell.string_of_command b)
+                mem := [];
+                Some (rm_last_backslash_n (Shell.string_of_command b))
             );
             (* XXX must unsanitize HTML -> LaTeX *)
             line_handler = (fun s -> mem := s :: !mem; None);
@@ -222,7 +226,8 @@ module BuiltIn = struct
                     (String.concat "\n" (List.rev !mem)) ^ "\n" in
                 Some (
                     (Shell.pipe_process filtered l)
-                    ^ (Shell.string_of_command e))
+                    ^ (rm_last_backslash_n (Shell.string_of_command e))
+                )
             );
         }
 
