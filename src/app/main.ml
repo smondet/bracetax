@@ -73,7 +73,10 @@ module Options = struct
 
     (* let arg_set ref v = Arg.Unit (fun () -> ref := v) *)
 
-    type action_to_do = [ `Brtx2HTML | `Brtx2LaTeX | `PostPro ]
+    type action_to_do = [
+        | `Brtx2HTML | `Brtx2LaTeX
+        | `PostPro of PostProcessor.BuiltIn.available list
+    ]
     let todo = ref (`Brtx2HTML:action_to_do)
     let input_stream = ref stdin
     let output_stream = ref stdout
@@ -82,13 +85,14 @@ module Options = struct
     let stylesheet_link = ref None
     let print_version = ref false
     let print_license = ref false
+    let plugins = ref []
 
     let options = Arg.align [
         ("-html", Arg.Unit (fun () -> todo := `Brtx2HTML),
             ~% " Output HTML format (default)");
         ("-latex", Arg.Unit (fun () -> todo := `Brtx2LaTeX),
             ~% " Output LaTeX format");
-        ("-postpro", Arg.Unit (fun () -> todo := `PostPro),
+        ("-postpro", Arg.Unit (fun () -> todo := `PostPro []),
             ~% " Do post-processing");
         ("-debug", Arg.Set debug, " Debug mode");
         ("-doc", Arg.Set header_footer, " Output a complete document");
@@ -109,15 +113,62 @@ module Options = struct
             Arg.String (fun s -> stylesheet_link := Some s),
             "<url> link to a stylesheet (CSS for XHTML), needs -doc"
         );
-
+        (
+            "-pp", Arg.String (fun s -> plugins := s :: !plugins),
+            "<name> Add <name> to the list of post-processing plugins \n\
+            \                            \
+            (try -pp help for details on plugins) Needs -postpro !!"
+        );
     ]
     let short_usage =
         ~% "usage: %s [-i file] [-o file] [-help]" Sys.argv.(0)
     let anon_fun s =
         prerr_string (~% "Warning argument %s is ignored\n" s)
 
-    let get () =
+    let get () = (
         Arg.parse options anon_fun short_usage;
+        let sub s ofs siz  = String.sub s ofs siz in
+        let lgth s = String.length s in
+        let rec parse_plugins acc = function
+            | [] -> acc
+            | "help" :: q ->
+                p "Available plugins:\n\
+------------------------------------------------------------------------------------
+| -pp  option            |  recognized tag | Help                                  |
+|----------------------------------------------------------------------------------|
+|----------------------------------------------------------------------------------|
+| -pp inlinelatex        |   latex         | Will treat content as pure LaTeX      |
+|                        |                 | (input is LaTeX ouput of -latex)      |
+|----------------------------------------------------------------------------------|
+| -pp inlinehtml         |   html          | Will unsanitize content to rebuild    |
+|                        |                 | HTML (input is HTML)                  |
+|----------------------------------------------------------------------------------|
+| -pp latex2html:<cmd>   |   latex         | Will unsanitize input and pass it     |
+|                        |                 | through <cmd> shell command           |
+|                        |                 | example: -pp latex2html:hevea         |
+------------------------------------------------------------------------------------
+";
+                parse_plugins acc q
+            | "inlinelatex" :: q ->
+                parse_plugins (`inline_latex :: acc) q
+            | "inlinehtml" :: q ->
+                parse_plugins (`inline_html :: acc) q
+            | t :: q when sub t 0 11 = "latex2html:" ->
+                let filter = sub t 11 (lgth t - 11) in
+                let plugin =
+                    `shell ( 
+                        (`HTML, `LaTeX),
+                        "latex", ~% "echo '<!-- begin %s -->'" filter,
+                        filter, ~% "echo '<!-- end %s -->'" filter)
+                in
+                parse_plugins (plugin :: acc) q
+            | t :: q ->
+                p (~% "WARNING: Unknown plugin name: \"%s\"\n" t);
+                parse_plugins acc q
+        in
+        if !todo = `PostPro [] then (
+            todo := `PostPro (parse_plugins [] !plugins);
+        );
         if !print_version then
             `print_version
         else
@@ -126,7 +177,7 @@ module Options = struct
             else
                 (`process
                     (!todo, !debug, !input_stream, !output_stream))
-
+    )
 
 end
 
@@ -190,9 +241,10 @@ let () = (
                 LatexTransformer.do_transformation t;
                 if !Options.header_footer then
                     write (Bracetax.LatexPrinter.footer ());
-        | `PostPro ->
-            PostProcessor.process PostProcessor.BuiltIn.all
+        | `PostPro (t :: q as l) ->
+            PostProcessor.process (PostProcessor.BuiltIn.make_list l)
                 read (Printf.fprintf o "%s\n")
+        | `PostPro [] -> ()
         end;
     );
 )
