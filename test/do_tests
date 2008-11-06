@@ -24,13 +24,14 @@ mkdir -p _test_results
 cp `find /usr/share -name "*.png" | head -n 1` _test_results/found_image.png
 
 cp README.brtx test/02_sections.brtx test/01_for_html.brtx test/basic.css \
-    test/bracetax.sty _test_results/
+    test/bracetax.sty test/06_testpostpro.brtx _test_results/
 
 cd _test_results
 
 test_one README
 test_one 01_for_html
 test_one 02_sections
+test_one 06_testpostpro
 
 # Post processing
 
