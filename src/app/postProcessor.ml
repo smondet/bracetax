@@ -104,6 +104,8 @@ let process plugouts readline writeline = (
 
 module Shell = struct
 
+    module Unix = UnixLabels
+
     let string_of_command cmd = (
         let o = Unix.open_process_in cmd in
         let b = Buffer.create 1024 in
@@ -113,46 +115,58 @@ module Shell = struct
         Buffer.contents b;
     )
 
-    let pipe_process input_str cmd = (
+    let string_of_pipe_process input_str cmd = (
         let ich, och = Unix.open_process cmd in
         let dic, doc, cid, cod =
             Unix.descr_of_in_channel, Unix.descr_of_out_channel,
             Unix.in_channel_of_descr, Unix.out_channel_of_descr in
         let i, o = dic ich, doc och in
         let b = Buffer.create 1024 in
-        let s = String.make 4 'B' in
+        let buf = String.make 4 'B' in
         let written = ref 0 in
         let o_closed = ref false in
         let i_closed = ref false in
         while not !i_closed do
             let to_write =
-                if !written >= (String.length input_str) then (
+                if !o_closed || !written >= (String.length input_str) then (
                     if not !o_closed then (
                         Unix.close o;
                         o_closed := true;
-                        (* pr "Closed output\n%!"; *)
                     );
                     []
                 ) else (
                     [o]
                 )
             in
-            begin match Unix.select [i] to_write [] 10.0 with
+            let except, timeout = [], 120.0 in
+            begin match
+                Unix.select ~read:[i] ~write:to_write ~except ~timeout
+            with
             | [ii],_,_ -> 
-                if Unix.read ii s 0 1 = 1 then (
-                    Buffer.add_char b s.[0];
+                if Unix.read ii ~buf ~pos:0 ~len:1 = 1 then (
+                    Buffer.add_char b buf.[0];
                     (* pr "read: %s\n" (Buffer.contents b); *)
                 ) else (
                     Unix.close i;
                     i_closed := true;
                 );
             | [], [oo], _ ->
-                if Unix.write oo input_str !written 1 = 1 then (
+                if Unix.write oo ~buf:input_str ~pos:!written ~len:1 = 1 then (
                     incr written;
                     (* pr "wrote: %s\n" (String.sub input_str 0 !written); *)
                 ) else (
-                    pr "Didn't write at all\n";
+                    (* WARNING: this is an untested case: a command that closes its output
+                     * before finishing with the input *)
+                    Unix.close o;
+                    o_closed := true;
                 );
+            | [], [], [] -> 
+                (* WARNING: Also untested *)
+                let msg =
+                    Printf.sprintf
+                        "Command %s has timeouted (%.0f seconds without read/write)"
+                        cmd timeout in
+                failwith msg;
             | _, _, _ ->
                 failwith "Don't understand Unix.select behaviour";
             end;
@@ -162,6 +176,7 @@ module Shell = struct
     )
 
 end
+
 module BuiltIn = struct
 
     type format_type = [ `LaTeX | `HTML | `Unknown ]
@@ -212,7 +227,8 @@ module BuiltIn = struct
         | `HTML, `LaTeX -> 
             (* HTML is in a <pre>, and translation will be LaTeX *)
             unsanitize_html_pre str
-        | _ -> (* TODO *) str
+        | _ ->
+            (* TODO *) str
     )
 
     let shell_postpro io_form t b l e =
@@ -227,7 +243,6 @@ module BuiltIn = struct
                 mem := [];
                 Some (rm_last_backslash_n (Shell.string_of_command b))
             );
-            (* XXX must unsanitize HTML -> LaTeX *)
             line_handler = (fun s ->
                 mem := (unsanitize io_form s) :: !mem;
                 None
@@ -236,7 +251,7 @@ module BuiltIn = struct
                 let filtered = 
                     (String.concat "\n" (List.rev !mem)) ^ "\n" in
                 Some (
-                    (Shell.pipe_process filtered l)
+                    (Shell.string_of_pipe_process filtered l)
                     ^ (rm_last_backslash_n (Shell.string_of_command e))
                 )
             );
