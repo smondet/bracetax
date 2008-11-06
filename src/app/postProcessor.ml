@@ -113,7 +113,7 @@ module Shell = struct
         Buffer.contents b;
     )
 
-    let pipe_process ?(transform=fun s -> s) input_str cmd = (
+    let pipe_process input_str cmd = (
         let ich, och = Unix.open_process cmd in
         let dic, doc, cid, cod =
             Unix.descr_of_in_channel, Unix.descr_of_out_channel,
@@ -207,10 +207,18 @@ module BuiltIn = struct
         end_handler = (fun () -> Some "<!-- inline html -->");
     }
 
-    let shell_postpro (i_form, o_form) t b l e =
+    let unsanitize kind str = (
+        match kind with
+        | `HTML, `LaTeX -> 
+            (* HTML is in a <pre>, and translation will be LaTeX *)
+            unsanitize_html_pre str
+        | _ -> (* TODO *) str
+    )
+
+    let shell_postpro io_form t b l e =
         let rm_last_backslash_n s =
             let l = String.length s in
-            if s.[l - 1] = '\n' then String.sub s 0 (l - 2) else s
+            if s.[l - 1] = '\n' then String.sub s 0 (l - 1) else s
         in
         let mem = ref [] in
         {
@@ -220,7 +228,10 @@ module BuiltIn = struct
                 Some (rm_last_backslash_n (Shell.string_of_command b))
             );
             (* XXX must unsanitize HTML -> LaTeX *)
-            line_handler = (fun s -> mem := s :: !mem; None);
+            line_handler = (fun s ->
+                mem := (unsanitize io_form s) :: !mem;
+                None
+            );
             end_handler = (fun () ->
                 let filtered = 
                     (String.concat "\n" (List.rev !mem)) ^ "\n" in
