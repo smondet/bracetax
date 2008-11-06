@@ -102,6 +102,66 @@ let process plugouts readline writeline = (
     end;
 )
 
+module Shell = struct
+
+    let string_of_command cmd = (
+        let o = Unix.open_process_in cmd in
+        let b = Buffer.create 1024 in
+        begin try 
+            while true do Buffer.add_char b (input_char o) done
+        with End_of_file -> () end;
+        Buffer.contents b;
+    )
+
+    let pipe_process ?(transform=fun s -> s) input_str cmd = (
+        let ich, och = Unix.open_process cmd in
+        let dic, doc, cid, cod =
+            Unix.descr_of_in_channel, Unix.descr_of_out_channel,
+            Unix.in_channel_of_descr, Unix.out_channel_of_descr in
+        let i, o = dic ich, doc och in
+        let b = Buffer.create 1024 in
+        let s = String.make 4 'B' in
+        let written = ref 0 in
+        let o_closed = ref false in
+        let i_closed = ref false in
+        while not !i_closed do
+            let to_write =
+                if !written >= (String.length input_str) then (
+                    if not !o_closed then (
+                        Unix.close o;
+                        o_closed := true;
+                        (* pr "Closed output\n%!"; *)
+                    );
+                    []
+                ) else (
+                    [o]
+                )
+            in
+            begin match Unix.select [i] to_write [] 10.0 with
+            | [ii],_,_ -> 
+                if Unix.read ii s 0 1 = 1 then (
+                    Buffer.add_char b s.[0];
+                    (* pr "read: %s\n" (Buffer.contents b); *)
+                ) else (
+                    Unix.close i;
+                    i_closed := true;
+                );
+            | [], [oo], _ ->
+                if Unix.write oo input_str !written 1 = 1 then (
+                    incr written;
+                    (* pr "wrote: %s\n" (String.sub input_str 0 !written); *)
+                ) else (
+                    pr "Didn't write at all\n";
+                );
+            | _, _, _ ->
+                failwith "Don't understand Unix.select behaviour";
+            end;
+        done;
+        (Buffer.contents b)
+
+    )
+
+end
 module BuiltIn = struct
 
     type format_type = [ `LaTeX | `HTML | `Unknown ]
@@ -147,30 +207,22 @@ module BuiltIn = struct
         end_handler = (fun () -> Some "<!-- inline html -->");
     }
 
-    let string_of_command cmd = (
-        let o = Unix.open_process_in cmd in
-        let b = Buffer.create 1024 in
-        begin try 
-            while true do Buffer.add_char b (input_char o) done
-        with End_of_file -> () end;
-        Buffer.contents b;
-    )
-
-    let feed_process cmd read = (
-    )
     let shell_postpro (i_form, o_form) t b l e =
         let mem = ref [] in
         {
             tag = t;
             begin_handler = (fun () ->
-                mem := []; Some (string_of_command b)
+                (* XXX need to remove last '\n' *)
+                mem := []; Some (Shell.string_of_command b)
             );
             (* XXX must unsanitize HTML -> LaTeX *)
-            line_handler = (fun s -> mem := ("transfo:" ^ s) :: !mem; None);
+            line_handler = (fun s -> mem := s :: !mem; None);
             end_handler = (fun () ->
                 let filtered = 
-                    (String.concat "\n" (List.rev !mem)) in
-                Some (filtered ^ (string_of_command e))
+                    (String.concat "\n" (List.rev !mem)) ^ "\n" in
+                Some (
+                    (Shell.pipe_process filtered l)
+                    ^ (Shell.string_of_command e))
             );
         }
 
