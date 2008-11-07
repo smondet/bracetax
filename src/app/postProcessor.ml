@@ -242,7 +242,7 @@ module BuiltIn = struct
 
     let inlinehtml_postpro = {
         tag = "html";
-        begin_handler = (fun () -> Some "<-- inline html -->");
+        begin_handler = (fun () -> Some "<!-- inline html -->");
         line_handler = (fun s -> Some (unsanitize_html_pre s));
         end_handler = (fun () -> Some "<!-- inline html -->");
     }
