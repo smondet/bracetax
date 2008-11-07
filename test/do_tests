@@ -3,10 +3,17 @@
 test_one()
 {
     THE_ONE=$1
+    DO_POSTPRO=$2
     PDFLATEX="pdflatex -interaction=nonstopmode"
     bracetax -html -doc -i $THE_ONE.brtx -o ${THE_ONE}_raw.html
     bracetax -html -doc -i $THE_ONE.brtx -o ${THE_ONE}_css.html \
         -link-stylesheet basic.css
+    if [ "$DO_POSTPRO" = "postpro" ]; then
+        HTMLPP="bracetax -postpro -pp inlinehtml -pp latex2html:hevea"
+        $HTMLPP -i ${THE_ONE}_raw.html -o ${THE_ONE}_raw_pp.html
+        $HTMLPP -i ${THE_ONE}_css.html -o ${THE_ONE}_css_pp.html
+    fi
+
     # Exports to LaTeX:
     bracetax -doc -latex -i $THE_ONE.brtx -o ${THE_ONE}_latex.tex
     bracetax -doc -latex -i $THE_ONE.brtx -o ${THE_ONE}_latex_style.tex \
@@ -16,6 +23,15 @@ test_one()
     $PDFLATEX ${THE_ONE}_latex
     $PDFLATEX ${THE_ONE}_latex_style
     $PDFLATEX ${THE_ONE}_latex_style
+    if [ "$DO_POSTPRO" = "postpro" ]; then
+        LTXPP="bracetax -postpro -pp inlinelatex"
+        $LTXPP -i ${THE_ONE}_latex.tex -o ${THE_ONE}_latex_pp.tex
+        $LTXPP -i ${THE_ONE}_latex_style.tex -o ${THE_ONE}_latex_style_pp.tex
+        $PDFLATEX ${THE_ONE}_latex_pp
+        $PDFLATEX ${THE_ONE}_latex_pp
+        $PDFLATEX ${THE_ONE}_latex_style_pp
+        $PDFLATEX ${THE_ONE}_latex_style_pp
+    fi
 }
 
 mkdir -p _test_results
@@ -31,7 +47,7 @@ cd _test_results
 test_one README
 test_one 01_for_html
 test_one 02_sections
-test_one 06_testpostpro
+test_one 06_testpostpro "postpro"
 
 # Post processing
 
