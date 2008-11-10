@@ -115,9 +115,7 @@ module Options = struct
         );
         (
             "-pp", Arg.String (fun s -> plugins := s :: !plugins),
-            "<name> Add <name> to the list of post-processing plugins \n\
-            \                            \
-            (try -pp help for details on plugins) Needs -postpro !!"
+            "<name> Add postpro plugin (try `brtx -postpro -pp help')"
         );
     ]
     let short_usage =
@@ -132,21 +130,48 @@ module Options = struct
         let rec parse_plugins acc = function
             | [] -> acc
             | "help" :: q ->
-                p "Available plugins:\n\
-------------------------------------------------------------------------------------
-| -pp  option            |  recognized tag | Help                                  |
-|----------------------------------------------------------------------------------|
-|----------------------------------------------------------------------------------|
-| -pp inlinelatex        |   latex         | Will treat content as pure LaTeX      |
-|                        |                 | (input is LaTeX ouput of -latex)      |
-|----------------------------------------------------------------------------------|
-| -pp inlinehtml         |   html          | Will unsanitize content to rebuild    |
-|                        |                 | HTML (input is HTML)                  |
-|----------------------------------------------------------------------------------|
-| -pp latex2html:<cmd>   |   latex         | Will unsanitize input and pass it     |
-|                        |                 | through <cmd> shell command           |
-|                        |                 | example: -pp latex2html:hevea         |
-------------------------------------------------------------------------------------
+                p "Post-processing helper:
+
+Available plugins:\n\
+-------------------------------------------------------------------------------
+| -pp option        |  tag   | Help                                           |
+|-----------------------------------------------------------------------------|
+|-----------------------------------------------------------------------------|
+| inlinelatex       | latex  | Will treat content as pure LaTeX               |
+|                   |        | (input is LaTeX ouput of -latex)               |
+|-----------------------------------------------------------------------------|
+| inlinehtml        | html   | Will unsanitize content to rebuild             |
+|                   |        | HTML (input is HTML)                           |
+|-----------------------------------------------------------------------------|
+| latex2html:<cmd>  | latex  | Will unsanitize HTML input and pass it         |
+|                   |        | through <cmd> shell command                    |
+|                   |        | example: -pp latex2html:hevea                  |
+-------------------------------------------------------------------------------
+Example:
+    brtx -postpro -pp latex2html:hevea -i output.html -o output_and_pp.html
+will catch: 
+    <!--verbatimbegin:latex -->
+    <pre>
+    \\begin{itemize}
+      \\item {\\em some emph} \\&amp; \\textbf{bold}
+      \\item dfkljg $I_x (\\theta) = \\theta^2$
+    \\end{itemize}
+    </pre>
+    <!--verbatimend:latex -->
+and give (note the unsanitization: &amp; -> &):
+    \\begin{itemize}
+      \\item {\\em some emph} \\& \\textbf{bold}
+      \\item dfkljg $I_x (\\theta) = \\theta^2$
+    \\end{itemize}
+as standard input to hevea (http://hevea.inria.fr),
+and replace the catched text with its standard output:
+    <UL CLASS=\"itemize\">
+    <LI CLASS=\"li-itemize\"><EM>jkfg</EM> &amp; <B>bold</B></LI>
+    <LI CLASS=\"li-itemize\">
+        dfkljg <I>I</I><SUB><I>x</I></SUB> (&#X3B8;) = &#X3B8;<SUP>2</SUP>
+    </LI>
+    </UL>
+
 ";
                 parse_plugins acc q
             | "inlinelatex" :: q ->
