@@ -13,13 +13,13 @@
     {subtitle|A simple syntax for wikis and more...}
 }
 
-{section 1|Build}
+{section 1|Build {t|brtx}}
 
 Just need {link http://www.ocaml.org|OCamL}:
 {verbatim}
 ocamlbuild -I src/app -I src/lib  src/app/main.native
 {endverbatim}
-And then copy {t|main.native} somewhere in your {t|$PATH} as {t|bracetax}.
+And then copy {t|main.native} somewhere in your {t|$PATH} as {t|brtx}.
 
 {section 1|Usage}
 
@@ -27,8 +27,8 @@ And then copy {t|main.native} somewhere in your {t|$PATH} as {t|bracetax}.
 
 Please report to:
 {verbatim e}
- $ bracetax -help
-usage: /home/seb/bin/bracetax [-i file] [-o file] [-help]
+ $ brtx -help
+usage: brtx [-i file] [-o file] [-help]
   -html                  Output HTML format (default)
   -latex                 Output LaTeX format
   -debug                 Debug mode
@@ -45,25 +45,25 @@ usage: /home/seb/bin/bracetax [-i file] [-o file] [-help]
 
 Convert a file to XHTML:
 {verbatim}
-bracetax -html -i README.brtx -o README.html
+brtx -html -i README.brtx -o README.html
 {endverbatim}
 {p}
 Convert a file to LaTeX:
 {verbatim}
-bracetax -latex -i README.brtx -o README.html
+brtx -latex -i README.brtx -o README.html
 {endverbatim}
 {p}
 
 The option {t|-doc} adds header and footer (for both HTML and LaTeX):
 {verbatim e}
-bracetax -html -i README.brtx -o README.html -doc
+brtx -html -i README.brtx -o README.html -doc
 {e}
 will provide the {t|<!DOCTYPE html ...} etc...
 {p}
 
 Transform any string:
 {verbatim}
- $ echo 'I say {b|Hello} {i|world}{~}!!' | bracetax -html
+ $ echo 'I say {b|Hello} {i|world}{~}!!' | brtx -html
 <p>I say <b>Hello</b> <i>world</i>&nbsp;!!</p>
 {endverbatim}
 
