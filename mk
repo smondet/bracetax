@@ -27,8 +27,8 @@ for todo in $* ; do
         "b" ) build ;;
         "bg" ) build ".d" ;;
         "t" ) test/do_tests ;;
-        "d" ) tools/make_readme ;;
-        "c" ) ocamlbuild -clean ; rm -rf _test_results/ gendoc/ ;;
+        "d" ) tools/make_readme ; cd doc/ ; make ; cd .. ;;
+        "c" ) ocamlbuild -clean ; rm -rf _test_results/ gendoc/ doc/site/ ;;
         "h" ) echo_help ;;
         * ) echo "see \`mk h\`";;
     esac
