@@ -3,9 +3,9 @@
 
 {header|
     {title|Bracetax}
-    {authors|{link http://sebmdt.googlepages.com|Sebastien Mondet}}
-    {subtitle|A simple syntax for wikis and more...}
 }
+
+{section|Contents}
 
 In this project we have:
 {begin list item}
@@ -14,4 +14,10 @@ In this project we have:
     {item} The {t|brtx} application
     {item} Some tools
     {item} Room for more development.
+{end}
+
+{section|Authors}
+
+{begin list item}
+    {item} {link http://sebmdt.googlepages.com|Sebastien Mondet}
 {end}
