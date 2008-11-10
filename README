@@ -32,11 +32,22 @@ Include verbatim or not:
     
     => include and macro are non-wiki features maybe keep m4 for thesis/authoring but not in core bracetax
 
+Links:
+    cite:<erf>  (would become \cite{} or [<a ...></a>])
+    doc:<name> (would add .pdf or .html ?)
 
-A post-processor helper:
-    calls 3 commands {begin, on_line, end} and copies the rest of the text to the output
+    or done with m4 ?
 
 
+Documentation:
+    doc "Syntax"
+    doc "Lib"
+    doc "App"
+    doc "Dev"
 
+
+Change names:
+    app -> brtx
+    lib -> ocamlbracetax
 
 
