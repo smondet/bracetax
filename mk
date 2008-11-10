@@ -12,7 +12,8 @@ echo_help ()
 $0 [trch]
 b: Build brtx (default action)
 t: Do the tests
-d: Build the documentation
+d: Build the documentation without building pdfs
+D: Build the whole documentation.
 c: Clean
 h: This help"
 }
@@ -27,7 +28,8 @@ for todo in $* ; do
         "b" ) build ;;
         "bg" ) build ".d" ;;
         "t" ) test/do_tests ;;
-        "d" ) tools/make_readme ; cd doc/ ; make ; cd .. ;;
+        "d" ) cd doc/ ; make nopdf ; cd .. ;;
+        "D" ) cd doc/ ; make  ; cd .. ;;
         "c" ) ocamlbuild -clean ; rm -rf _test_results/ gendoc/ doc/site/ ;;
         "h" ) echo_help ;;
         * ) echo "see \`mk h\`";;
