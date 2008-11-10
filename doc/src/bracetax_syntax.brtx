@@ -1,9 +1,13 @@
 
 {header|
-    {title|The brtx application}
+    {title|The Bracetax syntax}
 }
 
 {section 1|Introduction}
+
+This document defines the rules of the Bracetax syntax and explain the
+semantics of its commands. Some examples give the expected behaviour for
+transformations in HTML and LaTeX using the {t|ocamlbracetax} library.
 
 {section 1|Rules}
 
