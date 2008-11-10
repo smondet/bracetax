@@ -16,6 +16,26 @@ In this project we have:
     {item} room for more development.
 {end}
 
+{section|Examples}
+
+{section 2|Complete example of core bracetax}
+
+We use the {link bracetax_syntax.html|Bracetax syntax} document, here we can see:
+{begin list}
+    {item} The {link bracetax_syntax.brtx.html|source}
+        (colored by Vim, c.f. {link tools.html#sec_vimsyntaxfile|tools})
+    {item} The generated {link bracetax_syntax_raw.html|raw HTML}
+    {item} The generated {link bracetax_syntax_latex.pdf|PDF} from LaTeX export
+    {item} The generated {link bracetax_syntax_latex_style.pdf|PDF} from LaTeX export with a style
+{end}
+
+
+{section 2|Complete example of authoring}
+
+Using M4 
+({link http://en.wikipedia.org/wiki/M4_(computer_language)|wikipedia})
+and {t|brtx}'s {link brtx_app.html#sec_postpro|post-processor}.
+
 {section|Authors}
 
 {begin list item}

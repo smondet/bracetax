@@ -4,7 +4,7 @@
 }
 
 
-{section 1|Vim syntax file}
+{section 1 sec_vimsyntaxfile|Vim syntax file}
 
 There's a {link http://www.vim.org|Vim} syntax file (the {t|verbatim} blocs are
 still to do): {t|./tools/bracetax_syntax.vim}
