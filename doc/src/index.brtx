@@ -2,18 +2,18 @@
 
 
 {header|
-    {title|Bracetax}
+    {title|Bracetax documentation}
 }
 
 {section|Contents}
 
 In this project we have:
 {begin list item}
-    {item} {link bracetax_syntax.html|The Bracetax syntax}
-    {item} The ocamlbracetax library
-    {item} The {t|brtx} application
-    {item} Some tools
-    {item} Room for more development.
+    {item} the {link bracetax_syntax.html|Bracetax syntax};
+    {item} the ocamlbracetax library;
+    {item} the {t|brtx} {link brtx_app.html|application} (build & usage);
+    {item} some {link tools.html|tools};
+    {item} room for more development.
 {end}
 
 {section|Authors}
