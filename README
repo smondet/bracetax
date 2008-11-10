@@ -6,7 +6,7 @@ BUILD:
 
 
 DOCUMENTATION:
-Launch the generation (needs bracetax and pdflatex in the $PATH):
+Launch the generation (needs brtx and pdflatex in the $PATH):
   ./mk d
 And open gendoc/index.html
 
@@ -42,12 +42,7 @@ Links:
 Documentation:
     doc "Syntax"
     doc "Lib"
-    doc "App"
+    doc "App & Tools" brtx (trans & pp), syntax.vim, top.ml
     doc "Dev"
-
-
-Change names:
-    app -> brtx
-    lib -> ocamlbracetax
 
 
