@@ -1,0 +1,17 @@
+
+
+
+{header|
+    {title|Bracetax}
+    {authors|{link http://sebmdt.googlepages.com|Sebastien Mondet}}
+    {subtitle|A simple syntax for wikis and more...}
+}
+
+In this project we have:
+{begin list item}
+    {item} {link bracetax_syntax.html|The Bracetax syntax}
+    {item} The ocamlbracetax library
+    {item} The {t|brtx} application
+    {item} Some tools
+    {item} Room for more development.
+{end}

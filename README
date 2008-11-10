@@ -39,10 +39,3 @@ Links:
     or done with m4 ?
 
 
-Documentation:
-    doc "Syntax"
-    doc "Lib"
-    doc "App & Tools" brtx (trans & pp), syntax.vim, top.ml
-    doc "Dev"
-
-
