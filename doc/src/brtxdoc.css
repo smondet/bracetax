@@ -20,13 +20,13 @@ div.p + div.p { padding-top: 1.5em; }
 div.header {
     text-align: center;
 }
-h1 {           font-size: 350%; font-variant: small-caps; }
-div.authors {  font-size: 200%; 	line-height: 200%; }
+h1 {           font-size: 250%; font-variant: small-caps; }
+div.authors {  font-size: 200%; line-height: 200%; }
 div.subtitle { font-size: 200%; font-style: italic; }
-h2 {           font-size: 250%; border-bottom: 1px solid #000;}
-h3 {           font-size: 210%; padding-top: 0.1em;padding-bottom: 0.05em;}
-h4 {           font-size: 180%; padding-top: 0.1em;padding-bottom: 0.05em;}
-h5 {           font-size: 150%; padding-top: 0.1em;padding-bottom: 0.05em;}
+h2 {           font-size: 210%; border-bottom: 1px solid #000;}
+h3 {           font-size: 180%; padding-top: 0.1em;padding-bottom: 0.05em;}
+h4 {           font-size: 150%; padding-top: 0.1em;padding-bottom: 0.05em;}
+h5 {           font-size: 125%; padding-top: 0.1em;padding-bottom: 0.05em;}
 
 code, pre {
 	font-family: monospace;
@@ -38,8 +38,8 @@ pre {
     border-color: #dddddd;
 	position: relative;
     background-color: #eeeeee;
-	left: 5%;
-	width: 90%;
+	left: 8%;
+	width: 70%;
     clear: both;
 	/*padding-bottom: 1em;*/
 }
@@ -93,8 +93,8 @@ small.note {
     /*right: 0;*/
     width: 150px;
     border: thin silver solid;
-    margin: 0.1em;
-    padding: 0.1em;
+    margin: 0.3em;
+    padding: 0.3em;
 }
 
 
