@@ -2,15 +2,15 @@
 
 build ()
 {
-    ocamlbuild -I src/app -I src/lib  src/app/main$1.byte bracetax.cma
-    rm -f bracetax
-    ln -s main$1.byte bracetax
+    ocamlbuild -I src/app -I src/lib  src/app/main$1.byte ocamlbracetax.cma
+    rm -f brtx
+    ln -s main$1.byte brtx
 }
 echo_help ()
 {
     echo "\
 $0 [trch]
-b: Build bracetax (default action)
+b: Build brtx (default action)
 t: Do the tests
 d: Build the documentation
 c: Clean

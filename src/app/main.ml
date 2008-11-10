@@ -26,7 +26,7 @@
 let (~%) = Printf.sprintf
 let p = print_string
 
-let version_string = ~% "0.1 (bracetax lib: %s)" Bracetax.Info.version
+let version_string = ~% "0.1 (ocamlbracetax lib: %s)" Bracetax.Info.version
 
 module DummyPrinter = struct
     type t = int
@@ -189,7 +189,7 @@ let () = (
         match Options.get () with 
         | `process something -> something
         | `print_version ->
-            p (~% "Bracetax %s\n" version_string);
+            p (~% "brtx %s\n" version_string);
             exit 0;
         | `print_license ->
             p Bracetax.Info.license;
