@@ -1,6 +1,8 @@
 
+# The header:
 {header|
     {title|The Bracetax syntax}
+# can also contain {authors|...} and {subtitle|...}
 }
 
 {section 1|Introduction}
@@ -8,6 +10,8 @@
 This document defines the rules of the Bracetax syntax and explain the
 semantics of its commands. Some examples give the expected behaviour for
 transformations in HTML and LaTeX using the {t|ocamlbracetax} library.
+It's also used as a {link index.html#sec_example_core|complete example of
+bracetax syntax}.
 
 {section 1|Rules}
 
@@ -84,6 +88,8 @@ To have a title bloc in you document:
 
 {section 2 sec_verbatim|Non parsed blocs}
 
+# We use the 'e' end tag so we are able to put {endverbatim} inside a verbatim
+# environment:
 The default case:
 {verbatim e}
 {verbatim}
