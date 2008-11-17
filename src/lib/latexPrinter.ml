@@ -90,6 +90,17 @@ let sanitize_nontext line = (
     ] in
     Escape.replace_chars ~src:line ~patterns
 )
+let sanitize_url line = (
+    let patterns = [
+        ('$' , "" );
+        ('{' , "" );
+        ('}' , "" );
+        ('\\', "" );
+        ('^' , "" );
+        ('~' , "" );
+    ] in
+    Escape.replace_chars ~src:line ~patterns
+)
 
 
 
@@ -120,17 +131,19 @@ let link_stop t l = (
     t.write <- t.write_mem;
     let kind, target, text = Commands.Link.stop l in
     let target_str = 
-        sanitize_nontext (match target with Some s -> s | None -> "notarget") in
+        (match target with Some s -> s | None -> "notarget") in
     t.write (
         match kind with
         | `local ->
+            let target = sanitize_nontext target_str in
             (match text with
-            | Some s ->  ~% "%s (\\ref{%s})" (sanitize_nontext s) target_str
-            | None ->  ~% "\\ref{%s}" target_str)
+            | Some s ->  ~% "%s (\\ref{%s})" (sanitize_nontext s) target
+            | None ->  ~% "\\ref{%s}" target)
         | _ ->
             ~% "\\href{%s}{%s}" 
-            (target_str)
-            (match text with Some s -> sanitize_nontext s | None -> target_str)
+                (sanitize_url target_str)
+                (sanitize_nontext 
+                    (match text with Some s -> s | None -> target_str))
     );
 )
 
