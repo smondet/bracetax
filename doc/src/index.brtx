@@ -34,7 +34,12 @@ We use the {link bracetax_syntax.html|Bracetax syntax} document, here we can see
 
 Using M4 
 ({link http://en.wikipedia.org/wiki/M4_(computer_language)|wikipedia})
-and {t|brtx}'s {link brtx_app.html#sec_postpro|post-processor}.
+and {t|brtx}'s {link brtx_app.html#sec_postpro|post-processor}, we get
+({i|work in progress}):
+{list|
+    {item} The {link ./example_m4pp/main.brtx|source}
+    {item} The generated {link ./example_m4pp/main.html|HTML}
+}
 
 {section|Authors}
 

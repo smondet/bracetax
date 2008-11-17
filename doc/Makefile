@@ -1,6 +1,6 @@
-CSS=brtxdoc.css
-BRTX2HTML=brtx -html -doc 
-BRTX2HTMLDOC=brtx -html -doc -link-stylesheet $(CSS)
+export CSS=brtxdoc.css
+export BRTX2HTML=brtx -html -doc 
+export BRTX2HTMLDOC=brtx -html -doc -link-stylesheet $(CSS)
 
 TMPTEXDIR=/tmp/tmptex/
 TMPTEXNAME=tmporary
@@ -19,19 +19,30 @@ WHOLE_SITE=$(HTML_PAGES) \
 		   site/bracetax_syntax_latex.pdf \
 		   site/bracetax_syntax_latex_style.pdf 
 
-all: $(WHOLE_SITE)
 
-.PHONY: clean nopdf
+.PHONY: clean nopdf example_m4pp_whole example_m4pp_nopdf
 
-nopdf: $(HTML_PAGES)
+all: $(WHOLE_SITE) example_m4pp_whole
+
+nopdf: $(HTML_PAGES) example_m4pp_nopdf
+
+example_m4pp_whole: site/
+	rm -rf site/example_m4pp 
+	cp -r src/example_m4pp site/example_m4pp
+	$(MAKE) -C site/example_m4pp
+
+example_m4pp_nopdf: site/
+	rm -rf site/example_m4pp 
+	cp -r src/example_m4pp site/example_m4pp
+	$(MAKE) -C site/example_m4pp nopdf
+
+
 
 site/:
 	mkdir site
 
 site/$(CSS): site/ src/$(CSS)
 	cp src/$(CSS) site/
-
-
 
 site/bracetax_syntax_raw.html: src/bracetax_syntax.brtx site/found_image.png
 	$(BRTX2HTML)  -i $< -o $@

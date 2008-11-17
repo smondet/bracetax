@@ -1,0 +1,38 @@
+
+{header|
+    {title|Self-documenting authoring example}
+    {authors|Sebastien Mondet}
+    {subtitle|Using m4, post-processing and more{...}}
+}
+
+{section 1 sec_links|Some links}
+
+We will use {link http://en.wikipedia.org/wiki/M4_(computer_language)|M4} 
+
+{section 1 sec_examples|Detailled examples}
+
+
+{section 2 sec_latex_command|Defining the {t|LATEX} command}
+
+# Talk about an internal command LATEX(...)
+
+{section 2 sec_date_command|Using command line definitions}
+
+Here we have compilation date: {t|_todaydate}
+{p}
+For that we just passed the source:
+{verbatim e brtx_code}
+Here we have compilation date: {t|`_todaydate'}
+{e}
+through the command:
+{verbatim e shell_code}
+m4 -D`_todaydate'="$(date)" main.brtx > main.brtx.tmp
+{e}
+
+
+
+{section 2 sec_biblio|Citations}
+
+# Bibtex for LaTeX, links for HTML
+
+
