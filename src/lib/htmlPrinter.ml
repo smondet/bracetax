@@ -347,10 +347,10 @@ let stop_command t location = (
                     t.write (list_item style);
                 );
             | Some c ->
-                t.warn (~% "Warning {item} is not just under list but %s\n"
+                t.warn (~% "Warning {*} is not just under list but %s\n"
                     (Commands.env_to_string c));
                 CS.push t.stack c;
-            | None -> t.warn (~% "Warning {item}... nothing to itemize !\n")
+            | None -> t.warn (~% "Warning {*}... nothing to itemize !\n")
             end
         | `section (level, label) ->
             t.write (section_stop level label);

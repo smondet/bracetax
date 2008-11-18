@@ -9,11 +9,11 @@
 
 In this project we have:
 {begin list item}
-    {item} the {link bracetax_syntax.html|Bracetax syntax};
-    {item} the ocamlbracetax library;
-    {item} the {t|brtx} {link brtx_app.html|application} (build & usage);
-    {item} some {link tools.html|tools};
-    {item} room for more development.
+    {*} the {link bracetax_syntax.html|Bracetax syntax};
+    {*} the ocamlbracetax library;
+    {*} the {t|brtx} {link brtx_app.html|application} (build & usage);
+    {*} some {link tools.html|tools};
+    {*} room for more development.
 {end}
 
 {section|Examples}
@@ -22,11 +22,11 @@ In this project we have:
 
 We use the {link bracetax_syntax.html|Bracetax syntax} document, here we can see:
 {begin list}
-    {item} The {link bracetax_syntax.brtx.html|source}
+    {*} The {link bracetax_syntax.brtx.html|source}
         (colored by Vim, c.f. {link tools.html#sec_vimsyntaxfile|tools})
-    {item} The generated {link bracetax_syntax_raw.html|raw HTML}
-    {item} The generated {link bracetax_syntax_latex.pdf|PDF} from LaTeX export
-    {item} The generated {link bracetax_syntax_latex_style.pdf|PDF} from LaTeX export with a style
+    {*} The generated {link bracetax_syntax_raw.html|raw HTML}
+    {*} The generated {link bracetax_syntax_latex.pdf|PDF} from LaTeX export
+    {*} The generated {link bracetax_syntax_latex_style.pdf|PDF} from LaTeX export with a style
 {end}
 
 
@@ -37,17 +37,17 @@ Using M4
 and {t|brtx}'s {link brtx_app.html#sec_postpro|post-processor}, we get
 ({i|work in progress}):
 {list|
-    {item} The {link ./example_m4pp/main.brtx|source}
+    {*} The {link ./example_m4pp/main.brtx|source}
         (and the {link ./example_m4pp/main.brtx.html|colored source})
-    {item} The generated {link ./example_m4pp/main.html|HTML}
-    {item} The generated {link ./example_m4pp/main.tex|latex file}
+    {*} The generated {link ./example_m4pp/main.html|HTML}
+    {*} The generated {link ./example_m4pp/main.tex|latex file}
         and the {link ./example_m4pp/main.pdf|corresponding PDF}
-    {item} The {link ./example_m4pp/Makefile.html|Makefile} used to generate the
+    {*} The {link ./example_m4pp/Makefile.html|Makefile} used to generate the
         example.
 }
 
 {section|Authors}
 
 {begin list item}
-    {item} {link http://sebmdt.googlepages.com|Sebastien Mondet}
+    {*} {link http://sebmdt.googlepages.com|Sebastien Mondet}
 {end}

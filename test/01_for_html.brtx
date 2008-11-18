@@ -35,14 +35,14 @@ More HTML: {i|italic}, {b|bold}, {t|mono-spaced}, super{sup|script}, sub{sub|scr
 {p}
 {begin b} A lot of{br} bold and {i|italics} {end} and {i|more}...
 {p}
-{list item| {item} one item {item} another}{br}
+{list item| {*} one item {*} another}{br}
 
 {begin list  enum }
-  {item} The one
-  {item} Two
-  {item} Three
-    {list|{item} inside {item} more}
-  {item} Four
+  {*} The one
+  {*} Two
+  {*} Three
+    {list|{*} inside {*} more}
+  {*} Four
 {end}
 
 {section 1| An h2...}

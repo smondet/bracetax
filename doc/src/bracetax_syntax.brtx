@@ -18,9 +18,9 @@ bracetax syntax}.
 
 In the text there are {i|only} three special characters:
 {list|
-    {item} The {i|opening brace}, {t|{{}}, which starts the command mode
-    {item} The {i|closing brace}, {t|{}}}, which finishes a command
-    {item} The {i|sharp}, {t|{#}}, which starts a comment to the end of the line
+    {*} The {i|opening brace}, {t|{{}}, which starts the command mode
+    {*} The {i|closing brace}, {t|{}}}, which finishes a command
+    {*} The {i|sharp}, {t|{#}}, which starts a comment to the end of the line
 }
 Those charcters can be escaped with the commands {t|{{}{{}{}}}, {t|{{}{}}{}}}
 and {t|{{}{#}{}}}.
@@ -33,10 +33,10 @@ A command has the form:
 {endverbatim}
 Between the {t|{{}} and the {t||}, it's the command mode:
 {begin list}
-    {item} {t|'\\'} escapes the backslash (used as escaper)
-    {item} {t|'\ '} escapes the space (used as argument separator)
-    {item} {t|'\|'} escapes the pipe (used as command/text separator)
-    {item} {t|'\{{}'} and {t|'\{}}'} escape
+    {*} {t|'\\'} escapes the backslash (used as escaper)
+    {*} {t|'\ '} escapes the space (used as argument separator)
+    {*} {t|'\|'} escapes the pipe (used as command/text separator)
+    {*} {t|'\{{}'} and {t|'\{}}'} escape
         the braces (except for the {t|{{}{{}{}}} and {t|{{}{}}{}}} commands)
 {end}
 A command can have no arguments and no text, {i|e.g.} {t|{{}br{}}}
@@ -154,22 +154,22 @@ The {t|label} is a string for local {link local:sec_links|links}/references.
 {section 2|Lists}
 
 A list can be {t|item} (default) or {t|enum}, a new item begins with
-{t|{{}item{}}}:
+{t|{{}*{}}}:
 {verbatim e}
 {begin list enum}
-  {item} The one
-  {item} Two
-  {item} Three
-    {list item|{item} inside {item} more}
-  {item} Four
+  {*} The one
+  {*} Two
+  {*} Three
+    {list item|{*} inside {*} more}
+  {*} Four
 {end}
 {e}
 {begin list  enum }
-  {item} The one
-  {item} Two
-  {item} Three
-    {list item|{item} inside {item} more}
-  {item} Four
+  {*} The one
+  {*} Two
+  {*} Three
+    {list item|{*} inside {*} more}
+  {*} Four
 {end}
 
 {section 2 sec_links|Links}

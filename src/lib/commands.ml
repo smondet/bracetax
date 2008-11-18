@@ -151,7 +151,7 @@ module Names = struct
         | "enum" -> `numbered
         | _ -> `itemize
 
-    let is_item name = name = "item"
+    let is_item name = name = "*"
 
     let is_section = (=) "section"
     let section_params =

@@ -63,7 +63,7 @@ echo "
 Here we have:
 {begin list}
 $(for f in $FILES ; do
-    echo "{item} {link $f}"
+    echo "{*} {link $f}"
 done)
 {end}
 " | $BRTXCC -html -o index.html -doc
