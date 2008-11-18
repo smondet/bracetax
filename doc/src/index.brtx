@@ -39,6 +39,8 @@ and {t|brtx}'s {link brtx_app.html#sec_postpro|post-processor}, we get
 {list|
     {item} The {link ./example_m4pp/main.brtx|source}
     {item} The generated {link ./example_m4pp/main.html|HTML}
+    {item} The generated {link ./example_m4pp/main.tex|latex file}
+        and the {link ./example_m4pp/main.pdf|corresponding PDF}
 }
 
 {section|Authors}
