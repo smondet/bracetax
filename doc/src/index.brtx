@@ -23,10 +23,11 @@ In this project we have:
 We use the {link bracetax_syntax.html|Bracetax syntax} document, here we can see:
 {begin list}
     {*} The {link bracetax_syntax.brtx.html|source}
-        (colored by Vim, c.f. {link tools.html#sec_vimsyntaxfile|tools})
-    {*} The generated {link bracetax_syntax_raw.html|raw HTML}
-    {*} The generated {link bracetax_syntax_latex.pdf|PDF} from LaTeX export
-    {*} The generated {link bracetax_syntax_latex_style.pdf|PDF} from LaTeX export with a style
+        (colored by Vim, c.f. {link tools.html#sec_vimsyntaxfile|tools});
+    {*} The generated {link bracetax_syntax_raw.html|raw HTML};
+    {*} The generated {link bracetax_syntax_latex.pdf|PDF} from LaTeX export;
+    {*} The generated {link bracetax_syntax_latex_style.pdf|PDF} from LaTeX
+    export with a style.
 {end}
 
 
@@ -38,10 +39,10 @@ and {t|brtx}'s {link brtx_app.html#sec_postpro|post-processor}, we get
 ({i|work in progress}):
 {list|
     {*} The {link ./example_m4pp/main.brtx|source}
-        (and the {link ./example_m4pp/main.brtx.html|colored source})
-    {*} The generated {link ./example_m4pp/main.html|HTML}
-    {*} The generated {link ./example_m4pp/main.tex|latex file}
-        and the {link ./example_m4pp/main.pdf|corresponding PDF}
+        (and the {link ./example_m4pp/main.brtx.html|colored source});
+    {*} The generated {link ./example_m4pp/main.html|HTML};
+    {*} The generated {link ./example_m4pp/main.tex|latex file};
+        and the {link ./example_m4pp/main.pdf|corresponding PDF};
     {*} The {link ./example_m4pp/Makefile.html|Makefile} used to generate the
         example.
 }
@@ -49,5 +50,5 @@ and {t|brtx}'s {link brtx_app.html#sec_postpro|post-processor}, we get
 {section|Authors}
 
 {begin list item}
-    {*} {link http://sebmdt.googlepages.com|Sebastien Mondet}
+    {*} {link http://sebmdt.googlepages.com|Sebastien Mondet}.
 {end}

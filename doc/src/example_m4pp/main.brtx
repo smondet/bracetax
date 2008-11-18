@@ -80,5 +80,15 @@ TODO
 
 {section 2 sec_include|Using {t|include}}
 
-TODO
+With a simple:
+{verbatim e brtx_code}
+{verbatim verycomplexend}
+`include'(./Makefile)
+{verycomplexend}
+{e}
+we obtain:
+{verbatim verycomplexend}
+include(./Makefile)
+{verycomplexend}
+
 
