@@ -55,7 +55,7 @@ for todo in $* ; do
         "t" ) test/do_tests ;;
         "d" ) cd doc/ ; make nopdf ; cd .. ;;
         "D" ) cd doc/ ; make  ; cd .. ;;
-        "c" ) ocamlbuild -clean ; rm -rf _test_results/ gendoc/ doc/site/ ;;
+        "c" ) ocamlbuild -clean ; rm -rf _test_results/ doc/site/ ;;
         "h" ) echo_help ;;
         * ) echo "see \`mk h\`";;
     esac
