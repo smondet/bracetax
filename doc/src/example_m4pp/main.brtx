@@ -11,10 +11,23 @@ We will use {link http://en.wikipedia.org/wiki/M4_(computer_language)|M4}
 
 {section 1 sec_examples|Detailled examples}
 
+{section 2 sec_def_todo|Creating a {q|ToDo} tag}
+
+
+define(`TODO', ifelse(_output_format , HTML , `{verbatim end html}
+<span style="color: red; background-color: yellow">TO-DO</span>
+{end}' , `{verbatim end latex}
+\textcolor{red}{TO-DO}
+{end}'
+))dnl
+
+TODO
 
 {section 2 sec_latex_command|Defining the {t|LATEX} command}
 
 # Talk about an internal command LATEX(...)
+
+TODO
 
 {section 2 sec_date_command|Using command line definitions}
 
@@ -34,5 +47,5 @@ m4 -D`_todaydate'="$(date)" main.brtx > main.brtx.tmp
 {section 2 sec_biblio|Citations}
 
 # Bibtex for LaTeX, links for HTML
-
+TODO
 
