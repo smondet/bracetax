@@ -167,7 +167,7 @@ let quotation_open_close a = (
 (* Header: *)
 let header_start t = (
     t.inside_header <- true; 
-    ~% "%% HEADER:\n"
+    ~% "%% HEADER:\n\\date{}"
 )
 let header_stop t = (
     t.inside_header <- false;
