@@ -40,6 +40,7 @@ bc: Build brtx without ocamlfind and ocamlbuild (e.g. with ocaml 3.09.x)
 t: Do the tests
 d: Build the documentation without building pdfs
 D: Build the whole documentation.
+cd: Clean documentation
 c: Clean
 h: This help"
 }
@@ -57,6 +58,7 @@ for todo in $* ; do
         "t" ) test/do_tests ;;
         "d" ) cd doc/ ; make nopdf ; cd .. ;;
         "D" ) cd doc/ ; make  ; cd .. ;;
+        "cd" )rm -rf doc/site/ ;;
         "c" ) ocamlbuild -clean ; rm -rf _test_results/ doc/site/ ;;
         "h" ) echo_help ;;
         * ) echo "see \`mk h\`";;
