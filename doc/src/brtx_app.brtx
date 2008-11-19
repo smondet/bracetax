@@ -10,7 +10,9 @@ Just need {link http://www.ocaml.org|OCamL} (at least version 3.09), and run:
 {verbatim}
 ./mk
 {endverbatim}
-And then copy {t|main.native} somewhere in your {t|$PATH} as {t|brtx}.
+And then copy {t|main.native} somewhere in your {t|$PATH} as {t|brtx}. Please
+see {q|{t|mk h}} for more options ({i|e.g.} compilation without
+{t|ocamlbuild}, documentation generation{...}).
 
 
 {section 1|Usage}
@@ -66,4 +68,8 @@ Transform any string:
 
 {section 3 sec_postpro|Post-processor}
 
+For now please refer to:
+{verbatim e}
+brtx -postpro -pp help
+{e}
 
