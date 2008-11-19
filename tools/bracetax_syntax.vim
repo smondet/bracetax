@@ -18,10 +18,9 @@
 :syn region bracetaxCommand keepend start="{" skip="\\|\|\\}" end="\(|\|}\)" contains=bracetaxSpecialChar,bracetaxKnown
 
 :syn match bracetaxKnown "\({\|{begin\s\)\@<=\<\(c\|q\|i\|b\|t\|sup\|sub\|section\|link\|list\|utf\|image\|table\|header\|title\|subtitle\|authors\|note\)\>"
-:syn match bracetaxSimple "{\(p\|br\|#\|{\|}\|\~\|\*\)}" contains=bracetaxSpecialChar
+:syn match bracetaxSimple "{\(p\|br\|#\|{\|}\|\~\|\*\|\.\.\.\)}" contains=bracetaxSpecialChar
 
 " Verbatim regions
-" :syn region bracetaxVerbatim start="\(^{verbatim{}\_.*$\)\@<=" end="^\({endverbatim}\)\@="
 :syn region bracetaxVerbatim start="^{verbatim}" end="^{endverbatim}"
 :syn region bracetaxVerbatim start="^{verbatim \z(\w\+\)" end="^{\z1}"
 
