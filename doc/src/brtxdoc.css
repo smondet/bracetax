@@ -19,6 +19,9 @@ div.p + div.p { padding-top: 1.5em; }
 
 div.header {
     text-align: center;
+    border: #3E0C0C solid;
+    padding-top:    2.1em;
+    padding-bottom: 2.05em;
 }
 h1 {           font-size: 250%; font-variant: small-caps; }
 div.authors {  font-size: 200%; line-height: 200%; }
