@@ -30,9 +30,11 @@ type gravity = [
 
 type message = [
     | `verbatim_ignored_text_after_begin of string
+    | `vell_out_of_table
 ]
 
 type error = [
-    | `syntactic of gravity * message
-    | `undefined of string
+    | `message of gravity * message
+    | `undefined of string (* Temporary, will be removed progressively *)
 ]
+type error_fun = error -> unit

@@ -28,16 +28,13 @@ type location = {
     s_line: int;
     s_char: int;
 }
-type write_fun = string -> unit
 type writer = {
-    w_write: write_fun;
-    w_warn: write_fun;
-    w_error: write_fun;
+    w_write: string -> unit;
+    w_error: Error.error -> unit;
 }
-let make_writer ~write ~warn ~error = (
+let make_writer ~write  ~error = (
     {
         w_write = write;
-        w_warn = warn;
         w_error = error;
     }
 )

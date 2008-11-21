@@ -32,13 +32,13 @@ functor (Printer: Sig.PRINTER) -> struct
         t_printer: Printer.t;
         t_read: unit -> string option;
         t_write: string -> unit;
-        t_warn: string -> unit;
+        t_error: Error.error_fun;
     }
     let create ~read ~writer = {
         t_printer = Printer.create ~writer;
         t_read = read;
         t_write = writer.Sig.w_write;
-        t_warn = writer.Sig.w_warn;
+        t_error = writer.Sig.w_error;
     }
 
     let make_loc l c = {Sig.s_line = l; s_char = c;}
@@ -104,13 +104,14 @@ functor (Printer: Sig.PRINTER) -> struct
         if false then (
             let l = S.length s in
             try
-                t.t_warn (~%
-                    "---[State: %s] \"%s[%s]%s\"    (%d)\n%!"
-                    (string_of_state state)
-                    (S.sub s 0 i)
-                    (S.sub s i 1)
-                    (S.sub s (i + 1) (l - i - 1))
-                    i)
+                t.t_error (`undefined
+                    (~%
+                        "---[State: %s] \"%s[%s]%s\"    (%d)\n%!"
+                        (string_of_state state)
+                        (S.sub s 0 i)
+                        (S.sub s i 1)
+                        (S.sub s (i + 1) (l - i - 1))
+                        i))
             with
             e -> ()
         );

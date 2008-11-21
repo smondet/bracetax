@@ -60,8 +60,7 @@ module DummyPrinter = struct
 
     let dummy_writer = {
         Bracetax.Signatures.w_write = (fun s -> ());
-        Bracetax.Signatures.w_warn = (fun s -> ());
-        Bracetax.Signatures.w_error = (fun s -> ());
+        Bracetax.Signatures.w_error = (fun error -> ());
     }
 
 end
@@ -239,9 +238,12 @@ let () = (
             Bracetax.Transformer.Make(Bracetax.HtmlPrinter) in
         let write = output_string o in
         let writer =
-            let warn = prerr_string in
-            let error = prerr_string in
-            Bracetax.Signatures.make_writer ~write ~warn ~error in
+            let error = 
+                function
+                | `undefined s -> prerr_string s 
+                | `message (gr, msg) -> prerr_string "TODO print messages !!"
+            in
+            Bracetax.Signatures.make_writer ~write  ~error in
         let read = read_line_opt i in
         begin match to_do with
         | `Brtx2HTML ->

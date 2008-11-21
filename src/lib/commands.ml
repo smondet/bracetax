@@ -321,12 +321,12 @@ module Table = struct
         } in
         (table, `table (col_nb, label), write table)
     )
-    let cell_start ~warn tab args = (
+    let cell_start ~(error:Error.error_fun) tab args = (
         let head, cnb, align = cell_args args in
         let def_cell = `cell (head, cnb, align) in
         begin match tab.current_cell with
         | Some c -> 
-            warn (~% "Warning: no use for a cell inside a cell !\n");
+            error (`undefined "Warning: no use for a cell inside a cell !\n");
             def_cell
         | None ->
             let cell_t = {
@@ -340,14 +340,15 @@ module Table = struct
         end
     )
 
-    let cell_stop ~warn tab = (
+    let cell_stop ~(error:Error.error_fun) tab = (
         begin match tab.current_cell with
         | Some c -> 
             tab.cells <- c :: tab.cells;
             tab.current_cell <- None;
         | None ->
-            warn "Should not be there... unless you already know you shouldn't \
-                cells put in cells...\n";
+            error (`undefined
+                "Should not be there... unless you already know you shouldn't \
+                cells put in cells...\n");
         end
     )
 
