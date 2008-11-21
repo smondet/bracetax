@@ -30,8 +30,14 @@ type gravity = [
 ]
 
 type message = [
+    | `transformer_lost of string
     | `verbatim_ignored_text_after_begin of string (* to ignored text *)
     | `cell_out_of_table
+    | `unknown_command of string
+    | `begin_without_arg
+    | `non_matching_end
+    | `closing_brace_matching_begin
+    | `item_out_of_list
 ]
 
 type location = {
@@ -59,10 +65,18 @@ let to_string (location, gravity, message) = (
         | `warning -> "Warning"
     in
     let message_str =
-        match message with
+        match (message:message) with
+        | `transformer_lost s -> 
+            spr "Shouldn't be there (%s)" s
         | `verbatim_ignored_text_after_begin s ->
             spr "Text after {verbatim... will be ignored: %s" s
         | `cell_out_of_table -> "Cell (\"{c ...}\") command not in table"
+        | `unknown_command s -> spr "Unknown command: %s" s
+        | `begin_without_arg -> "{begin} without argument"
+        | `non_matching_end -> "{end} does not match a {begin}"
+        | `closing_brace_matching_begin ->
+            "Closing brace ('}') matches a {begin ...}"
+        | `item_out_of_list -> "Item ({*}) not in a {list} environment}"
     in
     Printf.sprintf "[L:%d,C:%d][%s] %s"
         location.l_line location.l_char

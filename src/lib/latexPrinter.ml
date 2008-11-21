@@ -29,6 +29,7 @@ type t = {
     mutable inside_header:bool;
     mutable current_table: Commands.Table.table option;
     error: Error.error_fun;
+    mutable loc: Error.location;
 }
 module CS = Commands.Stack
 
@@ -45,6 +46,7 @@ let create ~writer =  (
         inside_header = false;
         current_table = None;
         error = writer.S.w_error;
+        loc = {Error.l_line = -1; Error.l_char = -1;};
     }
 )
 
@@ -287,13 +289,16 @@ let cell_start t args = (
     let def_cell = `cell (head, cnb, align) in
     match t.current_table with
     | None ->
-        t.error (`undefined "Warning: no use for a cell here !\n");
+        t.error (Error.mk t.loc `error `cell_out_of_table);
         def_cell
     | Some tab -> Commands.Table.cell_start ~error:t.error tab args
 )
 let cell_stop t env = (
     match t.current_table with
-    | None -> t.error (`undefined "Warning: still no use for a cell here !\n");
+    | None ->
+        (* Already warned: *)
+        (* t.error (Error.mk t.loc `warning `cell_out_of_table); *)
+        ()
     | Some tab -> Commands.Table.cell_stop ~error:t.error tab
 )
 
@@ -312,6 +317,7 @@ let list_stop = function
 (* ==== PRINTER module type's functions ==== *)
 
 let handle_text t location line = (
+    t.loc <- location;
 
     if ((not t.inside_header)) ||
         (t.inside_header && (CS.head t.stack <> Some `header)) then (
@@ -329,11 +335,13 @@ let handle_text t location line = (
 )
 
 let handle_comment_line t location line = (
+    t.loc <- location;
     t.write (~% "%%%s %s\n"
         (debugstr t location "Comment") (sanitize_comments line));
 )
 
 let enter_verbatim t location args = (
+    t.loc <- location;
     CS.push t.stack (`verbatim args);
     begin match args with
     | q :: _ -> t.write (~% "\n%%verbatimbegin:%s" q)
@@ -342,6 +350,7 @@ let enter_verbatim t location args = (
     t.write "\n\\begin{verbatim}\n";
 )
 let exit_verbatim t location = (
+    t.loc <- location;
     let env =  (CS.pop t.stack) in
     match env with
     | Some (`verbatim args) ->
@@ -355,13 +364,15 @@ let exit_verbatim t location = (
         failwith "Shouldn't be there, Parser's fault ?";
 )
 let handle_verbatim_line t location line = (
+    t.loc <- location;
     t.write (~% "%s\n" line);
 )
 
-let terminate t location = ()
+let terminate t location = (t.loc <- location;)
 
 let start_environment ?(is_begin=false) t location name args = (
     let module C = Commands.Names in
+    t.loc <- location;
     let cmd name args =
         match name with
         | s when C.is_quotation s        ->
@@ -395,13 +406,15 @@ let start_environment ?(is_begin=false) t location name args = (
         | s when C.is_table s -> table_start t args
         | s when C.is_cell s -> cell_start t args
         | s when C.is_note s -> t.write "\\footnote{" ; `note
-        | s -> t.error (`undefined (~% "unknown: %s\n" s)); `unknown (s, args)
+        | s ->
+            t.error (Error.mk t.loc `error (`unknown_command  s));
+            `unknown (s, args)
     in
     let the_cmd =
         if C.is_begin name then (
             match args with
             | [] ->
-                t.error (`undefined "Lonely begin ??!!");
+                t.error (Error.mk t.loc `error `begin_without_arg);
                 (`cmd_begin ("", []))
             | h :: t -> (`cmd_begin (h, t))
         ) else (
@@ -417,6 +430,7 @@ let start_environment ?(is_begin=false) t location name args = (
 )
 
 let start_command t location name args = (
+    t.loc <- location;
     p (~% "%%%s[start %s(%s)]\n" (strstat location)
     name (String.concat ", " args));
     match Commands.non_env_cmd_of_name name args with
@@ -426,6 +440,7 @@ let start_command t location name args = (
 
 
 let stop_command t location = (
+    t.loc <- location;
     p (~% "%%%s[stop]\n" (strstat location));
     let rec out_of_env env =
         match env with
@@ -435,11 +450,10 @@ let stop_command t location = (
                 (* p (~% "{end} %s\n" (Commands.env_to_string benv)); *)
                 out_of_env benv
             | Some c ->
-                t.error (`undefined
-                    (~% "Warning {end} does not end a {begin...} but %s\n"
-                    (Commands.env_to_string c)));
+                t.error (Error.mk t.loc `error `non_matching_end);
                 CS.push t.stack c;
-            | None -> t.error (`undefined "Nothing to {end} there !!\n")
+            | None ->
+                t.error (Error.mk t.loc `error `non_matching_end);
             end
         | `cmd_begin (nam, args) ->
             (* p (~% "cmd begin %s(%s)\n" nam (String.concat ", " args)); *)
@@ -465,12 +479,10 @@ let stop_command t location = (
             | Some (`cmd_inside (`list (style, _, _))) ->
                 t.write list_item;
             | Some c ->
-                t.error (`undefined 
-                    (~% "Warning {*} is not just under list but %s\n"
-                    (Commands.env_to_string c)));
+                t.error (Error.mk t.loc `error `item_out_of_list);
                 CS.push t.stack c;
             | None ->
-                t.error (`undefined "Warning {*}... nothing to itemize !\n")
+                t.error (Error.mk t.loc `error `item_out_of_list)
             end
         | `section (level, label) -> t.write (section_stop level label);
         | `link l -> link_stop t l;
@@ -483,12 +495,12 @@ let stop_command t location = (
         | `cell _ as c -> cell_stop t c
         | `note -> t.write "}"
         | `cmd_inside c ->
-            t.error (`undefined 
-                (~% "Warning: a '}' is trying to terminate a {begin %s\n"
-                (Commands.env_to_string c)));
-        | s ->
-            t.error (`undefined
-                (~% "Unknown command... %s\n" (Commands.env_to_string s)));
+            t.error (Error.mk t.loc `error `closing_brace_matching_begin);
+        | `unknown c -> () (* Already "t.error-ed" in start_environment *)
+        | c -> (* shouldn't be there !! *)
+            t.error (Error.mk t.loc `fatal_error 
+                (`transformer_lost (Commands.env_to_string c)));
+
     in
     match CS.pop t.stack with
     | Some env -> out_of_env env
