@@ -225,7 +225,7 @@ functor (Printer: Sig.PRINTER) -> struct
     let verb_pattern = "{verbatim"
     let verb_default_end = "{endverbatim}"
 
-    let is_begin_verb line = (
+    let is_begin_verb loc t line = (
         let l_pattern = S.length verb_pattern in
         let l_line = (S.length line) in
         if not (l_line >= (l_pattern + 1)) then (
@@ -235,8 +235,14 @@ functor (Printer: Sig.PRINTER) -> struct
         ) else (
             match S.get line l_pattern with
             | '}' ->
+                if l_pattern + 1 < l_line then (
+                    (* warning if more data after *)
+                    t.t_error (Error.mk loc `warning
+                        (`ignored_text_after_verbatim_begin 
+                            (~% "%S" (S.sub line (l_pattern + 1)
+                                (l_line - l_pattern - 1)))));
+                );
                 (* start with defaults *)
-                (* warning if more data after *)
                 Some (verb_default_end, []) 
             | ' ' | '\t' ->
                 begin try
@@ -251,10 +257,13 @@ functor (Printer: Sig.PRINTER) -> struct
                         | h :: t -> (~% "{%s}" h,t)
                     in
                     Some (end_token, actual_args)
-                with Not_found -> None
+                with Not_found ->
+                    (* no '}' *)
+                    t.t_error (Error.mk loc `error `malformed_verbatim_begin);
+                    None
                 end
             | _ ->
-                    (* warning ? *)
+                    t.t_error (Error.mk loc `error `malformed_verbatim_begin);
                     None
         )
 
@@ -267,7 +276,7 @@ functor (Printer: Sig.PRINTER) -> struct
                 let new_state, new_metastate =
                     match meta_state with
                     | Parsing ->
-                        begin match is_begin_verb s with
+                        begin match is_begin_verb (make_loc lineno 0) t s with
                         | None ->
                             (parse_line t s lineno state, Parsing)
                         | Some (endtok, opts) ->

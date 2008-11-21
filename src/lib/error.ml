@@ -31,7 +31,8 @@ type gravity = [
 
 type message = [
     | `transformer_lost of string
-    | `verbatim_ignored_text_after_begin of string (* to ignored text *)
+    | `ignored_text_after_verbatim_begin of string (* the ignored text *)
+    | `malformed_verbatim_begin
     | `cell_out_of_table
     | `unknown_command of string
     | `begin_without_arg
@@ -68,8 +69,9 @@ let to_string (location, gravity, message) = (
         match (message:message) with
         | `transformer_lost s -> 
             spr "Shouldn't be there (%s)" s
-        | `verbatim_ignored_text_after_begin s ->
-            spr "Text after {verbatim... will be ignored: %s" s
+        | `ignored_text_after_verbatim_begin s ->
+            spr "Text after {verbatim ...} will be ignored: \"%s\"" s
+        | `malformed_verbatim_begin -> "Malformed begin of verbatim environment"
         | `cell_out_of_table -> "Cell (\"{c ...}\") command not in table"
         | `unknown_command s -> spr "Unknown command: %s" s
         | `begin_without_arg -> "{begin} without argument"
