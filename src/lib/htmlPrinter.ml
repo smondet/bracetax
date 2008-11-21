@@ -32,6 +32,7 @@ type t = {
     mutable inside_header:bool;
     mutable current_table: Commands.Table.table option;
     error: Error.error -> unit;
+    mutable loc: Error.location;
 }
 module CS = Commands.Stack
 
@@ -49,6 +50,7 @@ let create ~writer =  (
         inside_header = false;
         current_table = None;
         error = writer.S.w_error;
+        loc = {Error.l_line = -1; Error.l_char = -1;};
     }
 )
 
@@ -224,13 +226,13 @@ let cell_start t args = (
     let def_cell = `cell (head, cnb, align) in
     match t.current_table with
     | None ->
-        t.error (`undefined "Warning: no use for a cell here !\n");
+        t.error (Error.mk t.loc `error `cell_out_of_table);
         def_cell
     | Some tab -> Commands.Table.cell_start ~error:t.error tab args
 )
 let cell_stop t env = (
     match t.current_table with
-    | None -> t.error (`undefined "Warning: still no use for a cell here !\n");
+    | None -> (* Already warned *) ()
     | Some tab -> Commands.Table.cell_stop ~error:t.error tab
 )
 
@@ -242,6 +244,7 @@ let note_start t = (
 let note_stop = "</small><small class=\"noteend\">) </small>"
 
 let start_environment ?(is_begin=false) t location name args = (
+    t.loc <- location;
     let module C = Commands.Names in
     let cmd name args =
         match name with
@@ -277,14 +280,14 @@ let start_environment ?(is_begin=false) t location name args = (
         | s when C.is_cell s -> cell_start t args
         | s when C.is_note s -> note_start t
         | s ->
-            t.error (`undefined (~% "unknown command: %s\n" s));
+            t.error (Error.mk t.loc `error (`unknown_command  s));
             `unknown (s, args)
     in
     let the_cmd =
         if C.is_begin name then (
             match args with
             | [] ->
-                t.error (`undefined "Lonely begin ??!!");
+                t.error (Error.mk t.loc `error `begin_without_arg);
                 (`cmd_begin ("", []))
             | h :: t -> (`cmd_begin (h, t))
         ) else (
@@ -301,12 +304,14 @@ let start_environment ?(is_begin=false) t location name args = (
 (* ==== PRINTER module type's functions ==== *)
 
 let start_command t location name args = (
+    t.loc <- location;
     (* p (~% "Command: \"%s\"(%s)\n" name (String.concat ", " args)); *)
     match Commands.non_env_cmd_of_name name args with
     | `unknown (name, args) -> start_environment t location name args
     | cmd -> CS.push t.stack cmd
 )
 let stop_command t location = (
+    t.loc <- location;
     let rec out_of_env env =
         match env with
         | `cmd_end ->
@@ -315,11 +320,10 @@ let stop_command t location = (
                 (* p (~% "{end} %s\n" (Commands.env_to_string benv)); *)
                 out_of_env benv
             | Some c ->
-                t.error (`undefined 
-                    (~% "Warning {end} does not end a {begin...} but %s\n"
-                        (Commands.env_to_string c)));
+                t.error (Error.mk t.loc `error `non_matching_end);
                 CS.push t.stack c;
-            | None -> t.error (`undefined "Nothing to {end} there !!\n")
+            | None ->
+                t.error (Error.mk t.loc `error `non_matching_end);
             end
         | `cmd_begin (nam, args) ->
             (* p (~% "cmd begin %s(%s)\n" nam (String.concat ", " args)); *)
@@ -350,13 +354,10 @@ let stop_command t location = (
                     t.write (list_item style);
                 );
             | Some c ->
-                t.error (
-                    `undefined 
-                        (~% "Warning {*} is not just under list but %s\n"
-                         (Commands.env_to_string c)));
+                t.error (Error.mk t.loc `error `item_out_of_list);
                 CS.push t.stack c;
             | None ->
-                t.error (`undefined "Warning {*}... nothing to itemize !\n")
+                t.error (Error.mk t.loc `error `item_out_of_list);
             end
         | `section (level, label) ->
             t.write (section_stop level label);
@@ -370,12 +371,11 @@ let stop_command t location = (
         | `cell _ as c -> cell_stop t c
         | `note -> t.write note_stop
         | `cmd_inside c ->
-            t.error (`undefined 
-                (~% "Warning: a '}' is trying to terminate a {begin %s\n"
-                (Commands.env_to_string c)));
-        | s ->
-            t.error (`undefined
-                (~% "Unknown command... %s\n" (Commands.env_to_string s)));
+            t.error (Error.mk t.loc `error `closing_brace_matching_begin);
+        | `unknown c -> () (* Already "t.error-ed" in start_environment *)
+        | c -> (* shouldn't be there !! *)
+            t.error (Error.mk t.loc `fatal_error 
+                (`transformer_lost (Commands.env_to_string c)));
     in
     match CS.pop t.stack with
     | Some env -> out_of_env env
@@ -383,12 +383,14 @@ let stop_command t location = (
 ) 
 
 let handle_comment_line t location line = (
+    t.loc <- location;
     t.write (~% "%s<!--%s-->\n" (debugstr t location "Comment")
         (sanitize_comments line));
     t.current_line <- t.current_line + 1;
 )
 
 let handle_text t location line = (
+    t.loc <- location;
     if
         not t.started_text &&
         not t.inside_header &&
@@ -422,6 +424,7 @@ let handle_text t location line = (
 )
 
 let terminate t location = (
+    t.loc <- location;
     t.write "</div>\n";
 ) 
 
