@@ -23,11 +23,8 @@
 (*      OTHER DEALINGS IN THE SOFTWARE.                                       *)
 (******************************************************************************)
 
+type location = Error.location
 
-type location = {
-    s_line: int;
-    s_char: int;
-}
 type writer = {
     w_write: string -> unit;
     w_error: Error.error -> unit;

@@ -33,8 +33,13 @@ type message = [
     | `vell_out_of_table
 ]
 
+type location = {
+    l_line: int;
+    l_char: int;
+}
+
 type error = [
-    | `message of gravity * message
+    | `message of location * gravity * message
     | `undefined of string (* Temporary, will be removed progressively *)
 ]
 type error_fun = error -> unit

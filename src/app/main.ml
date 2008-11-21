@@ -34,7 +34,7 @@ module DummyPrinter = struct
     let create ~writer = 0
 
     let strstat s =
-        (~% "[%d:%d]" s.Bracetax.Signatures.s_line s.Bracetax.Signatures.s_char)
+        (~% "[%d:%d]" s.Bracetax.Error.l_line s.Bracetax.Error.l_char)
     let head = "####"
     
     let handle_comment_line t location line =
@@ -241,7 +241,8 @@ let () = (
             let error = 
                 function
                 | `undefined s -> prerr_string s 
-                | `message (gr, msg) -> prerr_string "TODO print messages !!"
+                | `message (loc, gr, msg) ->
+                    prerr_string "TODO print messages !!"
             in
             Bracetax.Signatures.make_writer ~write  ~error in
         let read = read_line_opt i in

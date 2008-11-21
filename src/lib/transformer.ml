@@ -41,7 +41,7 @@ functor (Printer: Sig.PRINTER) -> struct
         t_error = writer.Sig.w_error;
     }
 
-    let make_loc l c = {Sig.s_line = l; s_char = c;}
+    let make_loc l c = {Error.l_line = l; l_char = c;}
 
     type meta_state =
         | Parsing

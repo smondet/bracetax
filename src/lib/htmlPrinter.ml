@@ -52,11 +52,11 @@ let create ~writer =  (
     }
 )
 
-let strstat s = (~% "[%d:%d]" s.Signatures.s_line s.Signatures.s_char)
+let strstat s = (~% "[%d:%d]" s.Error.l_line s.Error.l_char)
 let debugstr t s msg = 
     if false then
         (~% "<!--DEBUG:[%s] Loc:[%d;%d] CurLine:%d-->"
-            msg s.Signatures.s_line s.Signatures.s_char t.current_line)
+            msg s.Error.l_line s.Error.l_char t.current_line)
     else
         ""
 
@@ -404,9 +404,9 @@ let handle_text t location line = (
 
         let debug = debugstr t location "Text" in
         let pcdata = sanitize_pcdata line in
-        if location.Signatures.s_line > t.current_line then (
+        if location.Error.l_line > t.current_line then (
             t.write (~% "%s%s" debug pcdata);
-            t.current_line <- location.Signatures.s_line;
+            t.current_line <- location.Error.l_line;
         ) else (
             t.write (~% "%s%s" debug pcdata);
         )
@@ -433,7 +433,7 @@ let enter_verbatim t location args = (
     | _ -> ()
     end;
     t.write "<pre>\n";
-    t.current_line <- location.Signatures.s_line;
+    t.current_line <- location.Error.l_line;
 )
 let exit_verbatim t location = (
     let env =  (CS.pop t.stack) in
@@ -445,7 +445,7 @@ let exit_verbatim t location = (
             t.write (~% "<!--verbatimend:%s -->\n" (sanitize_comments q))
         | _ -> ()
         end;
-        t.current_line <- location.Signatures.s_line;
+        t.current_line <- location.Error.l_line;
     | _ ->
         (* warning ? error ? anyway, *)
         failwith "Shouldn't be there, Parser's fault ?";
@@ -454,7 +454,7 @@ let exit_verbatim t location = (
 let handle_verbatim_line t location line = (
     let pcdata = sanitize_pcdata line in
     t.write (~% "%s\n" pcdata);
-    t.current_line <- location.Signatures.s_line;
+    t.current_line <- location.Error.l_line;
 )
 
 (* ==== Directly exported functions ==== *)

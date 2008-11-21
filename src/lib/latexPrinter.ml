@@ -48,11 +48,11 @@ let create ~writer =  (
     }
 )
 
-let strstat s = (~% "[%d:%d]" s.Signatures.s_line s.Signatures.s_char)
+let strstat s = (~% "[%d:%d]" s.Error.l_line s.Error.l_char)
 let debugstr t s msg = 
     if false then
         (~% "%%%%DEBUG:[%s] Loc:[%d;%d]\n"
-            msg s.Signatures.s_line s.Signatures.s_char)
+            msg s.Error.l_line s.Error.l_char)
     else
         ""
 
