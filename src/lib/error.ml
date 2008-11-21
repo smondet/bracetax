@@ -25,12 +25,13 @@
 
 type gravity = [
     | `fatal_error
+    | `error
     | `warning
 ]
 
 type message = [
-    | `verbatim_ignored_text_after_begin of string
-    | `vell_out_of_table
+    | `verbatim_ignored_text_after_begin of string (* to ignored text *)
+    | `cell_out_of_table
 ]
 
 type location = {
@@ -42,4 +43,31 @@ type error = [
     | `message of location * gravity * message
     | `undefined of string (* Temporary, will be removed progressively *)
 ]
+
 type error_fun = error -> unit
+
+let mk location gravity message =
+    (`message (location, gravity, message): error)
+
+(* An built-in error to string function *)
+let to_string (location, gravity, message) = (
+    let spr = Printf.sprintf in
+    let gravity_str = 
+        match gravity with
+        | `fatal_error -> "FATAL ERROR"
+        | `error -> "ERROR"
+        | `warning -> "Warning"
+    in
+    let message_str =
+        match message with
+        | `verbatim_ignored_text_after_begin s ->
+            spr "Text after {verbatim... will be ignored: %s" s
+        | `cell_out_of_table -> "Cell (\"{c ...}\") command not in table"
+    in
+    Printf.sprintf "[L:%d,C:%d][%s] %s"
+        location.l_line location.l_char
+        gravity_str message_str
+)
+
+
+

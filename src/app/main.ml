@@ -241,8 +241,7 @@ let () = (
             let error = 
                 function
                 | `undefined s -> prerr_string s 
-                | `message (loc, gr, msg) ->
-                    prerr_string "TODO print messages !!"
+                | `message msg -> prerr_string (Bracetax.Error.to_string msg)
             in
             Bracetax.Signatures.make_writer ~write  ~error in
         let read = read_line_opt i in
