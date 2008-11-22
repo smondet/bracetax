@@ -38,6 +38,7 @@ type message = [
     | `begin_without_arg
     | `non_matching_end
     | `closing_brace_matching_begin
+    | `nothing_to_end_with_brace
     | `item_out_of_list
 ]
 
@@ -70,7 +71,7 @@ let to_string (location, gravity, message) = (
         | `transformer_lost s -> 
             spr "Shouldn't be there (%s)" s
         | `ignored_text_after_verbatim_begin s ->
-            spr "Text after {verbatim ...} will be ignored: \"%s\"" s
+            spr "Text after {verbatim ...} will be ignored: %s" s
         | `malformed_verbatim_begin -> "Malformed begin of verbatim environment"
         | `cell_out_of_table -> "Cell (\"{c ...}\") command not in table"
         | `unknown_command s -> spr "Unknown command: %s" s
@@ -78,6 +79,7 @@ let to_string (location, gravity, message) = (
         | `non_matching_end -> "{end} does not match a {begin}"
         | `closing_brace_matching_begin ->
             "Closing brace ('}') matches a {begin ...}"
+        | `nothing_to_end_with_brace -> "Closing brace doesn't match"
         | `item_out_of_list -> "Item ({*}) not in a {list} environment}"
     in
     Printf.sprintf "[L:%d,C:%d][%s] %s"

@@ -247,6 +247,13 @@ functor (Printer: Sig.PRINTER) -> struct
             | ' ' | '\t' ->
                 begin try
                     let next_cbra = S.index_from line (l_pattern + 1) '}' in
+                    if next_cbra + 1 < l_line then (
+                        (* warning if more data after *)
+                        t.t_error (Error.mk loc `warning
+                            (`ignored_text_after_verbatim_begin 
+                             (~% "%S" (S.sub line (next_cbra + 1)
+                                       (l_line - next_cbra - 1)))));
+                    );
                     let args_string =
                         sub_i line (l_pattern + 1) (next_cbra - 1) in
                     let args = split_str args_string in

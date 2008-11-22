@@ -379,7 +379,8 @@ let stop_command t location = (
     in
     match CS.pop t.stack with
     | Some env -> out_of_env env
-    | None -> ()
+    | None ->
+        t.error (Error.mk t.loc `error `nothing_to_end_with_brace);
 ) 
 
 let handle_comment_line t location line = (
