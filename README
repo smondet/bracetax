@@ -8,34 +8,7 @@ BUILD:
 DOCUMENTATION:
 Launch the generation (needs brtx and pdflatex in the $PATH):
   ./mk d
-And open gendoc/index.html
+And open doc/site/index.html
 
-
-NEXT:
-
-Macro system:
-
-    M4 ?
-    http://en.wikipedia.org/wiki/M4_(computer_language)
-
-    {macro my_macro arg1 arg2}
-    Code of the macro {arg arg1} {contents} {arg arg2}
-    {end}
-    
-
-Include verbatim or not:
-
-    M4 ?
-    
-    {include /path/to/file}
-    {verbatiminput /path/to/file}
-    
-    => include and macro are non-wiki features maybe keep m4 for thesis/authoring but not in core bracetax
-
-Links:
-    cite:<erf>  (would become \cite{} or [<a ...></a>])
-    doc:<name> (would add .pdf or .html ?)
-
-    or done with m4 ?
-
+OTHER: See `mk h`
 
