@@ -240,8 +240,9 @@ let () = (
         let writer =
             let error = 
                 function
-                | `undefined s -> prerr_string s 
-                | `message msg -> prerr_string (Bracetax.Error.to_string msg)
+                | `undefined s -> prerr_string (s ^ "\n")
+                | `message msg ->
+                    prerr_string ((Bracetax.Error.to_string msg) ^ "\n")
             in
             Bracetax.Signatures.make_writer ~write  ~error in
         let read = read_line_opt i in
