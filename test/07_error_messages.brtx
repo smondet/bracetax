@@ -1,0 +1,42 @@
+
+{verbatim} Some ignored text
+bla bla
+{endverbatim}
+{verbatim}S
+bla bla
+{endverbatim}
+{verbatim}
+bla bla
+{endverbatim}
+
+{verbatim e} More ignored text
+bla bla
+{e}
+
+{verbatim e}E
+bla bla
+{e}
+{verbatim eddd}
+bla bla
+{eddd}
+
+
+}
+
+{end}
+
+{verbatim e
+ }
+bla bla}
+}
+
+{unknowncommand}
+{unknowncommand}
+
+{*} item out of list !
+
+{begin}
+
+{c h|Cell !}
+
+
