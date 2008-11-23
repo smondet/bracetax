@@ -73,6 +73,8 @@ type output_t = {
     stop_authors: string_fun;
     stop_subtitle: string_fun;
 
+    start_image: string -> [`w of int | `h of int ] list -> string -> string; 
+    stop_image : string -> [`w of int | `h of int ] list -> string -> string; 
 }
 
 type t = {
@@ -144,7 +146,10 @@ let start_environment ?(is_begin=false) t location name args = (
             Stack.push t.write t.write_mem;
             t.write <- new_write;
             link
-        (* | s when C.is_image s -> image_start t args *)
+        | s when C.is_image s ->
+            let src, opts, lbl = Commands.Names.image_params args in
+            t.write (o.start_image src opts lbl);
+            `image (src, opts, lbl)
         | s when C.is_header s ->
             t.inside_header <- true; 
             t.write (o.start_header ());
@@ -243,10 +248,8 @@ let stop_command t location = (
             t.write <- Stack.pop t.write_mem;
             let kind, target, text = Commands.Link.stop l in
             t.write (o.link kind target text);
-(*        | `image _ -> t.write image_stop; *)
-        | `header ->
-            t.inside_header <- false;
-            t.write (o.stop_header ());
+        | `image (src, opts, lbl) -> t.write (o.stop_image src opts lbl);
+        | `header -> t.inside_header <- false; t.write (o.stop_header ());
         | `title -> t.write (o.stop_title ());
         | `subtitle -> t.write (o.stop_subtitle ());
         | `authors -> t.write (o.stop_authors ());
