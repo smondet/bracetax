@@ -11,8 +11,8 @@
 The {b|Bracetax} Project is:
 {list|
     {*} {i|bracetax}: a simple and deterministic text-processing syntax;
-    {*} {t|ocamlbracetax}: an ocaml library manipulating the syntax (convert to
-    HTML, LaTeX{...});
+    {*} {t|ocamlbracetax}: an {link http://ocaml.org|ocaml} library
+    manipulating the syntax (convert to HTML, LaTeX{...});
     {*} {t|brtx}: a command-line application using the {t|ocamlbracetax}
     library;
     {*} {i|tools}: a few small tools related to the syntax (VIM syntax
