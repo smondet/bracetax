@@ -26,7 +26,7 @@
 type t = {
     stack: Commands.Stack.t;
     mutable write: string -> unit;
-    write_mem: string -> unit;
+    write_mem: (string -> unit) Stack.t;
     mutable current_line: int;
     mutable started_text: bool;
     mutable inside_header:bool;
@@ -45,7 +45,7 @@ let create ~writer () =  (
     {
         stack = CS.empty ();
         write = write;
-        write_mem = write;
+        write_mem = Stack.create ();
         current_line = 1;
         started_text = false;
         inside_header = false;
@@ -114,11 +114,12 @@ let section_stop n l =
 
 let link_start t args = (
     let link, new_write = Commands.Link.start args in
+    Stack.push t.write t.write_mem;
     t.write <- new_write;
     link
 )
 let link_stop t l = (
-    t.write <- t.write_mem;
+    t.write <- Stack.pop t.write_mem;
     let kind, target, text = Commands.Link.stop l in
     let target_str = 
         (match target with Some s -> s | None -> "#") in
@@ -175,6 +176,7 @@ let table_start t args = (
     (* http://www.topxml.com/xhtml/articles/xhtml_tables/ *)
     let table, to_stack, new_write = Commands.Table.start args in
     t.current_table <- Some table;
+    Stack.push t.write t.write_mem;
     t.write <- new_write;
     to_stack
 )
@@ -218,7 +220,7 @@ let table_stop t = (
     | None -> failwith "Why am I here ??? no table to end."
     | Some tab ->
         (* p (~% "End of table: %s\n" (Buffer.contents tab.caption)); *)
-        t.write <- t.write_mem;
+        t.write <- Stack.pop t.write_mem;
         t.current_table <- None;
         print_table t.write tab;
 )
