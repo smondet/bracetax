@@ -34,11 +34,12 @@ type t = {
     error: Error.error -> unit;
     mutable loc: Error.location;
 }
+type aux = unit
 module CS = Commands.Stack
 
 let (~%) = Printf.sprintf
 
-let create ~writer =  (
+let create ~writer () =  (
     let module S = Signatures in
     let write = writer.S.w_write in
     {

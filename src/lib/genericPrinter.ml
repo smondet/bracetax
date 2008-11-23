@@ -79,11 +79,14 @@ type t = {
     mutable loc: Error.location;
     mutable output: output_t;
 }
+
+type aux = output_t
+
 module CS = Commands.Stack
 
 let spr = Printf.sprintf
 
-let create ~writer ~output =  (
+let create ~writer output =  (
     let module S = Signatures in
     let write = writer.S.w_write in
     {

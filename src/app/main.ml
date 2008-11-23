@@ -30,8 +30,9 @@ let version_string = ~% "0.1 (ocamlbracetax lib: %s)" Bracetax.Info.version
 
 module DummyPrinter = struct
     type t = int
+    type aux = unit
 
-    let create ~writer = 0
+    let create ~writer () = 0
 
     let strstat s =
         (~% "[%d:%d]" s.Bracetax.Error.l_line s.Bracetax.Error.l_char)
@@ -229,7 +230,7 @@ let () = (
         let module DummyTransformer = Bracetax.Transformer.Make(DummyPrinter) in
         let t =
             DummyTransformer.create
-                ~writer:DummyPrinter.dummy_writer ~read:(read_line_opt i)
+                ~writer:DummyPrinter.dummy_writer ~read:(read_line_opt i) ()
         in
         DummyTransformer.do_transformation t;
         p (~% "DEBUG Done;\n");
@@ -248,7 +249,7 @@ let () = (
         let read = read_line_opt i in
         begin match to_do with
         | `Brtx2HTML ->
-                let t = HtmlTransformer.create ~writer ~read in
+                let t = HtmlTransformer.create ~writer ~read () in
                 if !Options.header_footer then
                     write (Bracetax.HtmlPrinter.header
                         ~comment:"Generated with BraceTax" ()
@@ -260,7 +261,7 @@ let () = (
         | `Brtx2LaTeX ->
                 let module LatexTransformer =
                     Bracetax.Transformer.Make(Bracetax.LatexPrinter) in
-                let t = LatexTransformer.create ~writer ~read in
+                let t = LatexTransformer.create ~writer ~read () in
                 if !Options.header_footer then
                     write (Bracetax.LatexPrinter.header
                         ~comment:"Generated with BraceTax" ()

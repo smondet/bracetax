@@ -26,7 +26,7 @@ module Sig = Signatures
 
 let (~%) = Printf.sprintf
 
-module FunctorMake =
+module Make =
 functor (Printer: Sig.PRINTER) -> struct
     type t = {
         t_printer: Printer.t;
@@ -34,8 +34,10 @@ functor (Printer: Sig.PRINTER) -> struct
         t_write: string -> unit;
         t_error: Error.error_fun;
     }
-    let create ~read ~writer = {
-        t_printer = Printer.create ~writer;
+    type aux = Printer.aux
+
+    let create ~read ~writer aux = {
+        t_printer = Printer.create ~writer aux;
         t_read = read;
         t_write = writer.Sig.w_write;
         t_error = writer.Sig.w_error;
@@ -315,6 +317,3 @@ functor (Printer: Sig.PRINTER) -> struct
     )
 end
 
-module Make =
-    (FunctorMake: functor (Printer: Sig.PRINTER) -> (Sig.TRANSFORMER))
-    (* with type t = FunctorMake.t)) *)

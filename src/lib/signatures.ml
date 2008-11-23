@@ -38,7 +38,8 @@ let make_writer ~write  ~error = (
 
 module type PRINTER = sig
     type t
-    val create: writer:writer -> t
+    type aux
+    val create: writer:writer -> aux -> t
     val handle_comment_line: t -> location -> string -> unit
     val handle_text: t -> location -> string -> unit
     val start_command: t -> location -> string -> string list -> unit
@@ -48,13 +49,6 @@ module type PRINTER = sig
     val enter_verbatim: t -> location -> string list -> unit
     val handle_verbatim_line: t -> location -> string -> unit
     val exit_verbatim: t -> location -> unit
-end
-
-
-module type TRANSFORMER = sig
-    type t
-    val create: read:(unit -> string option) -> writer:writer -> t
-    val do_transformation: t -> unit
 end
 
 
