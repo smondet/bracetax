@@ -60,11 +60,18 @@ type output_t = {
     close_brace : string_fun;
     sharp : string_fun;
 
-    utf8_char: int -> string
-    (* val link_start : *)
-      (* t -> string list -> [> `link of Bracetax.Commands.Link.t ] *)
-    (* val link_stop : t -> Bracetax.Commands.Link.t -> unit *)
+    utf8_char: int -> string;
 
+    link: Commands.Link.kind -> string option -> string option -> string;
+
+    start_header: string_fun;
+    start_title: string_fun;
+    start_authors: string_fun;
+    start_subtitle: string_fun;
+    stop_header: string_fun;
+    stop_title: string_fun;
+    stop_authors: string_fun;
+    stop_subtitle: string_fun;
 
 }
 
@@ -137,12 +144,15 @@ let start_environment ?(is_begin=false) t location name args = (
             Stack.push t.write t.write_mem;
             t.write <- new_write;
             link
-(*        | s when C.is_image s -> image_start t args
-        | s when C.is_header s -> t.write (header_start t); `header
-        | s when C.is_title s -> t.write title_start; `title
-        | s when C.is_subtitle s -> t.write subtitle_start; `subtitle
-        | s when C.is_authors s -> t.write authors_start; `authors
-        | s when C.is_table s -> table_start t args
+        (* | s when C.is_image s -> image_start t args *)
+        | s when C.is_header s ->
+            t.inside_header <- true; 
+            t.write (o.start_header ());
+            `header
+        | s when C.is_title s -> t.write (o.start_title ()); `title
+        | s when C.is_subtitle s -> t.write (o.start_subtitle ()); `subtitle
+        | s when C.is_authors s -> t.write (o.start_authors ()); `authors
+(*        | s when C.is_table s -> table_start t args
         | s when C.is_cell s -> cell_start t args
         | s when C.is_note s -> note_start t
 *)        | s ->
@@ -229,13 +239,18 @@ let stop_command t location = (
             end
         | `section (level, label) ->
             t.write (o.section_stop level label);
-(*        | `link l -> link_stop t l;
-        | `image _ -> t.write image_stop;
-        | `header ->  t.write (header_stop t);
-        | `title -> t.write title_stop;
-        | `subtitle -> t.write subtitle_stop;
-        | `authors -> t.write authors_stop;
-        | `table _ -> table_stop t
+        | `link l ->
+            t.write <- Stack.pop t.write_mem;
+            let kind, target, text = Commands.Link.stop l in
+            t.write (o.link kind target text);
+(*        | `image _ -> t.write image_stop; *)
+        | `header ->
+            t.inside_header <- false;
+            t.write (o.stop_header ());
+        | `title -> t.write (o.stop_title ());
+        | `subtitle -> t.write (o.stop_subtitle ());
+        | `authors -> t.write (o.stop_authors ());
+        (*| `table _ -> table_stop t
         | `cell _ as c -> cell_stop t c
         | `note -> t.write note_stop
 *)        | `cmd_inside c ->
