@@ -25,6 +25,7 @@
 
 type write_fun = string -> unit
 type string_of_args_fun = string list -> string
+type string_fun = unit -> string
 type transform_string_fun = string -> string
 
 type output_t = {
@@ -32,11 +33,16 @@ type output_t = {
     
     quotation_open_close: string list -> (string * string);
     
-    start_italic: string_of_args_fun;
-    start_bold: string_of_args_fun;
-    start_type: string_of_args_fun;
-    start_sup: string_of_args_fun;
-    start_sub: string_of_args_fun;
+    start_italic: string_fun;
+    start_bold:   string_fun;
+    start_type:   string_fun;
+    start_sup:    string_fun;
+    start_sub:    string_fun;
+    stop_italic:  string_fun;
+    stop_bold:    string_fun;
+    stop_type:    string_fun;
+    stop_sup:     string_fun;
+    stop_sub:     string_fun;
 
     list_start: [`itemize | `numbered ] -> string;
     list_first_item: [`itemize | `numbered ] -> string;
@@ -46,6 +52,15 @@ type output_t = {
     section_start : int -> string -> string;
     section_stop : int -> string -> string;
 
+    paragraph : string_fun;
+    new_line : string_fun;
+    non_break_space : string_fun;
+    horizontal_ellipsis : string_fun;
+    open_brace : string_fun;
+    close_brace : string_fun;
+    sharp : string_fun;
+
+    utf8_char: int -> string
     (* val link_start : *)
       (* t -> string list -> [> `link of Bracetax.Commands.Link.t ] *)
     (* val link_stop : t -> Bracetax.Commands.Link.t -> unit *)
@@ -96,11 +111,11 @@ let start_environment ?(is_begin=false) t location name args = (
             let op, clo = o.quotation_open_close args in
             t.write op;
             `quotation (op, clo)
-        | s when C.is_italic s      -> wr (o.start_italic []); `italic
-        | s when C.is_bold s        -> wr (o.start_bold   []); `bold
-        | s when C.is_mono_space s  -> wr (o.start_type   []); `mono_space
-        | s when C.is_superscript s -> wr (o.start_sup    []); `superscript
-        | s when C.is_subscript s   -> wr (o.start_sub    []); `subscript
+        | s when C.is_italic s      -> wr (o.start_italic ()); `italic
+        | s when C.is_bold s        -> wr (o.start_bold   ()); `bold
+        | s when C.is_mono_space s  -> wr (o.start_type   ()); `mono_space
+        | s when C.is_superscript s -> wr (o.start_sup    ()); `superscript
+        | s when C.is_subscript s   -> wr (o.start_sub    ()); `subscript
         | s when C.is_end s -> `cmd_end
         | s when C.is_list s ->
             let style, other_args, waiting =
@@ -114,8 +129,12 @@ let start_environment ?(is_begin=false) t location name args = (
             let level, label = C.section_params args in
             wr (o.section_start level label);
             `section (level, label)
-(*        | s when C.is_link s -> (link_start t args)
-        | s when C.is_image s -> image_start t args
+        | s when C.is_link s ->
+            let link, new_write = Commands.Link.start args in
+            Stack.push t.write t.write_mem;
+            t.write <- new_write;
+            link
+(*        | s when C.is_image s -> image_start t args
         | s when C.is_header s -> t.write (header_start t); `header
         | s when C.is_title s -> t.write title_start; `title
         | s when C.is_subtitle s -> t.write subtitle_start; `subtitle
@@ -157,6 +176,7 @@ let start_command t location name args = (
 )
 let stop_command t location = (
     t.loc <- location;
+    let o = t.output in
     let rec out_of_env env =
         match env with
         | `cmd_end ->
@@ -173,30 +193,30 @@ let stop_command t location = (
         | `cmd_begin (nam, args) ->
             (* p (~% "cmd begin %s(%s)\n" nam (String.concat ", " args)); *)
             start_environment ~is_begin:true t location nam args;
-(*        | `paragraph -> t.write "</div>\n<div class=\"p\">"
-        | `new_line -> t.write "<br/>\n"
-        | `non_break_space -> t.write "&nbsp;"
-        | `horizontal_ellipsis -> t.write "&hellip;"
-        | `open_brace -> t.write "{"
-        | `close_brace -> t.write "}"
-        | `sharp -> t.write "#"
-        | (`utf8_char i) -> t.write (~% "&#%d;" i)
+        | `paragraph -> t.write (o.paragraph ())
+        | `new_line -> t.write (o.new_line ())
+        | `non_break_space -> t.write (o.non_break_space ())
+        | `horizontal_ellipsis -> t.write (o.horizontal_ellipsis ())
+        | `open_brace -> t.write (o.open_brace ())
+        | `close_brace -> t.write (o.close_brace ())
+        | `sharp -> t.write (o.sharp ())
+        | (`utf8_char i) -> t.write (o.utf8_char i)
         | (`quotation (op, clo)) -> t.write clo
-        | `italic       ->  t.write "</i>"  
-        | `bold         ->  t.write "</b>"  
-        | `mono_space   ->  t.write "</tt>" 
-        | `superscript  ->  t.write "</sup>"
-        | `subscript    ->  t.write "</sub>"
-        | `list (style, _, r) -> t.write (list_stop style)
+        | `italic       ->  t.write (o.stop_italic ())
+        | `bold         ->  t.write (o.stop_bold   ())
+        | `mono_space   ->  t.write (o.stop_type   ())
+        | `superscript  ->  t.write (o.stop_sup    ())
+        | `subscript    ->  t.write (o.stop_sub    ())
+        | `list (style, _, r) -> t.write (o.list_stop style)
         | `item ->
             begin match CS.head t.stack with
             | Some (`list (style, _, r))
             | Some (`cmd_inside (`list (style, _, r))) ->
                 if !r then (
-                    t.write (list_firstitem style);
+                    t.write (o.list_first_item style);
                     r := false;
                 ) else (
-                    t.write (list_item style);
+                    t.write (o.list_item style);
                 );
             | Some c ->
                 t.error (Error.mk t.loc `error `item_out_of_list);
@@ -205,8 +225,8 @@ let stop_command t location = (
                 t.error (Error.mk t.loc `error `item_out_of_list);
             end
         | `section (level, label) ->
-            t.write (section_stop level label);
-        | `link l -> link_stop t l;
+            t.write (o.section_stop level label);
+(*        | `link l -> link_stop t l;
         | `image _ -> t.write image_stop;
         | `header ->  t.write (header_stop t);
         | `title -> t.write title_stop;
