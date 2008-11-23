@@ -10,22 +10,23 @@
 
 The {b|Bracetax} Project is:
 {list|
-    {*} {i|bracetax}: a simple text-processing syntax;
-    {*} {t|ocamlbracetax}: an ocaml library manipulating the syntax;
+    {*} {i|bracetax}: a simple and deterministic text-processing syntax;
+    {*} {t|ocamlbracetax}: an ocaml library manipulating the syntax (convert to
+    HTML, LaTeX{...});
     {*} {t|brtx}: a command-line application using the {t|ocamlbracetax}
-        library;
+    library;
     {*} {i|tools}: a few small tools related to the syntax (VIM syntax
-        highlighting{...}) 
+    highlighting{...}) 
 
 
 {section|Documentation}
 
 For now the documentations are:
 {begin list item}
-    {*} the {link bracetax_syntax.html|Bracetax syntax};
+    {*} the {link bracetax_syntax.html|Bracetax syntax} reference;
     # {*} the ocamlbracetax library;
-    {*} the {t|brtx} {link brtx_app.html|application} (build & usage);
-    {*} some {link tools.html|tools}.
+    {*} the {t|brtx} {link brtx_app.html|application} build & usage;
+    {*} the {link tools.html|tools} usage.
     # {*} room for more development.
 {end}
 
