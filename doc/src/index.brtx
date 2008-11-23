@@ -2,18 +2,31 @@
 
 
 {header|
-    {title|Bracetax documentation}
+    {title|Bracetax}
+    {subtitle|A simple syntax for wikis and more{...}}
 }
 
-{section|Contents}
+{section|Presentation}
 
-In this project we have:
+The {b|Bracetax} Project is:
+{list|
+    {*} {i|bracetax}: a simple text-processing syntax;
+    {*} {t|ocamlbracetax}: an ocaml library manipulating the syntax;
+    {*} {t|brtx}: a command-line application using the {t|ocamlbracetax}
+        library;
+    {*} {i|tools}: a few small tools related to the syntax (VIM syntax
+        highlighting{...}) 
+
+
+{section|Documentation}
+
+For now the documentations are:
 {begin list item}
     {*} the {link bracetax_syntax.html|Bracetax syntax};
-    {*} the ocamlbracetax library;
+    # {*} the ocamlbracetax library;
     {*} the {t|brtx} {link brtx_app.html|application} (build & usage);
-    {*} some {link tools.html|tools};
-    {*} room for more development.
+    {*} some {link tools.html|tools}.
+    # {*} room for more development.
 {end}
 
 {section|Examples}
@@ -22,30 +35,39 @@ In this project we have:
 
 We use the {link bracetax_syntax.html|Bracetax syntax} document, here we can see:
 {begin list}
-    {*} The {link bracetax_syntax.brtx.html|source}
+    {*} the {link bracetax_syntax.brtx.html|source}
         (colored by Vim, c.f. {link tools.html#sec_vimsyntaxfile|tools});
-    {*} The generated {link bracetax_syntax_raw.html|raw HTML};
-    {*} The generated {link bracetax_syntax_latex.pdf|PDF} from LaTeX export;
-    {*} The generated {link bracetax_syntax_latex_style.pdf|PDF} from LaTeX
+    {*} the generated {link bracetax_syntax_raw.html|raw HTML};
+    {*} the generated {link bracetax_syntax_latex.pdf|PDF} from LaTeX export;
+    {*} the generated {link bracetax_syntax_latex_style.pdf|PDF} from LaTeX
     export with a style.
 {end}
 
 
-{section 2|Complete example of authoring}
+{section 2|One example of authoring}
 
 Using M4 
 ({link http://en.wikipedia.org/wiki/M4_(computer_language)|wikipedia})
 and {t|brtx}'s {link brtx_app.html#sec_postpro|post-processor}, we get
+a {q|self-documenting document}
 ({i|work in progress}):
 {list|
-    {*} The {link ./example_m4pp/main.brtx|source}
+    {*} the {link ./example_m4pp/main.brtx|source}
         (and the {link ./example_m4pp/main.brtx.html|colored source});
-    {*} The generated {link ./example_m4pp/main.html|HTML};
-    {*} The generated {link ./example_m4pp/main.tex|latex file};
+    {*} the generated {link ./example_m4pp/main.html|HTML};
+    {*} the generated {link ./example_m4pp/main.tex|latex file};
         and the {link ./example_m4pp/main.pdf|corresponding PDF};
-    {*} The {link ./example_m4pp/Makefile.html|Makefile} used to generate the
+    {*} the {link ./example_m4pp/Makefile.html|Makefile} used to generate the
         example.
 }
+
+{section|Links}
+
+{begin list}
+    {*} Project {link http://bracetax.berlios.de|homepage};
+    {*} project {link https://developer.berlios.de/projects/bracetax/|
+        page} at {link http://berlios.de|berlios.de}.
+{end}
 
 {section|Authors}
 
