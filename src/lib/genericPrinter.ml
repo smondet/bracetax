@@ -29,8 +29,16 @@ type string_fun = unit -> string
 type transform_string_fun = string -> string
 
 type output_t = {
+
+    start_text: string_fun;
+    terminate: string_fun;
+    start_verbatim: string option -> string;
+    verbatim_line: transform_string_fun;
+    stop_verbatim: string option -> string;
+
+    line: transform_string_fun;
     comment_line: transform_string_fun;
-    
+
     quotation_open_close: string list -> (string * string);
     
     start_italic: string_fun;
@@ -76,7 +84,10 @@ type output_t = {
     start_image: string -> [`w of int | `h of int ] list -> string -> string; 
     stop_image : string -> [`w of int | `h of int ] list -> string -> string; 
 
-    print_table: (string -> unit) -> Commands.Table.table -> unit
+    print_table: (string -> unit) -> Commands.Table.table -> unit;
+
+    start_note: string_fun;
+    stop_note: string_fun;
 
 }
 
@@ -169,14 +180,14 @@ let start_environment ?(is_begin=false) t location name args = (
         | s when C.is_cell s ->
             let head, cnb, align = Commands.Table.cell_args args in
             let def_cell = `cell (head, cnb, align) in
-            match t.current_table with
+            begin match t.current_table with
             | None ->
                 t.error (Error.mk t.loc `error `cell_out_of_table);
                 def_cell
             | Some tab -> Commands.Table.cell_start ~error:t.error tab args
-
-(*        | s when C.is_note s -> note_start t
-*)        | s ->
+            end;
+        | s when C.is_note s -> t.write (o.start_note ()); `note
+        | s ->
             t.error (Error.mk t.loc `error (`unknown_command  s));
             `unknown (s, args)
     in
@@ -278,13 +289,13 @@ let stop_command t location = (
                 t.current_table <- None;
                 o.print_table t.write tab;
             end;
-        | `cell _ as c ->
+        | `cell _ ->
             begin match t.current_table with
             | None -> (* Already warned: *) ()
             | Some tab -> Commands.Table.cell_stop ~error:t.error tab
             end;
-(*        | `note -> t.write note_stop
-*)        | `cmd_inside c ->
+        | `note -> t.write (o.stop_note ())
+        | `cmd_inside c ->
             t.error (Error.mk t.loc `error `closing_brace_matching_begin);
         | `unknown c -> () (* Already "t.error-ed" in start_environment *)
         | c -> (* shouldn't be there !! *)
@@ -310,20 +321,14 @@ let handle_text t location line = (
         not (Escape.is_white_space line)
     then (
         t.started_text <- true;
-        (*TODO: t.write "<div class=\"p\">"; *)
+        t.write (t.output.start_text ());
     );
         
     if (* We should write <=> (text/noheader OR header fields) *)
         (t.started_text && (not t.inside_header)) ||
         (t.inside_header && (CS.head t.stack <> Some `header)) then (
 
-(*        let pcdata = sanitize_pcdata line in
-        if location.Error.l_line > t.current_line then (
-            t.write (~% "%s%s" debug pcdata);
-            t.current_line <- location.Error.l_line;
-        ) else (
-            t.write (~% "%s%s" debug pcdata);
-        )*)
+        t.write (t.output.line line);
     ) else (
         if
             CS.head t.stack = Some `header
@@ -337,37 +342,32 @@ let handle_text t location line = (
 
 let terminate t location = (
     t.loc <- location;
-    (* TODO t.write "</div>\n"; *)
+    t.write (t.output.terminate ());
 ) 
 
 let enter_verbatim t location args = (
     CS.push t.stack (`verbatim args);
-    begin match args with
-    | q :: _ ->
-        (* TODO  t.write (~% "\n<!--verbatimbegin:%s -->\n" (sanitize_comments q)) *)
-        ()
-    | _ -> ()
-    end;
-    (* TODO t.write "<pre>\n"; *)
+    let postpro =
+        match args with
+        | q :: _ -> Some q | _ -> None
+    in
+    t.write (t.output.start_verbatim postpro);
 )
 let exit_verbatim t location = (
     let env =  (CS.pop t.stack) in
     match env with
     | Some (`verbatim args) ->
-        (* TODO t.write "</pre>\n"; *)
-        begin match args with
-        | q :: _ ->
-            (* TODO t.write (~% "<!--verbatimend:%s -->\n" (sanitize_comments q)) *)
-            ()
-        | _ -> ()
-        end;
+        let postpro =
+            match args with
+            | q :: _ -> Some q | _ -> None
+        in
+        t.write (t.output.stop_verbatim postpro);
     | _ ->
         (* warning ? error ? anyway, *)
         failwith "Shouldn't be there, Parser's fault ?";
 )
 
 let handle_verbatim_line t location line = (
-    (* TODO let pcdata = sanitize_pcdata line in *)
-    (* t.write (~% "%s\n" pcdata); *)
+    t.write (t.output.verbatim_line line);
 )
 
