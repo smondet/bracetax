@@ -3,6 +3,7 @@ Commands
 Escape
 HtmlPrinter
 LatexPrinter
+GenericPrinter
 Signatures
 Transformer
 Info
