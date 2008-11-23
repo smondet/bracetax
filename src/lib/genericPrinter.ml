@@ -75,6 +75,9 @@ type output_t = {
 
     start_image: string -> [`w of int | `h of int ] list -> string -> string; 
     stop_image : string -> [`w of int | `h of int ] list -> string -> string; 
+
+    print_table: (string -> unit) -> Commands.Table.table -> unit
+
 }
 
 type t = {
@@ -157,9 +160,22 @@ let start_environment ?(is_begin=false) t location name args = (
         | s when C.is_title s -> t.write (o.start_title ()); `title
         | s when C.is_subtitle s -> t.write (o.start_subtitle ()); `subtitle
         | s when C.is_authors s -> t.write (o.start_authors ()); `authors
-(*        | s when C.is_table s -> table_start t args
-        | s when C.is_cell s -> cell_start t args
-        | s when C.is_note s -> note_start t
+        | s when C.is_table s ->
+            let table, to_stack, new_write = Commands.Table.start args in
+            t.current_table <- Some table;
+            Stack.push t.write t.write_mem;
+            t.write <- new_write;
+            to_stack
+        | s when C.is_cell s ->
+            let head, cnb, align = Commands.Table.cell_args args in
+            let def_cell = `cell (head, cnb, align) in
+            match t.current_table with
+            | None ->
+                t.error (Error.mk t.loc `error `cell_out_of_table);
+                def_cell
+            | Some tab -> Commands.Table.cell_start ~error:t.error tab args
+
+(*        | s when C.is_note s -> note_start t
 *)        | s ->
             t.error (Error.mk t.loc `error (`unknown_command  s));
             `unknown (s, args)
@@ -253,9 +269,21 @@ let stop_command t location = (
         | `title -> t.write (o.stop_title ());
         | `subtitle -> t.write (o.stop_subtitle ());
         | `authors -> t.write (o.stop_authors ());
-        (*| `table _ -> table_stop t
-        | `cell _ as c -> cell_stop t c
-        | `note -> t.write note_stop
+        | `table _ ->
+            begin match t.current_table with
+            | None -> failwith "Why am I here ??? no table to end."
+            | Some tab ->
+                (* p (~% "End of table: %s\n" (Buffer.contents tab.caption)); *)
+                t.write <- Stack.pop t.write_mem;
+                t.current_table <- None;
+                o.print_table t.write tab;
+            end;
+        | `cell _ as c ->
+            begin match t.current_table with
+            | None -> (* Already warned: *) ()
+            | Some tab -> Commands.Table.cell_stop ~error:t.error tab
+            end;
+(*        | `note -> t.write note_stop
 *)        | `cmd_inside c ->
             t.error (Error.mk t.loc `error `closing_brace_matching_begin);
         | `unknown c -> () (* Already "t.error-ed" in start_environment *)
