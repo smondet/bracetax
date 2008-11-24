@@ -18,6 +18,12 @@ The {b|Bracetax} Project is:
     {*} {i|tools}: a few small tools related to the syntax (VIM syntax
     highlighting{...}) 
 
+{section|Download}
+
+For now, you can get a snapshot of the sources from the
+{link http://git.berlios.de/cgi-bin/gitweb.cgi?p=bracetax;a=summary|gitweb interface},
+binaries will be available later.
+
 
 {section|Documentation}
 
@@ -50,12 +56,11 @@ We use the {link bracetax_syntax.html|Bracetax syntax} document, here we can see
 Using M4 
 ({link http://en.wikipedia.org/wiki/M4_(computer_language)|wikipedia})
 and {t|brtx}'s {link brtx_app.html#sec_postpro|post-processor}, we get
-a {q|self-documenting document}
-({i|work in progress}):
+a {q|self-documenting document}{note|work in progress}:
 {list|
+    {*} the generated {link ./example_m4pp/main.html|HTML};
     {*} the {link ./example_m4pp/main.brtx|source}
         (and the {link ./example_m4pp/main.brtx.html|colored source});
-    {*} the generated {link ./example_m4pp/main.html|HTML};
     {*} the generated {link ./example_m4pp/main.tex|latex file};
         and the {link ./example_m4pp/main.pdf|corresponding PDF};
     {*} the {link ./example_m4pp/Makefile.html|Makefile} used to generate the
@@ -66,8 +71,9 @@ a {q|self-documenting document}
 
 {begin list}
     {*} Project {link http://bracetax.berlios.de|homepage};
-    {*} project {link https://developer.berlios.de/projects/bracetax/|
-        page} at {link http://berlios.de|berlios.de}.
+    {*} project development 
+        {link https://developer.berlios.de/projects/bracetax/|page}
+        at {link http://berlios.de|berlios.de}.
 {end}
 
 {section|Authors}
