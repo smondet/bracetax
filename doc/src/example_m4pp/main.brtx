@@ -21,7 +21,7 @@ define(`TODO', ifelse(_output_format , HTML , `{verbatim end html}
 {end}'
 ))dnl
 
-Here is the M4 code (for now with {#} characters{...}):
+Here is the M4 code{note|M4 code will appear for now with {#} characters}:
 {verbatim e m4_code}
 # define(`TODO', ifelse(_output_format , HTML , `{verbatim end html}
 # <span style="color: red; background-color: yellow">TO-DO</span>
