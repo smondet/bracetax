@@ -102,8 +102,33 @@ m4 -D`_todaydate'="$(date)" main.brtx > main.brtx.tmp
 
 {section 2 sec_biblio|Citations}
 
-# Bibtex for LaTeX, links for HTML
-TODO
+Let's say we want to use BibTeX for LaTeX output and that we have a
+bibliography site ({t|./biblio/<refname>.html} or
+{t|./biblio.html{#}<refname>}).
+
+define(`CITATION', ifelse(_output_format , HTML , [{link ./biblio/$1.html|$1}], dnl
+`{verbatim end latex}
+\cite{$1}
+{end}'
+))dnl
+
+We define `CITATION':
+{verbatim}
+# define(`CITATION', ifelse(_output_format , HTML , [{link ./biblio/$1.html|$1}], dnl
+# `{verbatim end latex}
+# \cite{$1}
+# {end}'
+# ))dnl
+{endverbatim}
+so that
+{verbatim eee}
+`CITATION'(mondet08bracetax)
+{eee}
+will give us:
+{verbatim eee}
+CITATION(mondet08bracetax)
+{eee}
+
 
 {section 2 sec_include|Using {t|include}}
 
