@@ -19,7 +19,7 @@ nopdf: $(EXAMPLE_SITE_HTML) $(EXAMPLE_SITE_VIM)
 main.html: main.brtx
 	m4 -D_todaydate="`date`" -D_output_format="HTML" main.brtx > main.brtx.tmp
 	$(BRTX2HTMLDOC) -link-stylesheet ../$(CSS)  -i main.brtx.tmp -o $@.pp
-	brtx -postpro -pp inlinehtml -i $@.pp -o $@
+	brtx -postpro -pp inlinehtml -pp latex2html:hevea -i $@.pp -o $@
 	rm main.brtx.tmp  $@.pp
 
 

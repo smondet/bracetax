@@ -56,9 +56,36 @@ to:
 
 {section 2 sec_latex_command|Defining the {t|LATEX} command}
 
-# Talk about an internal command LATEX(...)
+define(`LATEX',{verbatim verycomplexend latex}
+$1
+{verycomplexend}')
+Quite simply:
+{verbatim eee}
+# define(`LATEX',{verbatim verycomplexend latex}
+# $1
+# {verycomplexend}')
+{eee}
 
-TODO
+And then:
+{verbatim eee}
+`LATEX'(Some {\bf bold} and $m = a^{th}_{ematics}$)
+{eee}
+will generate:
+{verbatim eee}
+LATEX(Some {\bf bold} and $m = a^{th}_{ematics}$)
+{eee}
+With post-processing, for LaTeX output:
+{verbatim}
+brtx -postpro -pp inlinelatex -i ... -o ...
+{endverbatim}
+and for HTML output (needs {link http://hevea.inria.fr/|Hevea} to convert from
+LaTeX to HTML):
+{verbatim}
+brtx -postpro -pp latex2html:hevea -i ... -o ...
+{endverbatim}
+we get:
+LATEX(Some {\bf bold} and $m = a^{th}_{ematics}$)
+
 
 {section 2 sec_date_command|Using command line definitions}
 
