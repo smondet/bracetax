@@ -16,10 +16,11 @@ nopdf: $(EXAMPLE_SITE_HTML) $(EXAMPLE_SITE_VIM)
 #                         m4              brtx -html       brtx -prospro    
 #   source bracetax + M4 ---> pure bracetax  --->    HTML       --->     HTML
 #
+HEVEA_OR_NOT= hevea || echo NoHeveaFound
 main.html: main.brtx
 	m4 -D_todaydate="`date`" -D_output_format="HTML" main.brtx > main.brtx.tmp
 	$(BRTX2HTMLDOC) -link-stylesheet ../$(CSS)  -i main.brtx.tmp -o $@.pp
-	brtx -postpro -pp inlinehtml -pp latex2html:hevea -i $@.pp -o $@
+	brtx -postpro -pp inlinehtml -pp latex2html:"$(HEVEA_OR_NOT)" -i $@.pp -o $@
 	rm main.brtx.tmp  $@.pp
 
 
