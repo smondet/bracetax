@@ -49,7 +49,10 @@ Makefile.html: Makefile
 	vim -f -R $< \
 		-c "sy on" \
 		-c 'colorscheme darkblue' \
-		-c TOhtml -c 'w! $@' -c 'qa!' 
+		-c TOhtml -c 'w! $@.tmp' -c 'qa!' && \
+	sed -e 's/<title>.*<\/title>/<title>Makefile<\/title>/' \
+		$@.tmp > $@
+	rm -f $@.tmp
 
 #
 # Using VIM to generate an HTML page from a source code
@@ -60,5 +63,8 @@ main.brtx.html: main.brtx
 		-c "sy on" \
 		-c 'colorscheme darkblue' \
 		-c 'source ../../../tools/bracetax_syntax.vim' \
-		-c TOhtml -c 'w! $@' -c 'qa!' 
+		-c TOhtml -c 'w! $@.tmp' -c 'qa!' && \
+	sed -e 's/<title>.*<\/title>/<title>Example - source<\/title>/' \
+		$@.tmp > $@ 
+	rm -f $@.tmp
 

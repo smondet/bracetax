@@ -68,7 +68,9 @@ site/bracetax_syntax.brtx.html: src/bracetax_syntax.brtx site/found_image.png
 		-c "sy on" \
 		-c 'colorscheme darkblue' \
 		-c 'source ../tools/bracetax_syntax.vim' \
-		-c TOhtml -c 'w! $@' -c 'qa!' 
+		-c TOhtml -c 'w! $@.tmp' -c 'qa!' && \
+	sed -e 's/<title>.*<\/title>/<title>Bracetax Syntax - source<\/title>/' $@.tmp > $@
+	rm -f $@.tmp
 
 
 site/%.html:src/%.brtx
