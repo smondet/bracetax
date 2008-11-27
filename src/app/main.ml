@@ -210,6 +210,7 @@ let read_line_opt i () = try Some (input_line i) with e -> None
 
 
 let () = (
+    let return_value_to_shell = ref 0 in
     let to_do, dbg, i, o =
         match Options.get () with 
         | `process something -> something
@@ -239,8 +240,11 @@ let () = (
         let writer =
             let error = 
                 function
-                | `undefined s -> prerr_string (s ^ "\n")
+                | `undefined s ->
+                    return_value_to_shell := 2;
+                    prerr_string (s ^ "\n")
                 | `message msg ->
+                    return_value_to_shell := 2;
                     prerr_string ((Bracetax.Error.to_string msg) ^ "\n")
             in
             Bracetax.Signatures.make_writer ~write  ~error in
@@ -276,5 +280,6 @@ let () = (
         | `PostPro [] -> ()
         end;
     );
+    exit !return_value_to_shell;
 )
 
