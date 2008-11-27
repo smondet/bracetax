@@ -80,7 +80,6 @@ module Stack = struct
         | `italic
         | `bold
         | `mono_space
-        | `under_line
         | `superscript
         | `subscript
         | `paragraph
@@ -217,37 +216,36 @@ let non_env_cmd_of_name name args = (
     env
 )
 
-let env_to_string (e:Stack.environment) = (
+let rec env_to_string (e:Stack.environment) = (
     let spr = Printf.sprintf in
     match e with
-    | `cmd_end                   -> spr "cmd_end                "
-    | `cmd_inside  environment   -> spr "cmd_inside  environment"
-    | `cmd_begin (s, l)          -> spr "cmd_begin (%s, l)       " s
-    | `unknown (s, l)            -> spr "unknown (%s, l)         " s
-    | `italic                    -> spr "italic                 "
-    | `bold                      -> spr "bold                   "
-    | `mono_space                -> spr "mono_space             "
-    | `under_line                -> spr "under_line             "
-    | `superscript               -> spr "superscript            "
-    | `subscript                 -> spr "subscript              "
-    | `paragraph                 -> spr "paragraph              "
-    | `new_line                  -> spr "new_line               "
-    | `quotation (s)             -> spr "quotation (s)          "
-    | `non_break_space           -> spr "non_break_space        "
-    | `horizontal_ellipsis       -> spr "horizontal_ellipsis    "
-    | `open_brace                -> spr "open_brace             "
-    | `close_brace               -> spr "close_brace            "
-    | `sharp                     -> spr "sharp                  "
-    | `utf8_char i               -> spr "utf8_char i            "
-    | `verbatim l                -> spr "verbatim l             "
-    | `list l                    -> spr "list                   "
-    | `item                      -> spr "item                   "
-    | `section (n, l)            -> spr "section %d  %s     " n l
-    | `link l                    -> spr "link          "
+    | `cmd_end                   -> spr "cmd_end"
+    | `cmd_inside  environment   -> spr "begin %s" (env_to_string environment)
+    | `cmd_begin (s, l)          -> spr "cmd_begin %s" s
+    | `unknown (s, l)            -> spr "unknown %s" s
+    | `italic                    -> spr "italic"
+    | `bold                      -> spr "bold"
+    | `mono_space                -> spr "mono_space (t)"
+    | `superscript               -> spr "superscript (sup)"
+    | `subscript                 -> spr "subscript (sub)"
+    | `paragraph                 -> spr "paragraph (p)"
+    | `new_line                  -> spr "new_line (br)"
+    | `quotation (s)             -> spr "quotation (q)"
+    | `non_break_space           -> spr "non_break_space (~)"
+    | `horizontal_ellipsis       -> spr "horizontal_ellipsis (...)"
+    | `open_brace                -> spr "open_brace ({)"
+    | `close_brace               -> spr "close_brace (})"
+    | `sharp                     -> spr "sharp (#)"
+    | `utf8_char i               -> spr "utf8_char 0x%x" i
+    | `verbatim l                -> spr "verbatim"
+    | `list l                    -> spr "list"
+    | `item                      -> spr "item (*)"
+    | `section (n, l)            -> spr "section %d" n
+    | `link l                    -> spr "link"
     | `image (src, _,_)          -> spr "image %s" src
-    | `header                    -> spr "header  "       
-    | `title                     -> spr "title   "      
-    | `authors                   -> spr "authors "        
+    | `header                    -> spr "header"       
+    | `title                     -> spr "title"      
+    | `authors                   -> spr "authors"        
     | `subtitle                  -> spr "subtitle"         
     | `table _                   ->     "table"
     | `cell _                    ->     "cell"
