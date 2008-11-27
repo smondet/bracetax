@@ -342,6 +342,10 @@ let handle_text t location line = (
 
 let terminate t location = (
     t.loc <- location;
+    if (CS.to_list t.stack) <> [] then (
+        let l = List.map Commands.env_to_string (CS.to_list t.stack) in
+        t.error (Error.mk t.loc `error (`terminating_with_open_environments l));
+    );  
     t.write (t.output.terminate ());
 ) 
 

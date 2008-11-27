@@ -116,6 +116,8 @@ module Stack = struct
     let pop s = match !s with [] -> None | h :: t -> s:= t; Some h
 
     let head s = match !s with [] -> None | h :: t -> Some h
+
+    let to_list = (!)
 end
 
 module Names = struct

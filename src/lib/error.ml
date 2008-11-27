@@ -40,6 +40,7 @@ type message = [
     | `closing_brace_matching_begin
     | `nothing_to_end_with_brace
     | `item_out_of_list
+    | `terminating_with_open_environments of string list
 ]
 
 type location = {
@@ -81,6 +82,9 @@ let to_string (location, gravity, message) = (
             "Closing brace ('}') matches a {begin ...}"
         | `nothing_to_end_with_brace -> "Closing brace doesn't match"
         | `item_out_of_list -> "Item ({*}) not in a {list} environment}"
+        | `terminating_with_open_environments l -> 
+            spr "Reached end of input with opened environments: %s"
+                (String.concat ", " l)
     in
     Printf.sprintf "[L:%d,C:%d][%s] %s"
         location.l_line location.l_char

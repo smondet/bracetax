@@ -371,7 +371,13 @@ let handle_verbatim_line t location line = (
     t.write (~% "%s\n" line);
 )
 
-let terminate t location = (t.loc <- location;)
+let terminate t location = (
+    t.loc <- location;
+    if (CS.to_list t.stack) <> [] then (
+        let l = List.map Commands.env_to_string (CS.to_list t.stack) in
+        t.error (Error.mk t.loc `error (`terminating_with_open_environments l));
+    );  
+)
 
 let start_environment ?(is_begin=false) t location name args = (
     let module C = Commands.Names in
