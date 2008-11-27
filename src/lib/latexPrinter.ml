@@ -440,8 +440,8 @@ let start_environment ?(is_begin=false) t location name args = (
 
 let start_command t location name args = (
     t.loc <- location;
-    p (~% "%%%s[start %s(%s)]\n" (strstat location)
-    name (String.concat ", " args));
+    (* p (~% "%%%s[start %s(%s)]\n" (strstat location) *)
+    (* name (String.concat ", " args)); *)
     match Commands.non_env_cmd_of_name name args with
     | `unknown (name, args) -> start_environment t location name args
     | cmd -> CS.push t.stack cmd
@@ -450,7 +450,7 @@ let start_command t location name args = (
 
 let stop_command t location = (
     t.loc <- location;
-    p (~% "%%%s[stop]\n" (strstat location));
+    (* p (~% "%%%s[stop]\n" (strstat location)); *)
     let rec out_of_env env =
         match env with
         | `cmd_end ->
