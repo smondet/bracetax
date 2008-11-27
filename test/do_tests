@@ -7,8 +7,8 @@ test_one()
     THE_ONE=$1
     DO_POSTPRO=$2
     PDFLATEX="pdflatex -interaction=nonstopmode"
-    $BRTXCC -html -doc -i $THE_ONE.brtx -o ${THE_ONE}_raw.html
-    $BRTXCC -html -doc -i $THE_ONE.brtx -o ${THE_ONE}_css.html \
+    $BRTXCC -html -doc "Test: $THE_ONE" -i $THE_ONE.brtx -o ${THE_ONE}_raw.html
+    $BRTXCC -html -doc "Test: $THE_ONE" -i $THE_ONE.brtx -o ${THE_ONE}_css.html \
         -link-stylesheet basic.css
     if [ "$DO_POSTPRO" = "postpro" ]; then
         HTMLPP="$BRTXCC -postpro -pp inlinehtml -pp latex2html:hevea"
@@ -17,9 +17,9 @@ test_one()
     fi
 
     # Exports to LaTeX:
-    $BRTXCC -doc -latex -i $THE_ONE.brtx -o ${THE_ONE}_latex.tex
-    $BRTXCC -doc -latex -i $THE_ONE.brtx -o ${THE_ONE}_latex_style.tex \
-        -link-stylesheet bracetax
+    $BRTXCC -doc "Test: $THE_ONE" -latex -i $THE_ONE.brtx -o ${THE_ONE}_latex.tex
+    $BRTXCC -doc "Test: $THE_ONE" -latex -i $THE_ONE.brtx \
+        -o ${THE_ONE}_latex_style.tex  -link-stylesheet bracetax
     # Compile the LaTeX:
     $PDFLATEX ${THE_ONE}_latex
     $PDFLATEX ${THE_ONE}_latex
@@ -66,5 +66,5 @@ $(for f in $FILES ; do
     echo "{*} {link $f}"
 done)
 {end}
-" | $BRTXCC -html -o index.html -doc
+" | $BRTXCC -html -o index.html -doc "Tests - index"
 

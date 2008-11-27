@@ -81,7 +81,7 @@ module Options = struct
     let input_stream = ref stdin
     let output_stream = ref stdout
     let debug = ref false
-    let header_footer = ref false
+    let header_footer = ref None
     let stylesheet_link = ref None
     let print_version = ref false
     let print_license = ref false
@@ -95,7 +95,9 @@ module Options = struct
         ("-postpro", Arg.Unit (fun () -> todo := `PostPro []),
             ~% " Do post-processing");
         ("-debug", Arg.Set debug, " Debug mode");
-        ("-doc", Arg.Set header_footer, " Output a complete document");
+        ("-doc",
+            Arg.String (fun s -> header_footer := Some s),
+            "<title> Output a complete document and use <title>");
         ("-version", Arg.Set print_version, " Print version and exit");
         ("-license", Arg.Set print_license, " Print license and exit");
         (
@@ -207,7 +209,7 @@ and replace the catched text with its standard output:
 end
 
 let read_line_opt i () = try Some (input_line i) with e -> None
-
+let opt_may ~f = function None -> () | Some o -> f o
 
 let () = (
     let return_value_to_shell = ref 0 in
@@ -254,26 +256,30 @@ let () = (
             let module HtmlTransformer =
                 Bracetax.Transformer.Make(Bracetax.HtmlPrinter) in
             let t = HtmlTransformer.create ~writer ~read () in
-            if !Options.header_footer then
+            opt_may !Options.header_footer ~f:(fun title ->
                 write (Bracetax.HtmlPrinter.header
-                    ~comment:"Generated with BraceTax" ()
-                    ?stylesheet_link:!Options.stylesheet_link
+                    ~comment:"Generated with BraceTax" ~title
+                    ?stylesheet_link:!Options.stylesheet_link ()
                 );
+            );
             HtmlTransformer.do_transformation t;
-            if !Options.header_footer then
+            opt_may !Options.header_footer  ~f:(fun _ ->
                 write (Bracetax.HtmlPrinter.footer ());
+            );
         | `Brtx2LaTeX ->
             let module LatexTransformer =
                 Bracetax.Transformer.Make(Bracetax.LatexPrinter) in
             let t = LatexTransformer.create ~writer ~read () in
-            if !Options.header_footer then
+            opt_may !Options.header_footer  ~f:(fun title ->
                 write (Bracetax.LatexPrinter.header
-                    ~comment:"Generated with BraceTax" ()
-                    ?stylesheet_link:!Options.stylesheet_link
+                    ~comment:"Generated with BraceTax" ~title
+                    ?stylesheet_link:!Options.stylesheet_link ()
                 );
+            );
             LatexTransformer.do_transformation t;
-            if !Options.header_footer then
+            opt_may !Options.header_footer  ~f:(fun _ ->
                 write (Bracetax.LatexPrinter.footer ());
+            );
         | `PostPro (t :: q as l) ->
             PostProcessor.process (PostProcessor.BuiltIn.make_list l)
                 read (Printf.fprintf o "%s\n")
