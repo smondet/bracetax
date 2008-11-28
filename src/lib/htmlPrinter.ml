@@ -246,45 +246,56 @@ let note_start t = (
 )
 let note_stop = "</small><small class=\"noteend\">) </small>"
 
+let may_start_text t = (
+    if not t.started_text && not t.inside_header then (
+        t.started_text <- true;
+        t.write "<div class=\"p\">";
+    );
+)
+
 let start_environment ?(is_begin=false) t location name args = (
     t.loc <- location;
     let module C = Commands.Names in
     let cmd name args =
         match name with
-        | s when C.is_quotation s        ->
-            let op, clo = quotation_open_close args in
-            t.write op;
-            `quotation (op, clo)
-        | s when C.is_italic s           -> t.write "<i>"  ; `italic
-        | s when C.is_bold s             -> t.write "<b>"  ; `bold
-        | s when C.is_mono_space s       -> t.write "<tt>" ; `mono_space
-        | s when C.is_superscript s      -> t.write "<sup>"; `superscript
-        | s when C.is_subscript s        -> t.write "<sub>"; `subscript
-        | s when (C.is_end s)           -> `cmd_end
-        | s when C.is_list s             ->
-            let style, other_args, waiting =
-                match args with
-                | [] -> (`itemize, [], ref true)
-                | h :: t -> (C.list_style h, t, ref true) in
-            t.write (list_start style);
-            `list (style, other_args, waiting)
-        | s when C.is_item s -> `item
-        | s when C.is_section s -> 
-            let level, label = C.section_params args in
-            t.write (section_start level label);
-            `section (level, label)
-        | s when C.is_link s -> (link_start t args)
-        | s when C.is_image s -> image_start t args
         | s when C.is_header s -> t.write (header_start t); `header
         | s when C.is_title s -> t.write title_start; `title
         | s when C.is_subtitle s -> t.write subtitle_start; `subtitle
         | s when C.is_authors s -> t.write authors_start; `authors
-        | s when C.is_table s -> table_start t args
-        | s when C.is_cell s -> cell_start t args
-        | s when C.is_note s -> note_start t
-        | s ->
-            t.error (Error.mk t.loc `error (`unknown_command  s));
-            `unknown (s, args)
+        | _ ->
+            may_start_text t;
+            begin match name with
+            | s when C.is_quotation s        ->
+                let op, clo = quotation_open_close args in
+                t.write op;
+                `quotation (op, clo)
+            | s when C.is_italic s           -> t.write "<i>"  ; `italic
+            | s when C.is_bold s             -> t.write "<b>"  ; `bold
+            | s when C.is_mono_space s       -> t.write "<tt>" ; `mono_space
+            | s when C.is_superscript s      -> t.write "<sup>"; `superscript
+            | s when C.is_subscript s        -> t.write "<sub>"; `subscript
+            | s when (C.is_end s)           -> `cmd_end
+            | s when C.is_list s             ->
+                let style, other_args, waiting =
+                    match args with
+                    | [] -> (`itemize, [], ref true)
+                    | h :: t -> (C.list_style h, t, ref true) in
+                t.write (list_start style);
+                `list (style, other_args, waiting)
+            | s when C.is_item s -> `item
+            | s when C.is_section s -> 
+                let level, label = C.section_params args in
+                t.write (section_start level label);
+                `section (level, label)
+            | s when C.is_link s -> (link_start t args)
+            | s when C.is_image s -> image_start t args
+            | s when C.is_table s -> table_start t args
+            | s when C.is_cell s -> cell_start t args
+            | s when C.is_note s -> note_start t
+            | s ->
+                t.error (Error.mk t.loc `error (`unknown_command  s));
+                `unknown (s, args)
+            end
     in
     let the_cmd =
         if C.is_begin name then (
@@ -395,13 +406,8 @@ let handle_comment_line t location line = (
 
 let handle_text t location line = (
     t.loc <- location;
-    if
-        not t.started_text &&
-        not t.inside_header &&
-        not (Escape.is_white_space line)
-    then (
-        t.started_text <- true;
-        t.write "<div class=\"p\">";
+    if not (Escape.is_white_space line) then (
+        may_start_text t;
     );
         
     if 
