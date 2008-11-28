@@ -347,10 +347,10 @@ let enter_verbatim t location args = (
     t.loc <- location;
     CS.push t.stack (`verbatim args);
     begin match args with
-    | q :: _ -> t.write (~% "\n%%verbatimbegin:%s" q)
+    | q :: _ -> t.write (~% "%%\n%%verbatimbegin:%s" q)
     | _ -> ()
     end;
-    t.write "\n\\begin{verbatim}\n";
+    t.write "%\n\\begin{verbatim}\n";
 )
 let exit_verbatim t location = (
     t.loc <- location;

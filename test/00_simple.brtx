@@ -15,9 +15,9 @@ s \{fd\} }
 That's {verbatim} {}, {{}
 {end_token}
 
-{verbatim _ option2 option3}
+{verbatim end option2 option3}
 That's {verbatim} again {}, {{}
-{endverbatim} # the default end_token
+{end} # the default end_token
 
 {verbatim}
 That's {it:still} {verbatim} {}, {{}
