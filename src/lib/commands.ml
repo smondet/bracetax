@@ -156,10 +156,10 @@ module Names = struct
     let is_end name = name = "end"
 
     let is_list name = name = "list"
-    let list_style = function
+    let list_style error_msg = function
         | "item" -> `itemize
         | "enum" -> `numbered
-        | _ -> `itemize
+        | s -> error_msg (`unknown_list_style s); `itemize
 
     let is_item name = name = "*"
 

@@ -393,9 +393,10 @@ let start_environment ?(is_begin=false) t location name args = (
         | s when (C.is_end s)           -> `cmd_end
         | s when C.is_list s             ->
             let style, other_args, waiting =
+                let error_msg m = t.error (Error.mk t.loc `error m) in
                 match args with
                 | [] -> (`itemize, [], ref true)
-                | h :: t -> (C.list_style h, t, ref true) in
+                | h :: t -> (C.list_style error_msg h, t, ref true) in
             t.write (list_start style);
             `list (style, other_args, waiting)
         | s when C.is_item s -> `item

@@ -22,6 +22,9 @@ bla bla
 
 {image source 50badsize label|Caption}
 
+{list badstyle|{*} one {*} two}
+
+
 }
 
 {end}
