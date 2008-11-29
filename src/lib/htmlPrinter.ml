@@ -147,9 +147,9 @@ let image_start t args = (
         match sanitize_xml_attribute lbl with 
         | "" -> "" | s -> ~% "id=\"%s\" " s in
     t.write (~%
-        "\n<div class=\"figure\">\n  <a href=\"%s\">\
+        "\n<div class=\"figure\" %s>\n  <a href=\"%s\">\
         \n    <img src=\"%s\" %s %s alt=\"%s\"/>\n  </a><br/>\n"
-        sansrc sansrc opts_str sanlbl sansrc
+        sanlbl sansrc sansrc opts_str sanlbl sansrc
     );
     `image (src, opts, lbl)
 )
