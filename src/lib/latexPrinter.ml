@@ -186,7 +186,8 @@ let subtitle_stop = "}\n"
 
 (* Images *)
 let image_start t args = (
-    let src, opts, lbl = Commands.Names.image_params args in
+    let error_msg m = t.error (Error.mk t.loc `error m) in
+    let src, opts, lbl = Commands.Names.image_params error_msg args in
     let opts_str =
         match opts with
         | `wpx w -> (~% "[width=%dpt]"  w)

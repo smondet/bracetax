@@ -178,7 +178,7 @@ module Names = struct
     let is_link = (=) "link"
 
     let is_image = (=) "image"
-    let image_params =
+    let image_params error_msg =
         let parse_options str =
             (* let l = String.length l in *)
             (* if str.[l - 1] = '%' then ( *)
@@ -186,7 +186,7 @@ module Names = struct
                 begin try Scanf.sscanf str "%dpx" (fun w -> `wpx w)
                 with _ -> Scanf.sscanf str "%d%%" (fun w -> `wpercent w)
                 end
-            with  _ -> (* TODO: ERROR !! *) `none
+            with  _ -> error_msg (`bad_size_specification_in_image str); `none
         in
         function
         | [] -> ("", `none, "")

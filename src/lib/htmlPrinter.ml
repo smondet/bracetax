@@ -133,7 +133,8 @@ let link_stop t l = (
 
 let image_start t args = (
     (* http://www.w3.org/Style/Examples/007/figures *)
-    let src, opts, lbl = Commands.Names.image_params args in
+    let error_msg m = t.error (Error.mk t.loc `error m) in
+    let src, opts, lbl = Commands.Names.image_params error_msg args in
     let opts_str =
         match opts with
         | `wpx px -> (~% "width=\"%dpx\""  px)

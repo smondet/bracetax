@@ -41,6 +41,7 @@ type message = [
     | `nothing_to_end_with_brace
     | `item_out_of_list
     | `terminating_with_open_environments of string list
+    | `bad_size_specification_in_image of string
 ]
 
 type location = {
@@ -85,6 +86,8 @@ let to_string (location, gravity, message) = (
         | `terminating_with_open_environments l -> 
             spr "Reached end of input with opened environments: %s"
                 (String.concat ", " l)
+        | `bad_size_specification_in_image s ->
+            spr "Bad size specification in image: \"%s\"" s
     in
     Printf.sprintf "[L:%d,C:%d][%s] %s"
         location.l_line location.l_char

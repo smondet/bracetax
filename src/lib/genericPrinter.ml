@@ -161,7 +161,8 @@ let start_environment ?(is_begin=false) t location name args = (
             t.write <- new_write;
             link
         | s when C.is_image s ->
-            let src, opts, lbl = Commands.Names.image_params args in
+            let error_msg m = t.error (Error.mk t.loc `error m) in
+            let src, opts, lbl = Commands.Names.image_params error_msg args in
             t.write (o.start_image src opts lbl);
             `image (src, opts, lbl)
         | s when C.is_header s ->
