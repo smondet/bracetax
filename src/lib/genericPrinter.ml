@@ -81,8 +81,8 @@ type output_t = {
     stop_authors: string_fun;
     stop_subtitle: string_fun;
 
-    start_image: string -> [`w of int | `h of int ] list -> string -> string; 
-    stop_image : string -> [`w of int | `h of int ] list -> string -> string; 
+    start_image: string -> Commands.Stack.image_size -> string -> string; 
+    stop_image : string -> Commands.Stack.image_size -> string -> string; 
 
     print_table: (string -> unit) -> Commands.Table.table -> unit;
 

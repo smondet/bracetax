@@ -72,6 +72,15 @@ module Link = struct
 end
 
 module Stack = struct
+    type image_size = [
+        | `none
+        | `wpx of int
+        (*| `hpx of int*)
+        (*| `whpx of int * int*)
+        | `wpercent of int
+        (* | `hpercent of int *)
+        (* | `whpercent of int * int *)
+    ]
     type environment = [
         | `cmd_end
         | `cmd_inside of environment
@@ -96,7 +105,7 @@ module Stack = struct
         | `item
         | `section of int * string
         | `link of Link.t
-        | `image of string * [`w of int | `h of int ] list * string
+        | `image of string * image_size * string
         | `header
         | `title
         | `authors
@@ -171,15 +180,17 @@ module Names = struct
     let is_image = (=) "image"
     let image_params =
         let parse_options str =
+            (* let l = String.length l in *)
+            (* if str.[l - 1] = '%' then ( *)
             try 
-                begin try Scanf.sscanf str "%d,%d" (fun w h -> [`w w; `h h])
-                with _ -> Scanf.sscanf str "%d" (fun w -> [`w w])
+                begin try Scanf.sscanf str "%dpx" (fun w -> `wpx w)
+                with _ -> Scanf.sscanf str "%d%%" (fun w -> `wpercent w)
                 end
-            with  _ -> []
+            with  _ -> (* TODO: ERROR !! *) `none
         in
         function
-        | [] -> ("", [], "")
-        | [s] -> (s, [], "")
+        | [] -> ("", `none, "")
+        | [s] -> (s, `none, "")
         | s :: o :: [] -> (s, parse_options o, "")
         | s :: o :: l :: t -> (s, parse_options o, l)
 

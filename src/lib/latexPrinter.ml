@@ -188,13 +188,10 @@ let subtitle_stop = "}\n"
 let image_start t args = (
     let src, opts, lbl = Commands.Names.image_params args in
     let opts_str =
-        if opts <> [] then 
-            let strs =List.map (function
-                | `w w -> (~% "width=%dpt"  w)
-                | `h h -> (~% "height=%dpt" h)) opts in
-            "[" ^ (String.concat "," strs) ^ "]"
-        else
-            ""
+        match opts with
+        | `wpx w -> (~% "[width=%dpt]"  w)
+        | `wpercent w -> (~% "[width=%f\\textwidth]" ((float w) /. 100.))
+        | `none -> ""
     in
     let sansrc = match src with "" -> "IMAGEWITHNOSOURCE" | s -> s in
     let sanlbl =

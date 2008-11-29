@@ -135,10 +135,10 @@ let image_start t args = (
     (* http://www.w3.org/Style/Examples/007/figures *)
     let src, opts, lbl = Commands.Names.image_params args in
     let opts_str =
-        let strs =List.map (function
-        | `w w -> (~% "width=\"%d\""  w)
-        | `h h -> (~% "height=\"%d\"" h)) opts in
-        String.concat " " strs
+        match opts with
+        | `wpx px -> (~% "width=\"%dpx\""  px)
+        | `wpercent w -> (~% "width=\"%d%%\"" w)
+        | `none -> "" 
     in
     let sansrc =
         match sanitize_xml_attribute src with

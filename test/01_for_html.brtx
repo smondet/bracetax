@@ -69,12 +69,12 @@ An another image:
 {p}
 
 An image:
-{image http://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Brackets.svg/145px-Brackets.svg.png  200|With width}{p}
+{image http://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Brackets.svg/145px-Brackets.svg.png  200px|With pixels for width}{p}
 
 An image: {image
     http://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Brackets.svg/145px-Brackets.svg.png
-    200,200
-    |With width and height}
+    75%
+    |With percent (%) for width}
 
 #{b|Lucy}:
 #{image
