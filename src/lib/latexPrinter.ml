@@ -191,7 +191,7 @@ let image_start t args = (
     let opts_str =
         match opts with
         | `wpx w -> (~% "[width=%dpt]"  w)
-        | `wpercent w -> (~% "[width=%f\\textwidth]" ((float w) /. 100.))
+        | `wpercent w -> (~% "[width=%f\\columnwidth]" ((float w) /. 100.))
         | `none -> ""
     in
     let sansrc = match src with "" -> "IMAGEWITHNOSOURCE" | s -> s in
