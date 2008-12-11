@@ -64,6 +64,7 @@ let sanitize_comments line = line
 let sanitize_text line = (
     let patterns = [
         ('$' , "\\$" );
+        ('-' , "-{}" );
         ('&' , "\\&" );
         ('%' , "\\%" );
         ('#' , "\\#" );
