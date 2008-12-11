@@ -188,8 +188,8 @@ let print_table write table = (
         | None -> ""
         | Some s -> (~% "id=\"%s\"" (sanitize_xml_attribute s))
     in
-    write (~% "<table border=\"1\" %s >\n" lbl_str);
-    write (~% "<caption>%s</caption>\n<tr>" (Buffer.contents table.CT.caption));
+    write (~% "<div class=\"tablefigure\"><table border=\"1\" %s >\n" lbl_str);
+    write (~% "<caption %s>%s</caption>\n<tr>" lbl_str (Buffer.contents table.CT.caption));
     let rec write_cells cells count =
         match cells with
         | [] -> (* fill the gap + warning *)
@@ -213,7 +213,7 @@ let print_table write table = (
             write_cells t (count + c.CT.cols_used)
     in
     write_cells (List.rev table.CT.cells) 0;
-    write "</tr></table>\n"
+    write "</tr></table></div>\n"
 )
 
 let table_stop t = (
