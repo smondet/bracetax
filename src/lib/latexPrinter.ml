@@ -140,13 +140,13 @@ let link_stop t l = (
         | `local ->
             let target = sanitize_nontext target_str in
             (match text with
-            | Some s ->  ~% "%s (\\ref{%s})" (sanitize_nontext s) target
+            | Some s ->  ~% "%s (\\ref{%s})" s target
             | None ->  ~% "\\ref{%s}" target)
         | _ ->
             ~% "\\href{%s}{%s}" 
                 (sanitize_url target_str)
-                (sanitize_nontext 
-                    (match text with Some s -> s | None -> target_str))
+                (match text with
+                Some s -> s | None -> sanitize_nontext target_str)
     );
 )
 
@@ -309,7 +309,7 @@ let cell_stop t env = (
 let list_start = function
     | `itemize -> "\n\\begin{itemize}\n"
     | `numbered -> "\n\\begin{enumerate}\n"
-let list_item = "\\item "
+let list_item = "\n    \\item "
 let list_stop = function
     | `itemize -> "\n\\end{itemize}\n"
     | `numbered -> "\n\\end{enumerate}\n"
@@ -467,7 +467,7 @@ let stop_command t location = (
             (* p (~% "cmd begin %s(%s)\n" nam (String.concat ", " args)); *)
             start_environment ~is_begin:true t location nam args;
         | `paragraph -> t.write "\\par\n"
-        | `new_line -> t.write "\\\n"
+        | `new_line -> t.write "\\\\\n"
         | `non_break_space -> t.write "~"
         | `horizontal_ellipsis -> t.write "\\ldots{}"
         | `open_brace -> t.write "\\{"
