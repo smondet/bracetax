@@ -146,7 +146,7 @@ let link_stop t l = (
             ~% "\\href{%s}{%s}" 
                 (sanitize_url target_str)
                 (match text with
-                Some s -> s | None -> sanitize_nontext target_str)
+                Some s -> s | None -> sanitize_text target_str)
     );
 )
 
