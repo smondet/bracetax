@@ -99,7 +99,6 @@ let sanitize_url line = (
         ('}' , "" );
         ('\\', "" );
         ('^' , "" );
-        ('~' , "" );
     ] in
     Escape.replace_chars ~src:line ~patterns
 )
