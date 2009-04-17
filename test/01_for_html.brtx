@@ -35,7 +35,11 @@ More HTML: {i|italic}, {b|bold}, {t|mono-spaced}, super{sup|script}, sub{sub|scr
 {p}
 {begin b} A lot of{br} bold and {i|italics} {end} and {i|more}...
 {p}
-{list item| {*} one item {*} another}{br}
+{list item| {*} one item {*} another}
+Sub/Super-scripts:
+one{sub|sub}, one{sup|sup}, {i|italic{sub|sub}}, {i|italic{sup|sup}}
+{b|bold{sub|sub}}, {b|bold{sup|sup}}
+
 
 {begin list  enum }
   {*} The one

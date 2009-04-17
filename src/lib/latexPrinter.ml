@@ -315,6 +315,28 @@ let list_stop = function
 
 
 
+let start_subsup t supsub = (
+    let discriminating_char =
+        match supsub with `superscript -> '^' | `subscript -> '_' | _ -> '%' in
+    let inside_italic, inside_bold =
+        let it, bf = ref false, ref false in
+        List.iter (function
+            | `italic -> it := true;
+            | `bold -> bf := true;
+            | _ -> ()) (CS.to_list t.stack);
+        !it, !bf
+    in
+    t.write (~% "$%c{\\textnormal{\\footnotesize{}%s%s"
+        discriminating_char
+        (if inside_italic then "\\it{}" else "")
+        (if inside_bold then "\\bf{}" else "")
+    );
+    supsub
+)
+let stop_subsup t = (
+    t.write "}}$"
+)
+
 (* ==== PRINTER module type's functions ==== *)
 
 let handle_text t location line = (
@@ -388,8 +410,8 @@ let start_environment ?(is_begin=false) t location name args = (
         | s when C.is_italic s      -> t.write "{\\it{}"  ; `italic
         | s when C.is_bold s        -> t.write "{\\bf{}"  ; `bold
         | s when C.is_mono_space s  -> t.write "\\texttt{" ; `mono_space
-        | s when C.is_superscript s -> t.write "$^{\\textnormal{\\footnotesize "; `superscript
-        | s when C.is_subscript s   -> t.write "$_{\\textnormal{\\footnotesize "; `subscript
+        | s when C.is_superscript s -> start_subsup t `superscript
+        | s when C.is_subscript s   -> start_subsup t `subscript
         | s when (C.is_end s)           -> `cmd_end
         | s when C.is_list s             ->
             let style, other_args, waiting =
@@ -477,8 +499,8 @@ let stop_command t location = (
         | `italic       ->  t.write "}"  
         | `bold         ->  t.write "}"  
         | `mono_space   ->  t.write "}" 
-        | `superscript  ->  t.write "}}$"
-        | `subscript    ->  t.write "}}$"
+        | `superscript  -> stop_subsup t
+        | `subscript    ->  stop_subsup t
         | `list (style, _, r) -> t.write (list_stop style)
         | `item ->
             begin match CS.head t.stack with
