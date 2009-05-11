@@ -579,6 +579,7 @@ let header ?(title="") ?(comment="") ?stylesheet_link () = (
     pdfproducer = {Bracetax and PDFLaTeX}}\n\
     \n\
     \\usepackage[pdftex]{graphicx}\n\
+    \\frenchspacing\n\
     \\DeclareGraphicsExtensions{.jpg,.mps,.pdf,.png}\n\
     \n\
     %%%s\n\
