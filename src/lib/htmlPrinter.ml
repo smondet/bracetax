@@ -51,7 +51,7 @@ let create ~writer () =  (
         inside_header = false;
         current_table = None;
         error = writer.S.w_error;
-        loc = {Error.l_line = -1; Error.l_char = -1;};
+        loc = {Error.l_line = -1; l_char = -1; l_file = "NO FILE";};
     }
 )
 

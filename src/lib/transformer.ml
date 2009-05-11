@@ -33,17 +33,19 @@ functor (Printer: Sig.PRINTER) -> struct
         t_read: unit -> string option;
         t_write: string -> unit;
         t_error: Error.error_fun;
+        t_filename: string;
     }
     type aux = Printer.aux
 
-    let create ~read ~writer aux = {
+    let create ~read ~writer ?(filename="NO FILE NAME") aux = {
         t_printer = Printer.create ~writer aux;
         t_read = read;
         t_write = writer.Sig.w_write;
         t_error = writer.Sig.w_error;
+        t_filename = filename;
     }
 
-    let make_loc l c = {Error.l_line = l; l_char = c;}
+    let make_loc l c f = {Error.l_line = l; l_char = c;l_file = f;}
 
     type meta_state =
         | Parsing
@@ -130,27 +132,29 @@ functor (Printer: Sig.PRINTER) -> struct
         in
         let flush_text ?add_space since last =
             Printer.handle_text t.t_printer
-                (make_loc number last)
+                (make_loc number last t.t_filename)
                 (opt_from_to ?add_space line since last)
         in
         let handle_read_text i since = function
             | '#' ->
                 flush_text since (i - 1);
                 Printer.handle_comment_line t.t_printer
-                    (make_loc number i) (sub_end line (i+1));
+                    (make_loc number i t.t_filename) (sub_end line (i+1));
                 (l, ReadText l)
             | '{' ->
                 flush_text since (i - 1);
                 (i + 1, ReadCommand (i + 1, None))
             | '}' ->
                 flush_text since (i - 1);
-                Printer.stop_command t.t_printer (make_loc number i);
+                Printer.stop_command t.t_printer
+                    (make_loc number i t.t_filename);
                 (i + 1, ReadText (i + 1))
             | '\n' ->
                 if since <> i then (
                     flush_text ~add_space:true since (i - 1);
                 ) else (
-                    Printer.handle_text t.t_printer (make_loc number i) " ";
+                    Printer.handle_text t.t_printer
+                        (make_loc number i t.t_filename) " ";
                 );
                 (4242, ReadText 0)
             | _ -> (* characters *) (i + 1, ReadText since)
@@ -167,7 +171,7 @@ functor (Printer: Sig.PRINTER) -> struct
                 (i + 1, ReadCommand (since, opt))
             | '|' ->
                 if not !escaping then (
-                    split_and_start t (make_loc number i)
+                    split_and_start t (make_loc number i t.t_filename)
                         (opt_from_to ~opt line since (i-1));
                     (i + 1, ReadText (i + 1))
                 ) else (
@@ -180,7 +184,7 @@ functor (Printer: Sig.PRINTER) -> struct
                         ReadCommand (since, opt)
                     else (
                         if not !escaping then (
-                            let loc = (make_loc number i) in
+                            let loc = (make_loc number i t.t_filename) in
                             split_and_start t loc
                                 (opt_from_to ~opt line since (i-1));
                                 Printer.stop_command t.t_printer loc;
@@ -285,12 +289,16 @@ functor (Printer: Sig.PRINTER) -> struct
                 let new_state, new_metastate =
                     match meta_state with
                     | Parsing ->
-                        begin match is_begin_verb (make_loc lineno 0) t s with
+                        let beg_verb = 
+                            is_begin_verb (make_loc lineno 0 t.t_filename) t s
+                        in
+                        begin match beg_verb with
                         | None ->
                             (parse_line t s lineno state, Parsing)
                         | Some (endtok, opts) ->
                             Printer.enter_verbatim
-                                t.t_printer (make_loc lineno 0) opts;
+                                t.t_printer (make_loc lineno 0 t.t_filename)
+                                opts;
                             (ReadText 0, BeganVerbatim (endtok, opts))
                         end
                     | BeganVerbatim (end_token, opts) ->
@@ -300,11 +308,11 @@ functor (Printer: Sig.PRINTER) -> struct
                             (S.sub s 0 (S.length end_token) = end_token)
                         ) then (
                             Printer.exit_verbatim
-                                t.t_printer (make_loc lineno 0);
+                                t.t_printer (make_loc lineno 0 t.t_filename);
                             (ReadText 0, Parsing)
                         ) else (
                             Printer.handle_verbatim_line t.t_printer
-                                (make_loc lineno 0) s;
+                                (make_loc lineno 0 t.t_filename) s;
                             (state, meta_state)
                         )
                 in
@@ -313,7 +321,7 @@ functor (Printer: Sig.PRINTER) -> struct
         in
         let last_line, last_state = while_loop 1 (ReadText 0) (Parsing) in
         (* call Printer.this_is_the_end *)
-        Printer.terminate t.t_printer (make_loc last_line 0);
+        Printer.terminate t.t_printer (make_loc last_line 0 t.t_filename);
     )
 end
 

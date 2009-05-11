@@ -48,6 +48,7 @@ type message = [
 type location = {
     l_line: int;
     l_char: int;
+    l_file: string;
 }
 
 type error = [
