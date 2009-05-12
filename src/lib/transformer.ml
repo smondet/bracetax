@@ -325,7 +325,12 @@ functor (Printer: Sig.PRINTER) -> struct
     )
 end
 
-type raw_t = [ `escape| `code ]
+type raw_t = [ `bypass | `code ]
+let str_of_raw_cmd = function
+    | `bypass -> "bypass"
+    | `code -> "verbatim"
+let default_raw_end = "end"
+
 type printer = {
     print_comment: Error.location -> string -> unit;
     print_text:    Error.location -> string -> unit;
@@ -423,6 +428,16 @@ and parse_command printer read_fun location = (
                     printer.print_text location c;
                     (* TODO add warning if (t <> []) *)
                     parse_text printer read_fun location
+                | c :: t when c = (str_of_raw_cmd `code) ->
+                    let endpat,args =
+                        match t with [] -> default_raw_end,[] | h :: q -> h,q in
+                    printer.enter_raw location `code args;
+                    parse_raw printer read_fun location endpat;
+                | c :: t when c = (str_of_raw_cmd `bypass) ->
+                    let endpat,args =
+                        match t with [] -> default_raw_end,[] | h :: q -> h,q in
+                    printer.enter_raw location `bypass args;
+                    parse_raw printer read_fun location endpat;
                 | q :: t ->
                     printer.enter_cmd location q t;
                     printer.leave_cmd location;
@@ -444,6 +459,19 @@ and parse_command printer read_fun location = (
                     printer.enter_cmd location q t;
                     parse_text printer read_fun location
             )
+        | Some given_char ->
+            Buffer.add_char buf given_char;
+            read_loop location false
+    in
+    read_loop location false
+)
+and parse_raw printer read_fun location end_pattern = (
+    let buf = Buffer.create 42 in
+    let rec read_loop location escaping = 
+        match read_fun () with
+        | None ->
+            err printer location (`end_of_input_not_in_text "Reading Command");
+            printer.terminate location;
         | Some given_char ->
             Buffer.add_char buf given_char;
             read_loop location false
