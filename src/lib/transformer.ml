@@ -411,15 +411,14 @@ and parse_command printer read_fun location = (
                 read_loop loc false
             )
         | Some '}' ->
-            if escaping then (
+            if escaping || (Buffer.length buf = 0 && !cmd = []) then (
                 Buffer.add_char buf '}';
                 read_loop location false
             ) else (
                 cmd := (Buffer.contents buf) :: !cmd;
                 match List.rev !cmd with
                 | [] ->
-                    Buffer.add_char buf '}';
-                    read_loop location false
+                    failwith "Shouldn't be here..."
                 | c :: t when c = "{" || c = "}" || c = "#" ->
                     printer.print_text location c;
                     (* TODO add warning if (t <> []) *)
@@ -437,6 +436,8 @@ and parse_command printer read_fun location = (
                 cmd := (Buffer.contents buf) :: !cmd;
                 match List.rev !cmd with
                 | [] ->
+                    failwith "Shouldn't be here..."
+                | "" :: [] ->
                     err printer location (`unknown_command "EMPTY CMD!!!");
                     parse_text printer read_fun location
                 | q :: t ->
