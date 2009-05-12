@@ -330,6 +330,15 @@ let str_of_raw_cmd = function
     | `bypass -> "bypass"
     | `code -> "verbatim"
 let default_raw_end = "end"
+let check_end_pattern pattern = (
+    try
+        String.iter (function
+            | '0' .. '9' | 'a' .. 'z' | 'A' .. 'Z' | '_' | '-' | ':'  -> ()
+            | _ -> raise Not_found) pattern;
+        true
+    with Not_found ->
+        false
+)
 
 type printer = {
     print_comment: Error.location -> string -> unit;
@@ -430,12 +439,26 @@ and parse_command printer read_fun location = (
                     parse_text printer read_fun location
                 | c :: t when c = (str_of_raw_cmd `code) ->
                     let endpat,args =
-                        match t with [] -> default_raw_end,[] | h :: q -> h,q in
+                        match t with [] -> default_raw_end,[]
+                        | h :: q ->
+                            if check_end_pattern h then
+                                h,q
+                            else (
+                                err printer location (`invalid_end_pattern h);
+                                (default_raw_end, [])
+                            ) in
                     printer.enter_raw location `code args;
                     parse_raw printer read_fun location endpat;
                 | c :: t when c = (str_of_raw_cmd `bypass) ->
                     let endpat,args =
-                        match t with [] -> default_raw_end,[] | h :: q -> h,q in
+                        match t with [] -> default_raw_end,[]
+                        | h :: q ->
+                            if check_end_pattern h then
+                                h,q
+                            else (
+                                err printer location (`invalid_end_pattern h);
+                                (default_raw_end, [])
+                            ) in
                     printer.enter_raw location `bypass args;
                     parse_raw printer read_fun location endpat;
                 | q :: t ->
