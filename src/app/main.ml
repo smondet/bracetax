@@ -267,6 +267,21 @@ let () = (
                 write (Bracetax.HtmlPrinter.footer ());
             );
         | `Brtx2LaTeX ->
+            let t = Bracetax.LatexPrinter.create ~writer () in
+            let printer = {
+                Bracetax.Transformer.
+                print_comment = Bracetax.LatexPrinter.handle_comment_line t;
+                print_text =    Bracetax.LatexPrinter.handle_text t;
+                enter_cmd =     Bracetax.LatexPrinter.start_command t;
+                leave_cmd =     Bracetax.LatexPrinter.stop_command t;
+                terminate =     Bracetax.LatexPrinter.terminate t;
+                enter_raw = (fun o _ l ->  Bracetax.LatexPrinter.enter_verbatim t o l);
+                print_raw =     Bracetax.LatexPrinter.handle_verbatim_line t;
+                leave_raw =     Bracetax.LatexPrinter.exit_verbatim t;
+                error = writer.Bracetax.Signatures.w_error; } in
+            let read_char_opt i () = try Some (input_char i) with e -> None in
+            Bracetax.Transformer.do_transformation printer (read_char_opt i) "bouh"
+            (*
             let module LatexTransformer =
                 Bracetax.Transformer.Make(Bracetax.LatexPrinter) in
             let t = LatexTransformer.create ~writer ~read () in
@@ -279,7 +294,7 @@ let () = (
             LatexTransformer.do_transformation t;
             opt_may !Options.header_footer  ~f:(fun _ ->
                 write (Bracetax.LatexPrinter.footer ());
-            );
+            );*)
         | `PostPro (t :: q as l) ->
             PostProcessor.process (PostProcessor.BuiltIn.make_list l)
                 read (Printf.fprintf o "%s\n")

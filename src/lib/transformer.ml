@@ -325,72 +325,132 @@ functor (Printer: Sig.PRINTER) -> struct
     )
 end
 
-type loc = Error.location
 type raw_t = [ `escape| `code ]
 type printer = {
-    print_comment: loc -> string -> unit;
-    print_text:    loc -> string -> unit;
-    enter_cmd:     loc -> string -> string list -> unit;
-    leave_cmd:     loc -> unit;
-    terminate:     loc -> unit;
+    print_comment: Error.location -> string -> unit;
+    print_text:    Error.location -> string -> unit;
+    enter_cmd:     Error.location -> string -> string list -> unit;
+    leave_cmd:     Error.location -> unit;
+    terminate:     Error.location -> unit;
 
-    enter_raw:     loc -> raw_t -> string list -> unit;
-    print_raw:     loc -> unit;
-    leave_raw:     loc -> unit;
+    enter_raw:     Error.location -> raw_t -> string list -> unit;
+    print_raw:     Error.location -> string -> unit;
+    leave_raw:     Error.location -> unit;
     error: Error.error -> unit;
 }
 
-type parser_state = 
-    | ReadCmd of bool
-    | ReadRaw of string
-    | ReadText
-    | ReadComment
-    | ReadDirective
+let err pr loc typ = pr.error (Error.mk loc `error typ)
+let loc line file = { Error.l_line = line; l_char = -1; l_file = file }
+let incr_loc location = loc (location.Error.l_line + 1) location.Error.l_file
 
-let do_transformation printer read_fun filename = (
+let rec parse_text printer read_fun location = (
     let buf = Buffer.create 42 in
-    let filename = ref filename in
-    let loc line = { Error.l_line = line; l_char = -1; l_file = !filename } in
-    (* let incr_loc location = loc (location.Error.l_ine + 1) in *)
-    let err loc typ = printer.error (Error.mk loc `error typ) in
-    let rec read_loop state location =
-        match read_fun with
+    let rec read_loop location = 
+        match read_fun () with
         | None ->
-            begin match state with
-            | ReadText ->
-                printer.print_text location (Buffer.contents buf);
-                Buffer.reset buf;
-            | ReadComment ->
-                printer.print_comment location (Buffer.contents buf);
-                Buffer.reset buf;
-            | ReadDirective -> ()
-            | ReadCmd _ ->
-                err location (`end_of_input_not_in_text "Reading Command")
-            | ReadRaw _ ->
-                err location (`end_of_input_not_in_text "Reading Raw...")
-            end;
+            printer.print_text location (Buffer.contents buf);
             printer.terminate location;
-            (state, location)
-            (*
-        | Some '\n' | Some '\r' ->
-            begin match state with
-            | ReadText ->
-                Buffer.add_char buf ' ';
-                read_loop state (incr_loc location)
-            | ReadComment| ReadDirective ->
-                printer.print_comment location (Buffer.contents buf);
-                Buffer.reset buf;
-                read_loop ReadText (incr_loc location)
-            | ReadDirective -> ()
-            | ReadCmd _ ->
-                err location (`end_of_input_not_in_text "Reading Command")
-            | ReadRaw _ ->
-                err location (`end_of_input_not_in_text "Reading Raw...")
-            end;
-*)
+        | Some '\n' ->
+            Buffer.add_char buf ' ';
+            read_loop (incr_loc location)
+        | Some '#' ->
+            printer.print_text location (Buffer.contents buf);
+            parse_comment printer read_fun location
+        | Some '{' ->
+            printer.print_text location (Buffer.contents buf);
+            parse_command printer read_fun location
+        | Some '}' ->
+            printer.print_text location (Buffer.contents buf);
+            Buffer.reset buf;
+            printer.leave_cmd location;
+            read_loop location
         | Some given_char ->
             Buffer.add_char buf given_char;
-            read_loop state location
-    in 
-    read_loop ReadText (loc 1)
+            read_loop location
+    in
+    read_loop location
+)
+and parse_comment printer read_fun location = (
+    let buf = Buffer.create 42 in
+    let rec read_loop location = 
+        match read_fun () with
+        | None ->
+            printer.print_comment location (Buffer.contents buf);
+            printer.terminate location;
+        | Some '\n' ->
+            printer.print_comment location (Buffer.contents buf);
+            parse_text printer read_fun (incr_loc location)
+        | Some given_char ->
+            Buffer.add_char buf given_char;
+            read_loop location
+    in
+    read_loop location
+)
+and parse_command printer read_fun location = (
+    let buf = Buffer.create 42 in
+    let cmd = ref [] in
+    let rec read_loop location escaping = 
+        match read_fun () with
+        | None ->
+            err printer location (`end_of_input_not_in_text "Reading Command");
+            printer.terminate location;
+        | Some '\\' ->
+            if escaping then (
+                Buffer.add_char buf '\\';
+                read_loop location false
+            ) else
+                read_loop location true
+        | Some c when c = ' ' || c = '\t' || c = '\n' ->
+            let loc = if c = '\n' then (incr_loc location) else location in
+            if escaping then (
+                Buffer.add_char buf c;
+                read_loop loc false
+            ) else (
+                cmd := (Buffer.contents buf) :: !cmd;
+                Buffer.reset buf;
+                read_loop loc false
+            )
+        | Some '}' ->
+            if escaping then (
+                Buffer.add_char buf '}';
+                read_loop location false
+            ) else (
+                cmd := (Buffer.contents buf) :: !cmd;
+                match List.rev !cmd with
+                | [] ->
+                    Buffer.add_char buf '}';
+                    read_loop location false
+                | c :: t when c = "{" || c = "}" || c = "#" ->
+                    printer.print_text location c;
+                    (* TODO add warning if (t <> []) *)
+                    parse_text printer read_fun location
+                | q :: t ->
+                    printer.enter_cmd location q t;
+                    printer.leave_cmd location;
+                    parse_text printer read_fun location
+            )
+        | Some '|' ->
+            if escaping then (
+                Buffer.add_char buf '|';
+                read_loop location false
+            ) else (
+                cmd := (Buffer.contents buf) :: !cmd;
+                match List.rev !cmd with
+                | [] ->
+                    err printer location (`unknown_command "EMPTY CMD!!!");
+                    parse_text printer read_fun location
+                | q :: t ->
+                    printer.enter_cmd location q t;
+                    parse_text printer read_fun location
+            )
+        | Some given_char ->
+            Buffer.add_char buf given_char;
+            read_loop location false
+    in
+    read_loop location false
+)
+
+
+let do_transformation printer read_fun filename = (
+    parse_text printer read_fun (loc 1 filename)
 )
