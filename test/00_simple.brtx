@@ -20,8 +20,7 @@ That's {verbatim} again {}, {{}
 {end} # the default end_token
 
 {verbatim}
-That's {it:still} {verbatim} {}, {{}
-{endverbatim} # the default end_token
+That's {it:still} {verbatim} {}, {{}{end} # the default end_token
 
 
 

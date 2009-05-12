@@ -490,14 +490,43 @@ and parse_command printer read_fun location = (
 )
 and parse_raw printer read_fun location end_pattern = (
     let buf = Buffer.create 42 in
+    let last_chars str nb =
+        let ls = String.length str in
+        let i = ls - nb in
+        String.sub str i nb in
+    let without_last_chars str nb =
+        let ls = String.length str in
+        let l = ls - nb in
+        String.sub str 0 l
+    in
+
+    let try_pattern buf patt =
+        let lb = Buffer.length buf and lp = String.length patt in
+        (lb >= lp + 2) &&
+        ((last_chars (Buffer.contents buf) (lp+2)) = ("{"^patt^"}"))
+    in
+
     let rec read_loop location escaping = 
         match read_fun () with
         | None ->
             err printer location (`end_of_input_not_in_text "Reading Command");
             printer.terminate location;
+        | Some '\n' ->
+            Buffer.add_char buf '\n';
+            printer.print_raw location (Buffer.contents buf);
+            Buffer.reset buf;
+            read_loop location false
         | Some given_char ->
             Buffer.add_char buf given_char;
-            read_loop location false
+            if try_pattern buf end_pattern then (
+                let to_write =
+                    let len = String.length end_pattern + 2 in
+                    without_last_chars (Buffer.contents buf) len in
+                printer.print_raw location to_write;
+                printer.leave_raw location;
+                parse_text printer read_fun location
+            ) else
+                read_loop location false
     in
     read_loop location false
 )
