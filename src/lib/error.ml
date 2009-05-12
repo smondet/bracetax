@@ -43,6 +43,7 @@ type message = [
     | `terminating_with_open_environments of string list
     | `bad_size_specification_in_image of string
     | `unknown_list_style of string
+    | `end_of_input_not_in_text of string
 ]
 
 type location = {
@@ -92,6 +93,8 @@ let to_string (location, gravity, message) = (
             spr "Bad size specification in image: \"%s\"" s
         | `unknown_list_style s ->
             spr "Unknown list syle: \"%s\"" s
+        | `end_of_input_not_in_text s ->
+            spr "Reached end of input in wrong state... \"%s\"" s
     in
     Printf.sprintf "[L:%d,C:%d][%s] %s"
         location.l_line location.l_char

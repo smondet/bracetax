@@ -325,3 +325,72 @@ functor (Printer: Sig.PRINTER) -> struct
     )
 end
 
+type loc = Error.location
+type raw_t = [ `escape| `code ]
+type printer = {
+    print_comment: loc -> string -> unit;
+    print_text:    loc -> string -> unit;
+    enter_cmd:     loc -> string -> string list -> unit;
+    leave_cmd:     loc -> unit;
+    terminate:     loc -> unit;
+
+    enter_raw:     loc -> raw_t -> string list -> unit;
+    print_raw:     loc -> unit;
+    leave_raw:     loc -> unit;
+    error: Error.error -> unit;
+}
+
+type parser_state = 
+    | ReadCmd of bool
+    | ReadRaw of string
+    | ReadText
+    | ReadComment
+    | ReadDirective
+
+let do_transformation printer read_fun filename = (
+    let buf = Buffer.create 42 in
+    let filename = ref filename in
+    let loc line = { Error.l_line = line; l_char = -1; l_file = !filename } in
+    (* let incr_loc location = loc (location.Error.l_ine + 1) in *)
+    let err loc typ = printer.error (Error.mk loc `error typ) in
+    let rec read_loop state location =
+        match read_fun with
+        | None ->
+            begin match state with
+            | ReadText ->
+                printer.print_text location (Buffer.contents buf);
+                Buffer.reset buf;
+            | ReadComment ->
+                printer.print_comment location (Buffer.contents buf);
+                Buffer.reset buf;
+            | ReadDirective -> ()
+            | ReadCmd _ ->
+                err location (`end_of_input_not_in_text "Reading Command")
+            | ReadRaw _ ->
+                err location (`end_of_input_not_in_text "Reading Raw...")
+            end;
+            printer.terminate location;
+            (state, location)
+            (*
+        | Some '\n' | Some '\r' ->
+            begin match state with
+            | ReadText ->
+                Buffer.add_char buf ' ';
+                read_loop state (incr_loc location)
+            | ReadComment| ReadDirective ->
+                printer.print_comment location (Buffer.contents buf);
+                Buffer.reset buf;
+                read_loop ReadText (incr_loc location)
+            | ReadDirective -> ()
+            | ReadCmd _ ->
+                err location (`end_of_input_not_in_text "Reading Command")
+            | ReadRaw _ ->
+                err location (`end_of_input_not_in_text "Reading Raw...")
+            end;
+*)
+        | Some given_char ->
+            Buffer.add_char buf given_char;
+            read_loop state location
+    in 
+    read_loop ReadText (loc 1)
+)
