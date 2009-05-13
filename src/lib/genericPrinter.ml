@@ -180,12 +180,10 @@ let start_environment ?(is_begin=false) t location name args = (
             t.write <- new_write;
             to_stack
         | s when C.is_cell s ->
-            let head, cnb, align = Commands.Table.cell_args args in
-            let def_cell = `cell (head, cnb, align) in
             begin match t.current_table with
             | None ->
                 t.error (Error.mk t.loc `error `cell_out_of_table);
-                def_cell
+                `cell (false, 1, `center)
             | Some tab -> Commands.Table.cell_start ~error:t.error tab args
             end;
         | s when C.is_note s -> t.write (o.start_note ()); `note

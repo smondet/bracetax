@@ -112,7 +112,7 @@ module Stack = struct
         | `authors
         | `subtitle
         | `table of int * string option
-        | `cell of bool * int * [`right | `center | `left | `default]
+        | `cell of bool * int * [`right | `center | `left]
         | `note
     ]
 
@@ -266,10 +266,20 @@ let rec env_to_string (e:Stack.environment) = (
 )
 
 module Table = struct
+    (* New version target:
+       {begin table 4 label defalign}
+           {c lrch 2|on two columns}
+           {c r3| for backward compat}
+           {c r 2×3|new multirow format}
+       {end}
+       *)
+    type alignment = [`right | `center | `left ]
+
     type cell = {
         is_head: bool;
         cols_used: int;
-        align: [`right | `center | `left | `default];
+        rows_used: int;
+        align: alignment;
         cell_text: Buffer.t;
     }
 
@@ -279,6 +289,7 @@ module Table = struct
         mutable cells: cell list;
         mutable current_cell: cell option;
         caption: Buffer.t;
+        default_align: alignment;
     }
 
     let table_args =
@@ -289,10 +300,10 @@ module Table = struct
         | [s] -> (parse_int s, None)
         | s :: o :: t -> (parse_int s, Some o)
 
-    let cell_args args =
+    let cell_args args default_align =
         let head = ref false in
         let cols = ref 1 in
-        let alig = ref `default in
+        let alig = ref default_align in
         let rec parse_str str =
             if str = "" then ()
             else (
@@ -331,11 +342,12 @@ module Table = struct
             cells = [];
             current_cell = None;
             caption = Buffer.create 64;
+            default_align = `center;
         } in
         (table, `table (col_nb, label), write table)
     )
     let cell_start ~(error:Error.error_fun) tab args = (
-        let head, cnb, align = cell_args args in
+        let head, cnb, align = cell_args args tab.default_align in
         let def_cell = `cell (head, cnb, align) in
         begin match tab.current_cell with
         | Some c -> 
@@ -345,6 +357,7 @@ module Table = struct
             let cell_t = {
                 is_head= head;
                 cols_used = cnb;
+                rows_used = 1;
                 align = align;
                 cell_text = Buffer.create 64;
             } in

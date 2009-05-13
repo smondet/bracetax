@@ -208,7 +208,6 @@ let print_table write table = (
                 | `right -> "class=\"rightalign\" style=\"text-align:right;\""
                 | `center -> "class=\"centeralign\" style=\"text-align:center;\""
                 | `left -> "class=\"leftalign\" style=\"text-align:left;\""
-                | `default -> ""
             in
             write (~% "<t%s colspan=\"%d\" %s >%s</t%s>"
                 typ_of_cell c.CT.cols_used alignement
@@ -230,13 +229,12 @@ let table_stop t = (
         print_table t.write tab;
 )
 let cell_start t args = (
-    let head, cnb, align = Commands.Table.cell_args args in
-    let def_cell = `cell (head, cnb, align) in
     match t.current_table with
     | None ->
         t.error (Error.mk t.loc `error `cell_out_of_table);
-        def_cell
-    | Some tab -> Commands.Table.cell_start ~error:t.error tab args
+        `cell (false, 1, `center)
+    | Some tab ->
+        Commands.Table.cell_start ~error:t.error tab args
 )
 let cell_stop t env = (
     match t.current_table with

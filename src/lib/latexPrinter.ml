@@ -257,7 +257,6 @@ let print_table write table = (
                 | `right -> "r"
                 | `center -> "c"
                 | `left -> "l"
-                | `default -> "c"
             in
             let multicol = 
                 (~% "\\multicolumn{%d}{|%s|}{%s}"
@@ -286,12 +285,10 @@ let table_stop t = (
         print_table t.write tab;
 )
 let cell_start t args = (
-    let head, cnb, align = Commands.Table.cell_args args in
-    let def_cell = `cell (head, cnb, align) in
     match t.current_table with
     | None ->
         t.error (Error.mk t.loc `error `cell_out_of_table);
-        def_cell
+        `cell (false, 1, `center)
     | Some tab -> Commands.Table.cell_start ~error:t.error tab args
 )
 let cell_stop t env = (
