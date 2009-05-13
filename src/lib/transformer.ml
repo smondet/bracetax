@@ -329,6 +329,11 @@ type raw_t = [ `bypass | `code ]
 let str_of_raw_cmd = function
     | `bypass -> "bypass"
     | `code -> "verbatim"
+let raw_cmd_of_str = function
+    | "bypass"   -> `bypass
+    | "verbatim" -> `code
+    | s -> failwith (~% "Bad usage of raw_cmd_of_str: %S" s)
+
 let default_raw_end = "end"
 let check_end_pattern pattern = (
     try
@@ -437,7 +442,9 @@ and parse_command printer read_fun location = (
                     printer.print_text location c;
                     (* TODO add warning if (t <> []) *)
                     parse_text printer read_fun location
-                | c :: t when c = (str_of_raw_cmd `code) ->
+                | c :: t when
+                    c = (str_of_raw_cmd `code) ||
+                    c = (str_of_raw_cmd `bypass) ->
                     let endpat,args =
                         match t with [] -> default_raw_end,[]
                         | h :: q ->
@@ -447,19 +454,7 @@ and parse_command printer read_fun location = (
                                 err printer location (`invalid_end_pattern h);
                                 (default_raw_end, [])
                             ) in
-                    printer.enter_raw location `code args;
-                    parse_raw printer read_fun location endpat;
-                | c :: t when c = (str_of_raw_cmd `bypass) ->
-                    let endpat,args =
-                        match t with [] -> default_raw_end,[]
-                        | h :: q ->
-                            if check_end_pattern h then
-                                h,q
-                            else (
-                                err printer location (`invalid_end_pattern h);
-                                (default_raw_end, [])
-                            ) in
-                    printer.enter_raw location `bypass args;
+                    printer.enter_raw location (raw_cmd_of_str c) args;
                     parse_raw printer read_fun location endpat;
                 | q :: t ->
                     printer.enter_cmd location q t;
