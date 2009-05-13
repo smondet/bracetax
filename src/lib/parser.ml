@@ -29,10 +29,10 @@ let (~%) = Printf.sprintf
 
 let str_of_raw_cmd = function
     | `bypass -> "bypass"
-    | `code -> "verbatim"
+    | `code -> "code"
 let raw_cmd_of_str = function
     | "bypass"   -> `bypass
-    | "verbatim" -> `code
+    | "code" -> `code
     | s -> failwith (~% "Bad usage of raw_cmd_of_str: %S" s)
 
 let default_raw_end = "end"
