@@ -100,7 +100,8 @@ module Stack = struct
         | `close_brace
         | `sharp
         | `utf8_char of int
-        | `verbatim of string list
+        | `code of string list
+        | `bypass
         | `list of [`itemize | `numbered ] * string list * bool ref
         | `item
         | `section of int * string
@@ -248,7 +249,8 @@ let rec env_to_string (e:Stack.environment) = (
     | `close_brace               -> spr "close_brace (})"
     | `sharp                     -> spr "sharp (#)"
     | `utf8_char i               -> spr "utf8_char 0x%x" i
-    | `verbatim l                -> spr "verbatim"
+    | `code l                    -> spr "code"
+    | `bypass                    -> spr "bypass"
     | `list l                    -> spr "list"
     | `item                      -> spr "item (*)"
     | `section (n, l)            -> spr "section %d" n

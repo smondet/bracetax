@@ -449,7 +449,7 @@ let terminate t location = (
 ) 
 
 let enter_verbatim t location args = (
-    CS.push t.stack (`verbatim args);
+    CS.push t.stack (`code args);
     begin match args with
     | q :: _ ->
         t.write (~% "\n<!--verbatimbegin:%s -->\n" (sanitize_comments q))
@@ -461,7 +461,7 @@ let enter_verbatim t location args = (
 let exit_verbatim t location = (
     let env =  (CS.pop t.stack) in
     match env with
-    | Some (`verbatim args) ->
+    | Some (`code args) ->
         t.write "</pre>\n";
         begin match args with
         | q :: _ ->

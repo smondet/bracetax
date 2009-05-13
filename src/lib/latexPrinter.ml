@@ -365,7 +365,7 @@ let handle_comment_line t location line = (
 
 let enter_verbatim t location args = (
     t.loc <- location;
-    CS.push t.stack (`verbatim args);
+    CS.push t.stack (`code args);
     begin match args with
     | q :: _ -> t.write (~% "%%\n%%verbatimbegin:%s\n\\begin{verbatim}\n" q)
     | _ -> t.write "%\n\\begin{verbatim}\n";
@@ -375,7 +375,7 @@ let exit_verbatim t location = (
     t.loc <- location;
     let env =  (CS.pop t.stack) in
     match env with
-    | Some (`verbatim args) ->
+    | Some (`code args) ->
         t.write "\\end{verbatim}\n";
         begin match args with
         | q :: _ -> t.write (~% "%%verbatimend:%s\n" q)
