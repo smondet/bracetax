@@ -205,55 +205,18 @@ let () = (
         in
         Bracetax.Signatures.make_writer ~write  ~error in
     let read = read_line_opt i in
+    let read_char_opt i () = try Some (input_char i) with e -> None in
     begin match to_do with
     | `Brtx2HTML ->
-        opt_may !Options.header_footer ~f:(fun title ->
-            write (Bracetax.HtmlPrinter.header
-                ~comment:"Generated with BraceTax" ~title
-                ?stylesheet_link:!Options.stylesheet_link ()
-            );
-        );
-        let t = Bracetax.HtmlPrinter.create ~writer () in
-        let printer = {
-            Bracetax.Transformer.
-            print_comment = Bracetax.HtmlPrinter.handle_comment_line t;
-            print_text =    Bracetax.HtmlPrinter.handle_text t;
-            enter_cmd =     Bracetax.HtmlPrinter.start_command t;
-            leave_cmd =     Bracetax.HtmlPrinter.stop_command t;
-            terminate =     Bracetax.HtmlPrinter.terminate t;
-            enter_raw = (fun o _ l ->  Bracetax.HtmlPrinter.enter_verbatim t o l);
-            print_raw =     Bracetax.HtmlPrinter.handle_verbatim_line t;
-            leave_raw =     Bracetax.HtmlPrinter.exit_verbatim t;
-            error = writer.Bracetax.Signatures.w_error; } in
-        let read_char_opt i () = try Some (input_char i) with e -> None in
-        Bracetax.Transformer.do_transformation printer (read_char_opt i) "bouh";
-        opt_may !Options.header_footer  ~f:(fun _ ->
-            write (Bracetax.HtmlPrinter.footer ());
-        );
+        Bracetax.Transform.brtx_to_html
+            ~writer ?doc:!Options.header_footer
+            ?css_link:!Options.stylesheet_link
+            ~input_char:(read_char_opt i) ();
     | `Brtx2LaTeX ->
-        opt_may !Options.header_footer  ~f:(fun title ->
-            write (Bracetax.LatexPrinter.header
-                ~comment:"Generated with BraceTax" ~title
-                ?stylesheet_link:!Options.stylesheet_link ()
-            );
-        );
-        let t = Bracetax.LatexPrinter.create ~writer () in
-        let printer = {
-            Bracetax.Transformer.
-            print_comment = Bracetax.LatexPrinter.handle_comment_line t;
-            print_text =    Bracetax.LatexPrinter.handle_text t;
-            enter_cmd =     Bracetax.LatexPrinter.start_command t;
-            leave_cmd =     Bracetax.LatexPrinter.stop_command t;
-            terminate =     Bracetax.LatexPrinter.terminate t;
-            enter_raw = (fun o _ l ->  Bracetax.LatexPrinter.enter_verbatim t o l);
-            print_raw =     Bracetax.LatexPrinter.handle_verbatim_line t;
-            leave_raw =     Bracetax.LatexPrinter.exit_verbatim t;
-            error = writer.Bracetax.Signatures.w_error; } in
-        let read_char_opt i () = try Some (input_char i) with e -> None in
-        Bracetax.Transformer.do_transformation printer (read_char_opt i) "bouh";
-        opt_may !Options.header_footer  ~f:(fun _ ->
-            write (Bracetax.LatexPrinter.footer ());
-        );
+        Bracetax.Transform.brtx_to_latex
+            ~writer ?doc:!Options.header_footer
+            ?use_package:!Options.stylesheet_link
+            ~input_char:(read_char_opt i) ();
     | `PostPro (t :: q as l) ->
         PostProcessor.process (PostProcessor.BuiltIn.make_list l)
             read (Printf.fprintf o "%s\n")

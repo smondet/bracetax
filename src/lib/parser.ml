@@ -1,5 +1,5 @@
 (******************************************************************************)
-(*      Copyright (c) 2008, Sebastien MONDET                                  *)
+(*      Copyright (c) 2008, 2009, Sebastien MONDET                            *)
 (*                                                                            *)
 (*      Permission is hereby granted, free of charge, to any person           *)
 (*      obtaining a copy of this software and associated documentation        *)
@@ -22,11 +22,11 @@
 (*      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR         *)
 (*      OTHER DEALINGS IN THE SOFTWARE.                                       *)
 (******************************************************************************)
-module Sig = Signatures
+
+open Signatures 
 
 let (~%) = Printf.sprintf
 
-type raw_t = [ `bypass | `code ]
 let str_of_raw_cmd = function
     | `bypass -> "bypass"
     | `code -> "verbatim"
@@ -45,19 +45,6 @@ let check_end_pattern pattern = (
     with Not_found ->
         false
 )
-
-type printer = {
-    print_comment: Error.location -> string -> unit;
-    print_text:    Error.location -> string -> unit;
-    enter_cmd:     Error.location -> string -> string list -> unit;
-    leave_cmd:     Error.location -> unit;
-    terminate:     Error.location -> unit;
-
-    enter_raw:     Error.location -> raw_t -> string list -> unit;
-    print_raw:     Error.location -> string -> unit;
-    leave_raw:     Error.location -> unit;
-    error: Error.error -> unit;
-}
 
 let err pr loc typ = pr.error (Error.mk loc `error typ)
 let loc line file = { Error.l_line = line; l_char = -1; l_file = file }
