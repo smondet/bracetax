@@ -440,7 +440,10 @@ and parse_command printer read_fun location = (
                     failwith "Shouldn't be here..."
                 | c :: t when c = "{" || c = "}" || c = "#" ->
                     printer.print_text location c;
-                    (* TODO add warning if (t <> []) *)
+                    if t <> [] then (
+                        printer.error (Error.mk location `warning
+                            (`command_shouldnot_have_args c));
+                    );
                     parse_text printer read_fun location
                 | c :: t when
                     c = (str_of_raw_cmd `code) ||

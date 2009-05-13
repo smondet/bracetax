@@ -4,7 +4,7 @@
 {b|bold} {i|italo{b|bold}}
 # More comments...
 {t|type-writer text}
-A sharp: {#} A {{}Command{}} {cmd arg1    arg\\2 arg\ 3 a\|aa| The lkj fdg# comment
+A sharp: {#} A {{}Command{} strang_arg} {cmd arg1    arg\\2 arg\ 3 a\|aa| The lkj fdg# comment
 }
 {cmd fssf
 sd \|\|\|\| \\\\\|

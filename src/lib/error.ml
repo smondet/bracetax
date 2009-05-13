@@ -45,6 +45,7 @@ type message = [
     | `unknown_list_style of string
     | `end_of_input_not_in_text of string
     | `invalid_end_pattern of string
+    | `command_shouldnot_have_args of string
 ]
 
 type location = {
@@ -98,6 +99,8 @@ let to_string (location, gravity, message) = (
             spr "Reached end of input in wrong state... \"%s\"" s
         | `invalid_end_pattern s ->
             spr "Invalid end pattern: \"%S\"" s
+        | `command_shouldnot_have_args s ->
+            spr "This command should not have arguments: %s" s
     in
     Printf.sprintf "[L:%d,C:%d][%s] %s"
         location.l_line location.l_char
