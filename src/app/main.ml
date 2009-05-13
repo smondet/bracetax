@@ -231,6 +231,12 @@ let () = (
             write (Bracetax.HtmlPrinter.footer ());
         );
     | `Brtx2LaTeX ->
+        opt_may !Options.header_footer  ~f:(fun title ->
+            write (Bracetax.LatexPrinter.header
+                ~comment:"Generated with BraceTax" ~title
+                ?stylesheet_link:!Options.stylesheet_link ()
+            );
+        );
         let t = Bracetax.LatexPrinter.create ~writer () in
         let printer = {
             Bracetax.Transformer.
@@ -244,21 +250,10 @@ let () = (
             leave_raw =     Bracetax.LatexPrinter.exit_verbatim t;
             error = writer.Bracetax.Signatures.w_error; } in
         let read_char_opt i () = try Some (input_char i) with e -> None in
-        Bracetax.Transformer.do_transformation printer (read_char_opt i) "bouh"
-        (*
-        let module LatexTransformer =
-            Bracetax.Transformer.Make(Bracetax.LatexPrinter) in
-        let t = LatexTransformer.create ~writer ~read () in
-        opt_may !Options.header_footer  ~f:(fun title ->
-            write (Bracetax.LatexPrinter.header
-                ~comment:"Generated with BraceTax" ~title
-                ?stylesheet_link:!Options.stylesheet_link ()
-            );
-        );
-        LatexTransformer.do_transformation t;
+        Bracetax.Transformer.do_transformation printer (read_char_opt i) "bouh";
         opt_may !Options.header_footer  ~f:(fun _ ->
             write (Bracetax.LatexPrinter.footer ());
-        );*)
+        );
     | `PostPro (t :: q as l) ->
         PostProcessor.process (PostProcessor.BuiltIn.make_list l)
             read (Printf.fprintf o "%s\n")
