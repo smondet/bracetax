@@ -11,14 +11,15 @@ sd \|\|\|\| \\\\\|
 s \{fd\} }
 
 
-{verbatim end_token option2}
+{code end_token option2}
 That's {verbatim} {}, {{}
 {end_token}
 
 And now {i|{bypass end option2 option3}That's {bypass}{end}} # the default end_token
 
-{verbatim}
-That's {it:still} {verbatim} {}, {{}{end} # the default end_token
+{code}
+That's {it:still} {verbatim} {}, {{}
+{end} # the default end_token
 
 
 

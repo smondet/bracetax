@@ -21,8 +21,8 @@
 :syn match bracetaxSimple "{\(p\|br\|#\|{\|}\|\~\|\*\|\.\.\.\)}" contains=bracetaxSpecialChar
 
 " Verbatim regions
-:syn region bracetaxVerbatim start="^{verbatim}" end="^{endverbatim}"
-:syn region bracetaxVerbatim start="^{verbatim \z(\w\+\)" end="^{\z1}"
+:syn region bracetaxVerbatim start="{\(code\|bypass\)}" end="{end}"
+:syn region bracetaxVerbatim start="{\(code\|bypass\) \z(\w\+\)" end="{\z1}"
 
 " Setting colorization:
 
