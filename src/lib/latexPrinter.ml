@@ -363,33 +363,6 @@ let handle_comment_line t location line = (
         (debugstr t location "Comment") (sanitize_comments line));
 )
 
-let enter_verbatim t location args = (
-    t.loc <- location;
-    CS.push t.stack (`code args);
-    begin match args with
-    | q :: _ -> t.write (~% "%%\n%%verbatimbegin:%s\n\\begin{verbatim}\n" q)
-    | _ -> t.write "%\n\\begin{verbatim}\n";
-    end;
-)
-let exit_verbatim t location = (
-    t.loc <- location;
-    let env =  (CS.pop t.stack) in
-    match env with
-    | Some (`code args) ->
-        t.write "\\end{verbatim}\n";
-        begin match args with
-        | q :: _ -> t.write (~% "%%verbatimend:%s\n" q)
-        | _ -> ()
-        end;
-    | _ ->
-        (* warning ? error ? anyway, *)
-        failwith "Shouldn't be there, Parser's fault ?";
-)
-let handle_verbatim_line t location line = (
-    t.loc <- location;
-    t.write (~% "%s\n" line);
-)
-
 let terminate t location = (
     t.loc <- location;
     if (CS.to_list t.stack) <> [] then (
@@ -537,9 +510,55 @@ let stop_command t location = (
         t.error (Error.mk t.loc `error `nothing_to_end_with_brace);
 )
 
+let start_raw_mode t location kind args = (
+    t.loc <- location;
+    match kind with
+    | `code ->
+        CS.push t.stack (`code args);
+        begin match args with
+        | q :: _ -> t.write (~% "%%\n%%verbatimbegin:%s\n\\begin{verbatim}" q)
+        | _ -> t.write "%\n\\begin{verbatim}";
+        end;
+    | `bypass ->
+        CS.push t.stack (`bypass);
+)
+let handle_raw_text t location text = (
+    t.loc <- location;
+    t.write text;
+)
+let stop_raw_mode t location = (
+    t.loc <- location;
+    match CS.pop t.stack with
+    | Some (`code args) ->
+        t.write "\\end{verbatim}";
+        begin match args with
+        | q :: _ -> t.write (~% "\n%%verbatimend:%s\n" q)
+        | _ -> ()
+        end;
+    | Some `bypass -> ()
+    | _ ->
+        (* warning ? error ? anyway, *)
+        failwith "Shouldn't be there, Parser's fault ?";
+
+)
 
 (* ==== Directly exported functions ==== *)
 
+let build ~writer = (
+    let t = create ~writer () in
+    let printer = {
+        Signatures.
+        print_comment = handle_comment_line t;
+        print_text =    handle_text t;
+        enter_cmd =     start_command t;
+        leave_cmd =     stop_command t;
+        terminate =     terminate t;
+        enter_raw =     start_raw_mode t;
+        print_raw =     handle_raw_text t;
+        leave_raw =     stop_raw_mode t;
+        error = writer.Signatures.w_error; } in
+    printer
+)
 let header ?(title="") ?(comment="") ?stylesheet_link () = (
     let package_str =
         match stylesheet_link with

@@ -448,39 +448,64 @@ let terminate t location = (
     t.write "</div>\n";
 ) 
 
-let enter_verbatim t location args = (
-    CS.push t.stack (`code args);
-    begin match args with
-    | q :: _ ->
-        t.write (~% "\n<!--verbatimbegin:%s -->\n" (sanitize_comments q))
-    | _ -> ()
-    end;
-    t.write "<pre>\n";
+
+(* ==== Directly exported functions ==== *)
+let start_raw_mode t location kind args = (
     t.current_line <- location.Error.l_line;
+    match kind with
+    | `code ->
+        CS.push t.stack (`code args);
+        begin match args with
+        | q :: _ ->
+            t.write (~% "\n<!--verbatimbegin:%s -->\n" (sanitize_comments q))
+        | _ -> ()
+        end;
+        t.write "<pre>";
+    | `bypass ->
+        CS.push t.stack (`bypass);
 )
-let exit_verbatim t location = (
-    let env =  (CS.pop t.stack) in
-    match env with
+let handle_raw_text t location text = (
+    t.current_line <- location.Error.l_line;
+    match CS.head t.stack with
     | Some (`code args) ->
-        t.write "</pre>\n";
+        let pcdata = sanitize_pcdata text in
+        t.write (~% "%s" pcdata);
+    | Some `bypass ->
+        t.write text;
+    | _ ->
+        failwith "handle_raw_text: Shouldn't be there, Parser's fault ?";
+)
+let stop_raw_mode t location = (
+    t.current_line <- location.Error.l_line;
+    match CS.pop t.stack with
+    | Some (`code args) ->
+        t.write "</pre>";
         begin match args with
         | q :: _ ->
             t.write (~% "<!--verbatimend:%s -->\n" (sanitize_comments q))
         | _ -> ()
         end;
-        t.current_line <- location.Error.l_line;
+    | Some `bypass -> ()
     | _ ->
         (* warning ? error ? anyway, *)
         failwith "Shouldn't be there, Parser's fault ?";
-)
 
-let handle_verbatim_line t location line = (
-    let pcdata = sanitize_pcdata line in
-    t.write (~% "%s\n" pcdata);
-    t.current_line <- location.Error.l_line;
 )
-
-(* ==== Directly exported functions ==== *)
+let build ~writer = (
+    let t = create ~writer () in
+    let printer = {
+        Signatures.
+        print_comment = handle_comment_line t;
+        print_text =    handle_text t;
+        enter_cmd =     start_command t;
+        leave_cmd =     stop_command t;
+        terminate =     terminate t;
+        enter_raw =     start_raw_mode t;
+        print_raw =     handle_raw_text t;
+        leave_raw =     stop_raw_mode t;
+        error = writer.Signatures.w_error; } in
+    printer
+)
 
 let header ?(title="") ?(comment="") ?stylesheet_link () = (
     let css_str =

@@ -35,18 +35,7 @@ let brtx_to_html ~writer ?doc ?css_link ?(filename="<IN>") ~input_char () = (
             ?stylesheet_link:css_link ()
         );
     );
-    let t = HtmlPrinter.create ~writer () in
-    let printer = {
-        print_comment = HtmlPrinter.handle_comment_line t;
-        print_text =    HtmlPrinter.handle_text t;
-        enter_cmd =     HtmlPrinter.start_command t;
-        leave_cmd =     HtmlPrinter.stop_command t;
-        terminate =     HtmlPrinter.terminate t;
-        enter_raw = (fun o _ l ->  HtmlPrinter.enter_verbatim t o l);
-        print_raw =     HtmlPrinter.handle_verbatim_line t;
-        leave_raw =     HtmlPrinter.exit_verbatim t;
-        error = writer.w_error; } in
-
+    let printer = HtmlPrinter.build ~writer in
     Parser.do_transformation printer input_char filename;
     
     opt_may doc ~f:(fun _ ->
@@ -64,18 +53,7 @@ let brtx_to_latex ~writer ?doc ?use_package ?(filename="<IN>") ~input_char () = 
             ?stylesheet_link:use_package ()
         );
     );
-    let t = LatexPrinter.create ~writer () in
-    let printer = {
-        print_comment = LatexPrinter.handle_comment_line t;
-        print_text =    LatexPrinter.handle_text t;
-        enter_cmd =     LatexPrinter.start_command t;
-        leave_cmd =     LatexPrinter.stop_command t;
-        terminate =     LatexPrinter.terminate t;
-        enter_raw = (fun o _ l ->  LatexPrinter.enter_verbatim t o l);
-        print_raw =     LatexPrinter.handle_verbatim_line t;
-        leave_raw =     LatexPrinter.exit_verbatim t;
-        error = writer.w_error; } in
-
+    let printer = LatexPrinter.build ~writer in
     Parser.do_transformation printer input_char filename;
     
     opt_may doc ~f:(fun _ ->
