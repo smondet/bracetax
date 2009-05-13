@@ -102,8 +102,9 @@ let to_string (location, gravity, message) = (
         | `command_shouldnot_have_args s ->
             spr "This command should not have arguments: %s" s
     in
-    Printf.sprintf "[L:%d,C:%d][%s] %s"
-        location.l_line location.l_char
+    Printf.sprintf "[%s:%d%s][%s] %s"
+        location.l_file location.l_line 
+        (if location.l_char = -1 then "" else (spr ",%d" location.l_char))
         gravity_str message_str
 )
 
