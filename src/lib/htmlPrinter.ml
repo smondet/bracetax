@@ -321,8 +321,6 @@ let start_environment ?(is_begin=false) t location name args = (
     );
 )
 
-(* ==== PRINTER module type's functions ==== *)
-
 let start_command t location name args = (
     t.loc <- location;
     (* p (~% "Command: \"%s\"(%s)\n" name (String.concat ", " args)); *)

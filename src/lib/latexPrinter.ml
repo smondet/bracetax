@@ -337,8 +337,6 @@ let stop_subsup t = (
     t.write "}}$"
 )
 
-(* ==== PRINTER module type's functions ==== *)
-
 let handle_text t location line = (
     t.loc <- location;
 
