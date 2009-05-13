@@ -513,7 +513,7 @@ and parse_raw printer read_fun location end_pattern = (
             Buffer.add_char buf '\n';
             printer.print_raw location (Buffer.contents buf);
             Buffer.reset buf;
-            read_loop location false
+            read_loop (incr_loc location) false
         | Some given_char ->
             Buffer.add_char buf given_char;
             if try_pattern buf end_pattern then (
