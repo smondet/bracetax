@@ -26,45 +26,8 @@
 let (~%) = Printf.sprintf
 let p = print_string
 
-let version_string = ~% "0.1 (ocamlbracetax lib: %s)" Bracetax.Info.version
+let version_string = ~% "0.2 (ocamlbracetax lib: %s)" Bracetax.Info.version
 
-module DummyPrinter = struct
-    type t = int
-    type aux = unit
-
-    let create ~writer () = 0
-
-    let strstat s =
-        (~% "[%d:%d]" s.Bracetax.Error.l_line s.Bracetax.Error.l_char)
-    let head = "####"
-    
-    let handle_comment_line t location line =
-        p (~% "%s%s[comment] \"%s\"\n" head (strstat location) line)
-    let handle_text t location line =
-        p (~% "%s%s[text] \"%s\"\n" head (strstat location) line)
-
-    let start_command t location name args =
-        p (~% "%s%s[start %s(%s)]\n" head (strstat location)
-            name (String.concat ", " args))
-
-    let stop_command t location = 
-        p (~% "%s%s[stop]\n" head (strstat location))
-        
-    let terminate t location = 
-        p (~% "%s%s[This is the end...]\n" head (strstat location))
-
-    let handle_verbatim_line t location line =
-        p (~% "%s%s[verbatim] %s\n" head (strstat location) line)
-
-    let enter_verbatim t location args = ()
-    let exit_verbatim t location = ()
-
-    let dummy_writer = {
-        Bracetax.Signatures.w_write = (fun s -> ());
-        Bracetax.Signatures.w_error = (fun error -> ());
-    }
-
-end
 
 (* Used temporary to force intermodules dependency *)
 module PostPro = PostProcessor
@@ -229,78 +192,78 @@ let () = (
         flush o;
         close_out o;
     );
-    if dbg then (
-        let module DummyTransformer = Bracetax.Transformer.Make(DummyPrinter) in
-        let t =
-            DummyTransformer.create
-                ~writer:DummyPrinter.dummy_writer ~read:(read_line_opt i) ()
+    let write = output_string o in
+    let writer =
+        let error = 
+            function
+            | `undefined s ->
+                return_value_to_shell := 2;
+                prerr_string (s ^ "\n")
+            | `message msg ->
+                return_value_to_shell := 2;
+                prerr_string ((Bracetax.Error.to_string msg) ^ "\n")
         in
-        DummyTransformer.do_transformation t;
-        p (~% "DEBUG Done;\n");
-    ) else (
-        let write = output_string o in
-        let writer =
-            let error = 
-                function
-                | `undefined s ->
-                    return_value_to_shell := 2;
-                    prerr_string (s ^ "\n")
-                | `message msg ->
-                    return_value_to_shell := 2;
-                    prerr_string ((Bracetax.Error.to_string msg) ^ "\n")
-            in
-            Bracetax.Signatures.make_writer ~write  ~error in
-        let read = read_line_opt i in
-        begin match to_do with
-        | `Brtx2HTML ->
-            let module HtmlTransformer =
-                Bracetax.Transformer.Make(Bracetax.HtmlPrinter) in
-            let t = HtmlTransformer.create ~writer ~read () in
-            opt_may !Options.header_footer ~f:(fun title ->
-                write (Bracetax.HtmlPrinter.header
-                    ~comment:"Generated with BraceTax" ~title
-                    ?stylesheet_link:!Options.stylesheet_link ()
-                );
+        Bracetax.Signatures.make_writer ~write  ~error in
+    let read = read_line_opt i in
+    begin match to_do with
+    | `Brtx2HTML ->
+        opt_may !Options.header_footer ~f:(fun title ->
+            write (Bracetax.HtmlPrinter.header
+                ~comment:"Generated with BraceTax" ~title
+                ?stylesheet_link:!Options.stylesheet_link ()
             );
-            HtmlTransformer.do_transformation t;
-            opt_may !Options.header_footer  ~f:(fun _ ->
-                write (Bracetax.HtmlPrinter.footer ());
+        );
+        let t = Bracetax.HtmlPrinter.create ~writer () in
+        let printer = {
+            Bracetax.Transformer.
+            print_comment = Bracetax.HtmlPrinter.handle_comment_line t;
+            print_text =    Bracetax.HtmlPrinter.handle_text t;
+            enter_cmd =     Bracetax.HtmlPrinter.start_command t;
+            leave_cmd =     Bracetax.HtmlPrinter.stop_command t;
+            terminate =     Bracetax.HtmlPrinter.terminate t;
+            enter_raw = (fun o _ l ->  Bracetax.HtmlPrinter.enter_verbatim t o l);
+            print_raw =     Bracetax.HtmlPrinter.handle_verbatim_line t;
+            leave_raw =     Bracetax.HtmlPrinter.exit_verbatim t;
+            error = writer.Bracetax.Signatures.w_error; } in
+        let read_char_opt i () = try Some (input_char i) with e -> None in
+        Bracetax.Transformer.do_transformation printer (read_char_opt i) "bouh";
+        opt_may !Options.header_footer  ~f:(fun _ ->
+            write (Bracetax.HtmlPrinter.footer ());
+        );
+    | `Brtx2LaTeX ->
+        let t = Bracetax.LatexPrinter.create ~writer () in
+        let printer = {
+            Bracetax.Transformer.
+            print_comment = Bracetax.LatexPrinter.handle_comment_line t;
+            print_text =    Bracetax.LatexPrinter.handle_text t;
+            enter_cmd =     Bracetax.LatexPrinter.start_command t;
+            leave_cmd =     Bracetax.LatexPrinter.stop_command t;
+            terminate =     Bracetax.LatexPrinter.terminate t;
+            enter_raw = (fun o _ l ->  Bracetax.LatexPrinter.enter_verbatim t o l);
+            print_raw =     Bracetax.LatexPrinter.handle_verbatim_line t;
+            leave_raw =     Bracetax.LatexPrinter.exit_verbatim t;
+            error = writer.Bracetax.Signatures.w_error; } in
+        let read_char_opt i () = try Some (input_char i) with e -> None in
+        Bracetax.Transformer.do_transformation printer (read_char_opt i) "bouh"
+        (*
+        let module LatexTransformer =
+            Bracetax.Transformer.Make(Bracetax.LatexPrinter) in
+        let t = LatexTransformer.create ~writer ~read () in
+        opt_may !Options.header_footer  ~f:(fun title ->
+            write (Bracetax.LatexPrinter.header
+                ~comment:"Generated with BraceTax" ~title
+                ?stylesheet_link:!Options.stylesheet_link ()
             );
-        | `Brtx2LaTeX ->
-            let t = Bracetax.LatexPrinter.create ~writer () in
-            let printer = {
-                Bracetax.Transformer.
-                print_comment = Bracetax.LatexPrinter.handle_comment_line t;
-                print_text =    Bracetax.LatexPrinter.handle_text t;
-                enter_cmd =     Bracetax.LatexPrinter.start_command t;
-                leave_cmd =     Bracetax.LatexPrinter.stop_command t;
-                terminate =     Bracetax.LatexPrinter.terminate t;
-                enter_raw = (fun o _ l ->  Bracetax.LatexPrinter.enter_verbatim t o l);
-                print_raw =     Bracetax.LatexPrinter.handle_verbatim_line t;
-                leave_raw =     Bracetax.LatexPrinter.exit_verbatim t;
-                error = writer.Bracetax.Signatures.w_error; } in
-            let read_char_opt i () = try Some (input_char i) with e -> None in
-            Bracetax.Transformer.do_transformation printer (read_char_opt i) "bouh"
-            (*
-            let module LatexTransformer =
-                Bracetax.Transformer.Make(Bracetax.LatexPrinter) in
-            let t = LatexTransformer.create ~writer ~read () in
-            opt_may !Options.header_footer  ~f:(fun title ->
-                write (Bracetax.LatexPrinter.header
-                    ~comment:"Generated with BraceTax" ~title
-                    ?stylesheet_link:!Options.stylesheet_link ()
-                );
-            );
-            LatexTransformer.do_transformation t;
-            opt_may !Options.header_footer  ~f:(fun _ ->
-                write (Bracetax.LatexPrinter.footer ());
-            );*)
-        | `PostPro (t :: q as l) ->
-            PostProcessor.process (PostProcessor.BuiltIn.make_list l)
-                read (Printf.fprintf o "%s\n")
-        | `PostPro [] -> ()
-        end;
-    );
+        );
+        LatexTransformer.do_transformation t;
+        opt_may !Options.header_footer  ~f:(fun _ ->
+            write (Bracetax.LatexPrinter.footer ());
+        );*)
+    | `PostPro (t :: q as l) ->
+        PostProcessor.process (PostProcessor.BuiltIn.make_list l)
+            read (Printf.fprintf o "%s\n")
+    | `PostPro [] -> ()
+    end;
     exit !return_value_to_shell;
 )
 
