@@ -200,7 +200,6 @@ let print_table write table = (
             List.fold_left
                 (fun sum cell -> sum + (cell.CT.cols_used * cell.CT.rows_used))
                 0 table.CT.cells in
-        Printf.eprintf "===nb_cells %d / table.CT.col_nb %d\n%!" nb_cells table.CT.col_nb;
         nb_cells / table.CT.col_nb in
     let cur_row = ref 0 and cur_col = ref 0 in
     let riddle =
@@ -242,8 +241,6 @@ let print_table write table = (
                 typ_of_cell c.CT.rows_used c.CT.cols_used alignement
                 (Buffer.contents c.CT.cell_text)
                 typ_of_cell);
-            Printf.eprintf "===fill_riddle %d %d %d %d\n"
-                !cur_row !cur_col c.CT.rows_used c.CT.cols_used;
             fill_riddle !cur_row !cur_col c.CT.rows_used c.CT.cols_used;
             if update_coordinates_and_row_changed cur_row cur_col then (
                 write "</tr>\n";
