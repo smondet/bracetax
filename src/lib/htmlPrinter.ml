@@ -209,8 +209,8 @@ let print_table write table = (
                 | `center -> "class=\"centeralign\" style=\"text-align:center;\""
                 | `left -> "class=\"leftalign\" style=\"text-align:left;\""
             in
-            write (~% "<t%s colspan=\"%d\" %s >%s</t%s>"
-                typ_of_cell c.CT.cols_used alignement
+            write (~% "<t%s colspan=\"%d\" rowspan=\"%d\" %s >%s</t%s>"
+                typ_of_cell c.CT.cols_used c.CT.rows_used alignement
                 (Buffer.contents c.CT.cell_text)
                 typ_of_cell);
             write_cells t (count + c.CT.cols_used)

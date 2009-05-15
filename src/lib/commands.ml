@@ -270,7 +270,8 @@ module Table = struct
        {begin table 4 label defalign}
            {c lrch 2|on two columns}
            {c r3| for backward compat}
-           {c r 2×3|new multirow format}
+           {c r 2x3|new multirow format}
+           {c _ 2x3|multirow, with default align}
        {end}
        *)
     type alignment = [`right | `center | `left ]
@@ -283,6 +284,7 @@ module Table = struct
         cell_text: Buffer.t;
     }
 
+    let default_default_align = `left
     type table = {
         col_nb: int;
         label: string option;
@@ -295,35 +297,58 @@ module Table = struct
     let table_args =
         let default = 1 in
         let parse_int i = try int_of_string i with e -> default in
+        let parse_align str = 
+            match str.[0] with
+            | 'r' -> `right
+            | 'l' -> `left
+            | 'c' -> `center
+            | _   -> (* TODO warning *) default_default_align in
         function
-        | [] -> (default, None)
-        | [s] -> (parse_int s, None)
-        | s :: o :: t -> (parse_int s, Some o)
+        | [] -> (default, None, default_default_align)
+        | s :: [] | s :: _ :: [] -> (parse_int s, None, default_default_align)
+        | s :: l :: a :: _ -> (parse_int s, Some l, parse_align a)
 
-    let cell_args args default_align =
-        let head = ref false in
-        let cols = ref 1 in
-        let alig = ref default_align in
-        let rec parse_str str =
-            if str = "" then ()
-            else (
-                try Scanf.sscanf str "%d%s" (fun c s -> cols := c; parse_str s)
-                with
-                e ->
-                    begin match str.[0] with
-                    | 'h' -> head := true;
-                    | 'r' -> alig := `right;
-                    | 'l' -> alig := `left;
-                    | 'c' -> alig := `center;
-                    | _   -> ()
-                    end;
-                    parse_str (String.sub str 1 (String.length str - 1));
-            )
-        in
-        if args <> [] then (
-            parse_str (List.hd args);
-        );
-        (!head, !cols, !alig)
+    let cell_arguments tab args =
+        let parse_1arg str =
+            let head = ref false in
+            let cols = ref 1 in
+            let alig = ref tab.default_align in
+            let rec p str =
+                if str = "" then ()
+                else (
+                    try Scanf.sscanf
+                        str "%d%s" (fun c s -> cols := c; p s)
+                    with
+                    e ->
+                        begin match str.[0] with
+                        | 'h' -> head := true;
+                        | 'r' -> alig := `right;
+                        | 'l' -> alig := `left;
+                        | 'c' -> alig := `center;
+                        | '_' -> ()
+                        | _   -> (* TODO warning *) ()
+                        end;
+                        p (String.sub str 1 (String.length str - 1));
+                );
+            in
+            p str;
+            (!head, 1, !cols, !alig) in
+        let parse_2args a1 a2 =
+            let h, _, _, a = parse_1arg a1 in
+            let r, c =
+                try 
+                    (try Scanf.sscanf a2 "%dx%d" (fun r c -> (r, c))
+                        with e -> Scanf.sscanf a2 "%d" (fun c -> (1, c)))
+                with e ->
+                    (* TODO: Warning *) (1, 1)
+            in
+            (h, r, c, a) in
+        match args with
+        | [] -> (false, 1, 1, tab.default_align)
+        | arg :: [] ->
+            (parse_1arg arg)
+        | arg1 :: arg2 :: _ ->
+            (parse_2args arg1 arg2)
 
     let write table str = (
         let the_buffer =
@@ -335,19 +360,19 @@ module Table = struct
     )
     
     let start args = (
-        let col_nb, label = table_args args in
+        let col_nb, label, def_alig = table_args args in
         let table = {
             col_nb = col_nb;
             label = label;
             cells = [];
             current_cell = None;
             caption = Buffer.create 64;
-            default_align = `center;
+            default_align = def_alig;
         } in
         (table, `table (col_nb, label), write table)
     )
     let cell_start ~(error:Error.error_fun) tab args = (
-        let head, cnb, align = cell_args args tab.default_align in
+        let head, rnb, cnb, align = cell_arguments tab args in
         let def_cell = `cell (head, cnb, align) in
         begin match tab.current_cell with
         | Some c -> 
@@ -357,7 +382,7 @@ module Table = struct
             let cell_t = {
                 is_head= head;
                 cols_used = cnb;
-                rows_used = 1;
+                rows_used = rnb;
                 align = align;
                 cell_text = Buffer.create 64;
             } in

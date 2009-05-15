@@ -12,6 +12,8 @@ Caption of the old style table
 {c lh|Left header cell} {c c 2|Center double cell}  {c hl|Left header cell}
 {c l 2x3|Two rows, three columns, left} {c|Default, fourth in the row}
                                         {c h|Header, 4th in the row}
+{c _ 2x2|2 rows, 2 columns, default} {c|Default, 3rd} {c|Default, 4th}
+                                      {c 2|Default, 3rd and 4th}
 Caption of the new style table, default align is right
 {end}
 
