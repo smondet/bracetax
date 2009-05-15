@@ -6,14 +6,17 @@
 Caption of the old style table
 {end}
 
+{br}{br}{br}
+
 {begin table 4 new:style r} 
 {c|Simple cell} {c h|Header cell} {c rh|Header right cell} {c r|Right cell}
 {c c|Center cell} {c l|Left cell} {c r2|Right double cell} 
 {c lh|Left header cell} {c c 2|Center double cell}  {c hl|Left header cell}
 {c l 2x3|Two rows, three columns, left} {c|Default, fourth in the row}
                                         {c h|Header, 4th in the row}
-{c _ 2x2|2 rows, 2 columns, default} {c|Default, 3rd} {c|Default, 4th}
-                                      {c 2|Default, 3rd and 4th}
+{c|Default, 3rd} {c|Default, 4th} {c _ 2x2|2 rows, 2 columns, default} 
+ {c 2|Default, 3rd and 4th}                                           
+{c|Simple cell} {c h|Header cell} {c rh|Header right cell} {c r|Right cell}
 Caption of the new style table, default align is right
 {end}
 

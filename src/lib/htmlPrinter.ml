@@ -194,14 +194,43 @@ let print_table write table = (
         lbl_str);
     write (~% "<caption  class=\"tablefigure\" %s>%s</caption>\n<tr>"
         lbl_str (Buffer.contents table.CT.caption));
-    let rec write_cells cells count =
+
+    let nb_rows = 
+        let nb_cells = 
+            List.fold_left
+                (fun sum cell -> sum + (cell.CT.cols_used * cell.CT.rows_used))
+                0 table.CT.cells in
+        Printf.eprintf "===nb_cells %d / table.CT.col_nb %d\n%!" nb_cells table.CT.col_nb;
+        nb_cells / table.CT.col_nb in
+    let cur_row = ref 0 and cur_col = ref 0 in
+    let riddle =
+        (* one row too much to simplify update_coordinates_and_row_change *)
+        Array.make_matrix (nb_rows + 1) table.CT.col_nb false in
+
+    let fill_riddle from_row from_col offset_row offset_col =
+        for i = 1 to offset_row do
+            for j = 1 to offset_col do
+                riddle.(from_row + i - 1).(from_col + j - 1) <- true;
+            done;
+        done;
+    in
+    let update_coordinates_and_row_changed row col =
+        (* Find next false in riddle *)
+        let prev_row = !row in
+        let next_coord () =
+            if !col = table.CT.col_nb - 1 then
+                (col := 0; incr row;) else (incr col;) in
+        next_coord ();
+        while riddle.(!row).(!col) do
+            next_coord ();
+        done;
+        (prev_row <> !row)
+    in
+    let rec write_cells cells =
         match cells with
         | [] -> (* fill the gap + warning *)
             ()
         | c :: t ->
-            if count <> 0 && count mod table.CT.col_nb = 0 then (
-                write "</tr>\n<tr>"
-            );
             let typ_of_cell = if c.CT.is_head then "h" else "d" in
             let alignement =
                 match c.CT.align with
@@ -209,13 +238,21 @@ let print_table write table = (
                 | `center -> "class=\"centeralign\" style=\"text-align:center;\""
                 | `left -> "class=\"leftalign\" style=\"text-align:left;\""
             in
-            write (~% "<t%s colspan=\"%d\" rowspan=\"%d\" %s >%s</t%s>"
-                typ_of_cell c.CT.cols_used c.CT.rows_used alignement
+            write (~% "<t%s  rowspan=\"%d\" colspan=\"%d\" %s >%s</t%s>"
+                typ_of_cell c.CT.rows_used c.CT.cols_used alignement
                 (Buffer.contents c.CT.cell_text)
                 typ_of_cell);
-            write_cells t (count + c.CT.cols_used)
+            Printf.eprintf "===fill_riddle %d %d %d %d\n"
+                !cur_row !cur_col c.CT.rows_used c.CT.cols_used;
+            fill_riddle !cur_row !cur_col c.CT.rows_used c.CT.cols_used;
+            if update_coordinates_and_row_changed cur_row cur_col then (
+                write "</tr>\n";
+                if t <> [] then
+                    write "<tr>";
+            );
+            write_cells t
     in
-    write_cells (List.rev table.CT.cells) 0;
+    write_cells (List.rev table.CT.cells);
     write "</tr></table></div>\n"
 )
 
