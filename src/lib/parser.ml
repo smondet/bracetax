@@ -195,7 +195,8 @@ and parse_raw printer read_fun location end_pattern = (
     let rec read_loop location escaping = 
         match read_fun () with
         | None ->
-            err printer location (`end_of_input_not_in_text "Reading Command");
+            err printer location
+                (`end_of_input_not_in_text "Reading Code/Bypass");
             printer.terminate location;
         | Some '\n' ->
             Buffer.add_char buf '\n';
