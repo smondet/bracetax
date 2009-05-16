@@ -403,6 +403,47 @@ module Table = struct
         end
     )
 
+    (* Utilities for printing table without too much headache *)
+    module Util = struct
+        let nb_rows table = (
+            let nb_cells = 
+                List.fold_left
+                    (fun sum cell ->
+                        sum + (cell.cols_used * cell.rows_used))
+                    0 table.cells in
+            nb_cells / table.col_nb
+        )
+
+        let make_riddle table =
+            let rows, cols = nb_rows table, table.col_nb in
+            (* one row too much to simplify next_coordinates *)
+            Array.make_matrix (rows + 1) (cols) false
+
+        let fill_riddle riddle from_row from_col offset_row offset_col = (
+            for i = 1 to offset_row do
+                for j = 1 to offset_col do
+                    riddle.(from_row + i - 1).(from_col + j - 1) <- true;
+                done;
+            done;
+        )
+
+        (* Find next false in riddle *)
+        let next_coordinates riddle table prev_row prev_col = (
+            let row = ref prev_row in
+            let col = ref prev_col in
+            let next_coord () =
+                if !col = table.col_nb - 1 then
+                    (col := 0; incr row;) else (incr col;) in
+            next_coord ();
+            while riddle.(!row).(!col) do
+                next_coord ();
+            done;
+            (!row, !col)
+        )
+
+
+
+    end
 
 
 end

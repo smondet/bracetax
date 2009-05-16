@@ -195,37 +195,9 @@ let print_table write table = (
     write (~% "<caption  class=\"tablefigure\" %s>%s</caption>\n<tr>"
         lbl_str (Buffer.contents table.CT.caption));
 
-    let nb_rows = 
-        let nb_cells = 
-            List.fold_left
-                (fun sum cell -> sum + (cell.CT.cols_used * cell.CT.rows_used))
-                0 table.CT.cells in
-        nb_cells / table.CT.col_nb in
-    let cur_row = ref 0 and cur_col = ref 0 in
-    let riddle =
-        (* one row too much to simplify update_coordinates_and_row_change *)
-        Array.make_matrix (nb_rows + 1) table.CT.col_nb false in
+    let riddle = CT.Util.make_riddle table in
 
-    let fill_riddle from_row from_col offset_row offset_col =
-        for i = 1 to offset_row do
-            for j = 1 to offset_col do
-                riddle.(from_row + i - 1).(from_col + j - 1) <- true;
-            done;
-        done;
-    in
-    let update_coordinates_and_row_changed row col =
-        (* Find next false in riddle *)
-        let prev_row = !row in
-        let next_coord () =
-            if !col = table.CT.col_nb - 1 then
-                (col := 0; incr row;) else (incr col;) in
-        next_coord ();
-        while riddle.(!row).(!col) do
-            next_coord ();
-        done;
-        (prev_row <> !row)
-    in
-    let rec write_cells cells =
+    let rec write_cells cells cur_row cur_col =
         match cells with
         | [] -> (* fill the gap + warning *)
             ()
@@ -241,15 +213,18 @@ let print_table write table = (
                 typ_of_cell c.CT.rows_used c.CT.cols_used alignement
                 (Buffer.contents c.CT.cell_text)
                 typ_of_cell);
-            fill_riddle !cur_row !cur_col c.CT.rows_used c.CT.cols_used;
-            if update_coordinates_and_row_changed cur_row cur_col then (
+            CT.Util.fill_riddle riddle
+                cur_row cur_col c.CT.rows_used c.CT.cols_used;
+            let next_row, next_col = 
+                CT.Util.next_coordinates riddle table cur_row cur_col in
+            if cur_row <> next_row then (
                 write "</tr>\n";
                 if t <> [] then
                     write "<tr>";
             );
-            write_cells t
+            write_cells t next_row next_col
     in
-    write_cells (List.rev table.CT.cells);
+    write_cells (List.rev table.CT.cells) 0 0;
     write "</tr></table></div>\n"
 )
 
