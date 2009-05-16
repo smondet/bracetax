@@ -237,37 +237,58 @@ let print_table write table = (
         \    \\begin{tabular}{%s}\n\
         \    \\hline " table_format
     );
-    let rec write_cells cells count =
-        match cells with
-        | [] -> (* fill the gap + warning *)
-            ()
-        | c :: t ->
-            if count <> 0 then (
-                if count mod table.CT.col_nb = 0 then (
-                    write "\\\\\n      \\hline "
-                ) else (
-                    write " & "
-                );
-            );
-            let text = (Buffer.contents c.CT.cell_text) in
-            let text_with_type =
-                if c.CT.is_head then ~% "\\textbf{%s}" text else text in
-            let alignment =
-                match c.CT.align with
-                | `right -> "r"
-                | `center -> "c"
-                | `left -> "l"
-            in
-            let multicol = 
-                (~% "\\multicolumn{%d}{|%s|}{%s}"
-                    c.CT.cols_used alignment text_with_type)
-            in
-            (*write (~% "%s %s" ""[>TODO alignement<] multicol);*)
-            write multicol;
-            write_cells t (count + c.CT.cols_used);
-    in
-    write_cells (List.rev table.CT.cells) 0;
-    write (~% "\\\\\n    \\hline\n\
+    let nb_rows, nb_cols, matrix = 
+        CT.Util.cells_to_matrix table in
+    let string_of_cell c =
+        let text = (Buffer.contents c.CT.cell_text) in
+        let text_with_type =
+            if c.CT.is_head then ~% "\\textbf{%s}" text else text in
+        let text_with_type_and_rows =
+            if c.CT.rows_used <> 1 then 
+                ~% "\\multirow{%d}{*}{%s}" c.CT.rows_used text_with_type
+            else
+                text_with_type in
+        let alignment =
+            match c.CT.align with
+            | `right -> "r"
+            | `center -> "c"
+            | `left -> "l"
+        in
+        let multicol = 
+            (~% "\\multicolumn{%d}{|%s|}{%s}"
+                c.CT.cols_used alignment text_with_type_and_rows)
+        in
+        multicol
+    in 
+    for row = 0 to nb_rows - 1 do
+        let latest = ref (-1, -1) in
+        let buf_separ = Buffer.create 42 in
+        let buf_row = Buffer.create 42 in
+        for col = 0 to nb_cols - 1 do
+            begin match matrix.(row).(col) with
+            | `none ->
+                ()
+            | `cell c ->
+                Buffer.add_string buf_row (string_of_cell c);
+                latest := (row, col);
+                if col + c.CT.cols_used - 1 <> nb_cols - 1 then
+                    Buffer.add_string buf_row " & ";
+                Buffer.add_string buf_separ
+                    (~% " \\cline{%d-%d}" (col + 1) (col + 1));
+            | `filled (r, c) ->
+                if (r, c) <> !latest && col <> nb_cols - 1 then
+                    Buffer.add_string buf_row " & ";
+                if r = row then
+                    Buffer.add_string buf_separ
+                        (~% " \\cline{%d-%d}" (col + 1) (col + 1));
+                (* write " & "; *)
+            end;
+        done;
+        write (Buffer.contents buf_separ);
+        write (Buffer.contents buf_row);
+        write "\\\\\n";
+    done;
+    write (~% "\\hline\n\
         \  \\end{tabular}\n\
         \  \\end{center}\n\
         \  \\caption{%s%s}\n\
@@ -568,6 +589,7 @@ let header ?(title="") ?(comment="") ?stylesheet_link () = (
     \n\
     \\usepackage[T1]{fontenc}\n\
     \\usepackage[english]{babel}\n\
+    \\usepackage{multirow}\n\
     \\usepackage{ucs}\n\
     \\usepackage[utf8x,utf8]{inputenc}\n\
     \\usepackage[                         \n\

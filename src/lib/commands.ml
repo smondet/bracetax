@@ -417,12 +417,13 @@ module Table = struct
         let make_riddle table =
             let rows, cols = nb_rows table, table.col_nb in
             (* one row too much to simplify next_coordinates *)
-            Array.make_matrix (rows + 1) (cols) false
+            Array.make_matrix (rows + 1) (cols) (-1, -1)
 
         let fill_riddle riddle from_row from_col offset_row offset_col = (
             for i = 1 to offset_row do
                 for j = 1 to offset_col do
-                    riddle.(from_row + i - 1).(from_col + j - 1) <- true;
+                    riddle.(from_row + i - 1).(from_col + j - 1) <- 
+                        (from_row, from_col);
                 done;
             done;
         )
@@ -435,13 +436,56 @@ module Table = struct
                 if !col = table.col_nb - 1 then
                     (col := 0; incr row;) else (incr col;) in
             next_coord ();
-            while riddle.(!row).(!col) do
+            while riddle.(!row).(!col) <> (-1, -1) do
                 next_coord ();
             done;
             (!row, !col)
         )
 
 
+        type in_table = [
+            | `none
+            | `cell of cell
+            | `filed of int * int
+        ]
+        let matrix_next_coordinates mat table prev_row prev_col = (
+            let row = ref prev_row in
+            let col = ref prev_col in
+            let next_coord () =
+                if !col = table.col_nb - 1 then
+                    (col := 0; incr row;) else (incr col;) in
+            next_coord ();
+            while mat.(!row).(!col) <> `none do
+                next_coord ();
+            done;
+            (!row, !col)
+        )
+        let cells_to_matrix table = (
+            let rows, cols = nb_rows table, table.col_nb in
+            let mat = Array.make_matrix (rows + 1) (cols) `none in
+            let rec iter_on_cells cur_row cur_col = function
+                | [] -> ()
+                | cell :: t ->
+(* Printf.eprintf "===mat.(%d).(%d) <- `cell str_cell;\n%!" cur_row cur_col; *)
+(* Printf.eprintf "   rows: %d, cols: %d\n" cell.rows_used cell.cols_used; *)
+                    for i = 0 to cell.rows_used - 1 do
+                        for j = 0 to cell.cols_used - 1 do
+(* Printf.eprintf "     at.( %d + %d , %d + %d\n" cur_row i cur_col j; *)
+                            if i = 0 && j = 0 then (
+                                mat.(cur_row).(cur_col) <- `cell cell;
+                            ) else (
+                                mat.(cur_row + i).(cur_col + j) <- 
+                                    `filled (cur_row, cur_col);
+                            );
+                        done;
+                    done;
+                    let next_row, next_col = 
+                        matrix_next_coordinates mat table cur_row cur_col in
+                    iter_on_cells next_row next_col t
+            in
+            iter_on_cells 0 0 (List.rev table.cells);
+            (rows, cols, mat)
+        )
 
     end
 

@@ -6,7 +6,6 @@
 Caption of the old style table
 {end}
 
-{br}{br}{br}
 
 {begin table 4 new:style r} 
 {c|Simple cell} {c h|Header cell} {c rh|Header right cell} {c r|Right cell}
@@ -14,14 +13,14 @@ Caption of the old style table
 {c lh|Left header cell} {c c 2|Center double cell}  {c hl|Left header cell}
 {c l 2x3|Two rows, three columns, left} {c|Default, fourth in the row}
                                         {c h|Header, 4th in the row}
-{c|Default, 3rd} {c|Default, 4th} {c _ 2x2|2 rows, 2 columns, default} 
- {c 2|Default, 3rd and 4th}                                           
+{c|Default, 1st} {c|Default, 2nd} {c _ 2x2|2 rows, 2 columns, default} 
+ {c 2|Default, 1st and 2nd}                                           
 {c|Simple cell} {c h|Header cell} {c rh|Header right cell} {c r|Right cell}
 Caption of the new style table, default align is right
 {end}
 
 {code endcode}
-begin{table}[h]
+\begin{table}[h]
     \begin{center}
 
     \begin{tabular}{|l|c|c|c|}
@@ -41,15 +40,8 @@ begin{table}[h]
     \end{center}
     \caption{Comparison of coding performance of three methods: basic binary coding,
         basic coding compressed with bzip2 and our progressive coding
-        (using the ``best compromise'' setup; not the ``best compression''
-        one \cf Section \ref{sec:expprogdec}).
         Size is given in bytes and compression ratio is given w.r.t.
  the {\it basic} serialization size.
-% for our method (the file is the concatenation
-%     of all binary chunk), a binary naive format (32 bit integers and floats),
-%     and the same BNF compressed with bzip2 \TSwarning{(ref?)}
-%     (counting of course only geometry without radii) \TSwarning{which $c$
-%     value(s) do we keep ???
 }
     \label{tab:compression}
 \end{table}
