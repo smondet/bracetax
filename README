@@ -12,3 +12,26 @@ And open doc/site/index.html
 
 OTHER: See `mk h`
 
+
+
+
+TODO:
+  * table: finish latex output of newgen tables
+  * doc: postpro
+  * build documentation of lib
+  * more flexible postpros 
+  * `undefined errors in commands.ml 
+  * doc: add git log with to explain | sed -e 's/\([{}#]\)/{\1}/g' | 
+  * make understand line number directives 
+  * add TOC retrieval
+    as a tree of {list|s...
+
+MAYBE TODO:
+  * ?? an {options ...} command 
+    with default language, etc… also parametrable from command line…
+  * add a hack for figure names  
+    % becomes png for HTML output and pdf for LaTeX output.
+  * use Dynlink for custom printers 
+  * resume ConTeXt output
+  * Pure Text output
+
