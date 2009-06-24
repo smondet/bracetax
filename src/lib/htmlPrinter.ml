@@ -243,12 +243,12 @@ let cell_start t args = (
         t.error (Error.mk t.loc `error `cell_out_of_table);
         `cell (false, 1, `center)
     | Some tab ->
-        Commands.Table.cell_start ~error:t.error tab args
+        Commands.Table.cell_start ~loc:t.loc ~error:t.error tab args
 )
 let cell_stop t env = (
     match t.current_table with
     | None -> (* Already warned *) ()
-    | Some tab -> Commands.Table.cell_stop ~error:t.error tab
+    | Some tab -> Commands.Table.cell_stop ~loc:t.loc ~error:t.error tab
 )
 
 let note_start t = (

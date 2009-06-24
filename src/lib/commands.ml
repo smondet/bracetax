@@ -371,12 +371,12 @@ module Table = struct
         } in
         (table, `table (col_nb, label), write table)
     )
-    let cell_start ~(error:Error.error_fun) tab args = (
+    let cell_start ~loc ~(error:Error.error_fun) tab args = (
         let head, rnb, cnb, align = cell_arguments tab args in
         let def_cell = `cell (head, cnb, align) in
         begin match tab.current_cell with
         | Some c -> 
-            error (`undefined "Warning: no use for a cell inside a cell !\n");
+            error (Error.mk loc `error `cell_inside_cell);
             def_cell
         | None ->
             let cell_t = {
@@ -391,15 +391,14 @@ module Table = struct
         end
     )
 
-    let cell_stop ~(error:Error.error_fun) tab = (
+    let cell_stop ~loc ~(error:Error.error_fun) tab = (
         begin match tab.current_cell with
         | Some c -> 
             tab.cells <- c :: tab.cells;
             tab.current_cell <- None;
         | None ->
-            error (`undefined
-                "Should not be there... unless you already know you shouldn't \
-                cells put in cells...\n");
+            (* already errored *)
+            ()
         end
     )
 

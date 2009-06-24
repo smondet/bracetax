@@ -184,7 +184,7 @@ let start_environment ?(is_begin=false) t location name args = (
             | None ->
                 t.error (Error.mk t.loc `error `cell_out_of_table);
                 `cell (false, 1, `center)
-            | Some tab -> Commands.Table.cell_start ~error:t.error tab args
+            | Some tab -> Commands.Table.cell_start ~loc:t.loc ~error:t.error tab args
             end;
         | s when C.is_note s -> t.write (o.start_note ()); `note
         | s ->
@@ -289,7 +289,7 @@ let stop_command t location = (
         | `cell _ ->
             begin match t.current_table with
             | None -> (* Already warned: *) ()
-            | Some tab -> Commands.Table.cell_stop ~error:t.error tab
+            | Some tab -> Commands.Table.cell_stop ~loc:t.loc ~error:t.error tab
             end;
         | `note -> t.write (o.stop_note ())
         | `cmd_inside c ->

@@ -34,6 +34,7 @@ type message = [
     | `ignored_text_after_verbatim_begin of string (* the ignored text *)
     | `malformed_verbatim_begin
     | `cell_out_of_table
+    | `cell_inside_cell
     | `unknown_command of string
     | `begin_without_arg
     | `non_matching_end
@@ -81,6 +82,7 @@ let to_string (location, gravity, message) = (
             spr "Text after {verbatim ...} will be ignored: %s" s
         | `malformed_verbatim_begin -> "Malformed begin of verbatim environment"
         | `cell_out_of_table -> "Cell (\"{c ...}\") command not in table"
+        | `cell_inside_cell -> "Cell (\"{c ...}\") command inside another cell"
         | `unknown_command s -> spr "Unknown command: %s" s
         | `begin_without_arg -> "{begin} without argument"
         | `non_matching_end -> "{end} does not match a {begin}"

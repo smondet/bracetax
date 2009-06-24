@@ -20,7 +20,6 @@ TODO:
   * doc: postpro
   * build documentation of lib
   * more flexible postpros 
-  * `undefined errors in commands.ml 
   * doc: add git log with to explain | sed -e 's/\([{}#]\)/{\1}/g' | 
   * make understand line number directives 
   * add TOC retrieval

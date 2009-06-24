@@ -310,7 +310,7 @@ let cell_start t args = (
     | None ->
         t.error (Error.mk t.loc `error `cell_out_of_table);
         `cell (false, 1, `center)
-    | Some tab -> Commands.Table.cell_start ~error:t.error tab args
+    | Some tab -> Commands.Table.cell_start ~loc:t.loc ~error:t.error tab args
 )
 let cell_stop t env = (
     match t.current_table with
@@ -318,7 +318,7 @@ let cell_stop t env = (
         (* Already warned: *)
         (* t.error (Error.mk t.loc `warning `cell_out_of_table); *)
         ()
-    | Some tab -> Commands.Table.cell_stop ~error:t.error tab
+    | Some tab -> Commands.Table.cell_stop ~loc:t.loc ~error:t.error tab
 )
 
 
