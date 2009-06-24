@@ -24,6 +24,8 @@ TODO:
   * make understand line number directives 
   * add TOC retrieval
     as a tree of {list|s...
+  * html: optionaly add class="*type" (eg -class foo  <li class="foolistitem">)
+  * prepare the new version of the brtx command line style (svn like)
 
 MAYBE TODO:
   * ?? an {options ...} command 
