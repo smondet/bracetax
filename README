@@ -33,4 +33,5 @@ MAYBE TODO:
   * use Dynlink for custom printers 
   * resume ConTeXt output
   * Pure Text output
+  * add section numbering (for HTML, and also in TOC and for internal links)
 
