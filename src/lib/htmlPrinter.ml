@@ -105,12 +105,12 @@ let list_stop =
 let section_start n l =
     let lsan =
         match sanitize_xml_attribute l with
-        | "" -> "" | s -> ~% "name=\"%s\" id=\"%s\"" s s
+        | "" -> "" | s -> ~% " id=\"%s\"" s
     in
-    ~% "</div>\n<h%d><a %s>" (n + 1) lsan
+    ~% "</div>\n<h%d %s>" (n + 1) lsan
 
 let section_stop n l =
-    ~% "</a></h%d>\n<div class=\"p\">" (n + 1)
+    ~% "</h%d>\n<div class=\"p\">" (n + 1)
 
 let link_start t args = (
     let link, new_write = Commands.Link.start args in
