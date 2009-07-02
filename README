@@ -16,7 +16,6 @@ OTHER: See `mk h`
 
 
 TODO:
-  * table: finish latex output of newgen tables
   * doc: postpro
   * build documentation of lib
   * more flexible postpros 
