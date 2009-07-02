@@ -126,7 +126,10 @@ and parse_command printer read_fun location = (
                 Buffer.add_char buf c;
                 read_loop loc false
             ) else (
-                cmd := (Buffer.contents buf) :: !cmd;
+                let str = Buffer.contents buf in
+                if str <> "" then (
+                    cmd := (Buffer.contents buf) :: !cmd;
+                );
                 Buffer.reset buf;
                 read_loop loc false
             )
