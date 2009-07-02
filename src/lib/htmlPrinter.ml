@@ -496,11 +496,15 @@ let stop_raw_mode t location = (
         failwith "Shouldn't be there, Parser's fault ?";
 
 )
-let build ~writer = (
+let build ?(print_comments=false) ~writer () = (
     let t = create ~writer () in
     let printer = {
         Signatures.
-        print_comment = handle_comment_line t;
+        print_comment =
+            if print_comments then 
+                (handle_comment_line t)
+            else 
+                (fun a b -> ());
         print_text =    handle_text t;
         enter_cmd =     start_command t;
         leave_cmd =     stop_command t;

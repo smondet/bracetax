@@ -23,7 +23,6 @@ TODO:
   * add TOC retrieval
     - as a tree of {list|s...
     - using a new printer: tocPrinter ?
-  * make "print_comment" optional (in parser.ml:88)
   * redo command line interface
     - think about passing right filename to the parser (not '<IN>')
 
