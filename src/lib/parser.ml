@@ -49,6 +49,7 @@ let check_end_pattern pattern = (
 let err pr loc typ = pr.error (Error.mk loc `error typ)
 let loc line file = { Error.l_line = line; l_char = -1; l_file = file }
 let incr_loc location = loc (location.Error.l_line + 1) location.Error.l_file
+let mv_loc location line = loc line location.Error.l_file
 
 let rec parse_text printer read_fun location = (
     let buf = Buffer.create 42 in
@@ -85,8 +86,20 @@ and parse_comment printer read_fun location = (
             printer.print_comment location (Buffer.contents buf);
             printer.terminate location;
         | Some '\n' ->
-            printer.print_comment location (Buffer.contents buf);
-            parse_text printer read_fun (incr_loc location)
+            let comment_line = (Buffer.contents buf) in
+            printer.print_comment location comment_line;
+            let new_loc =
+                try 
+                    Scanf.sscanf comment_line "line %d %S"
+                        (fun i s ->
+                            Printf.eprintf "%d %s...\n" i s; (loc i s))
+                with
+                _ -> (try
+                    Scanf.sscanf comment_line "line %d"
+                        (fun i -> Printf.eprintf "%d same file...\n" i;
+                        mv_loc location i)
+                    with _ -> (incr_loc location)) in
+            parse_text printer read_fun new_loc
         | Some given_char ->
             Buffer.add_char buf given_char;
             read_loop location

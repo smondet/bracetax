@@ -1,0 +1,11 @@
+{err1}
+define(`bouh',`bla bla bla')dnl
+{err2}
+#line 34
+{err3}
+#line 42 "newfile_A"
+{err4}
+#line 42 "newfile B"
+{err5}
+
+bouh

@@ -19,16 +19,13 @@ TODO:
   * doc: postpro
   * build documentation of lib
   * doc: add git log with to explain | sed -e 's/\([{}#]\)/{\1}/g' | 
-  * make understand line number directives 
-    - doc end of: http://caml.inria.fr/pub/docs/manual-ocaml/lex.html
-    - also doc: http://publib.boulder.ibm.com/infocenter/systems/index.jsp?topic=/com.ibm.xlcpp101.cell.doc/language_ref/lc.html
-    - usable with 'm4 -s'
   * html: optionaly add class="*type" (eg -class foo  <li class="foolistitem">)
   * add TOC retrieval
     - as a tree of {list|s...
     - using a new printer: tocPrinter ?
   * make "print_comment" optional (in parser.ml:88)
   * redo command line interface
+    - think about passing right filename to the parser (not '<IN>')
 
 MAYBE TODO:
   * ?? an {options ...} command 
