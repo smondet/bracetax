@@ -16,16 +16,19 @@ OTHER: See `mk h`
 
 
 TODO:
-  * table: finish latex output of newgen tables
   * doc: postpro
   * build documentation of lib
-  * more flexible postpros 
   * doc: add git log with to explain | sed -e 's/\([{}#]\)/{\1}/g' | 
   * make understand line number directives 
-  * add TOC retrieval
-    as a tree of {list|s...
+    - doc end of: http://caml.inria.fr/pub/docs/manual-ocaml/lex.html
+    - also doc: http://publib.boulder.ibm.com/infocenter/systems/index.jsp?topic=/com.ibm.xlcpp101.cell.doc/language_ref/lc.html
+    - usable with 'm4 -s'
   * html: optionaly add class="*type" (eg -class foo  <li class="foolistitem">)
-  * prepare the new version of the brtx command line style (svn like)
+  * add TOC retrieval
+    - as a tree of {list|s...
+    - using a new printer: tocPrinter ?
+  * make "print_comment" optional (in parser.ml:88)
+  * redo command line interface
 
 MAYBE TODO:
   * ?? an {options ...} command 
@@ -33,6 +36,7 @@ MAYBE TODO:
   * add a hack for figure names  
     % becomes png for HTML output and pdf for LaTeX output.
   * use Dynlink for custom printers 
+  * more flexible postpros 
   * resume ConTeXt output
   * Pure Text output
   * add section numbering (for HTML, and also in TOC and for internal links)

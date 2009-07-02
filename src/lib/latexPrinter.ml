@@ -260,35 +260,46 @@ let print_table write table = (
         in
         multicol
     in 
+    let empty_multicol cols = (~% "\\multicolumn{%d}{|c|}{}" cols) in
+    let separator cur_col cols_used nb_cols =
+        if cur_col + cols_used - 1 <> nb_cols - 1 then " & " else " \\\\\n" in
+    let str_matrix = Array.make_matrix nb_rows nb_cols "" in
+    let lines_matrix = Array.make_matrix nb_rows nb_cols false in
     for row = 0 to nb_rows - 1 do
-        let latest = ref (-1, -1) in
+        for col = 0 to nb_cols - 1 do
+            begin match matrix.(row).(col) with
+            | `none -> ()
+            | `cell c ->
+                let the_cell =
+                    (string_of_cell c) ^ (separator col c.CT.cols_used nb_cols) in
+                str_matrix.(row).(col) <- the_cell;
+                for i = row + 1 to row + c.CT.rows_used - 1 do
+                    str_matrix.(i).(col) <- 
+                        (empty_multicol c.CT.cols_used) 
+                        ^ (separator col c.CT.cols_used nb_cols);
+                done;
+                for i = col to col + c.CT.cols_used - 1 do
+                    lines_matrix.(row + c.CT.rows_used - 1).(i) <- true;
+                done;
+            | `filled (r, c) -> ()
+            end;
+        done;
+    done;
+    for row = 0 to nb_rows - 1 do
         let buf_separ = Buffer.create 42 in
         let buf_row = Buffer.create 42 in
         for col = 0 to nb_cols - 1 do
-            begin match matrix.(row).(col) with
-            | `none ->
-                ()
-            | `cell c ->
-                Buffer.add_string buf_row (string_of_cell c);
-                latest := (row, col);
-                if col + c.CT.cols_used - 1 <> nb_cols - 1 then
-                    Buffer.add_string buf_row " & ";
+            Buffer.add_string buf_row str_matrix.(row).(col);
+            if (lines_matrix.(row).(col)) then (
                 Buffer.add_string buf_separ
                     (~% " \\cline{%d-%d}" (col + 1) (col + 1));
-            | `filled (r, c) ->
-                if (r, c) <> !latest && col <> nb_cols - 1 then
-                    Buffer.add_string buf_row " & ";
-                if r = row then
-                    Buffer.add_string buf_separ
-                        (~% " \\cline{%d-%d}" (col + 1) (col + 1));
-                (* write " & "; *)
-            end;
+            );
         done;
-        write (Buffer.contents buf_separ);
         write (Buffer.contents buf_row);
-        write "\\\\\n";
+        write (Buffer.contents buf_separ);
+        write "\n";
     done;
-    write (~% "\\hline\n\
+    write (~% "\n\
         \  \\end{tabular}\n\
         \  \\end{center}\n\
         \  \\caption{%s%s}\n\
