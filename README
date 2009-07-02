@@ -20,9 +20,12 @@ TODO:
   * build documentation of lib
   * doc: add git log with to explain | sed -e 's/\([{}#]\)/{\1}/g' | 
   * html: optionaly add class="*type" (eg -class foo  <li class="foolistitem">)
+    - there may be various classes:
+    http://www.w3schools.com/tags/att_standard_class.asp
   * add TOC retrieval
     - as a tree of {list|s...
     - using a new printer: tocPrinter ?
+    - => test genericPrinter
   * redo command line interface
     - think about passing right filename to the parser (not '<IN>')
 
