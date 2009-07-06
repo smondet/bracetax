@@ -31,12 +31,33 @@ let stop_section me level label = (
     ""
 )
 let termination me () = (
-    String.concat "" 
-        (List.rev_map (fun (level, label, title) ->
-            let l = match label with None -> "" | Some s -> s in
-            (spr "{section %d %s|%s}\n" level l title)) me.sections)
-
-
+    let string_of_section label title =
+        match label with
+        | None -> title
+        | Some link -> spr "{link local:%s|%s}" link title in
+    let spaces_of_level level = String.make (level * 2) ' ' in
+    let adjust_level_before curlv lv =
+        let res = ref "" in
+        for i = curlv to lv - 1 do
+            res := !res ^ (spr "%s{list enum|\n" (spaces_of_level i));
+        done;
+        !res in
+    let adjust_level_after curlv lv =
+        if curlv > lv then
+            (spr "%s%s\n" (spaces_of_level lv) (String.make (curlv - lv) '}'))
+        else "" in
+    let rec transform_list current_level acc = function
+        | [] -> (String.make current_level '}') :: acc
+        | (level, label, title) :: t ->
+            let str =
+                spr "%s%s%s{*} %s\n"
+                    (adjust_level_before current_level level)
+                    (adjust_level_after current_level level)
+                    (spaces_of_level level) (string_of_section label title)
+            in
+            transform_list level (str :: acc) t
+    in
+    String.concat "" (List.rev (transform_list 0 [] (List.rev me.sections)))
 )
 
 let create () = (

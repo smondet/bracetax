@@ -22,10 +22,6 @@ TODO:
   * html: optionaly add class="*type" (eg -class foo  <li class="foolistitem">)
     - there may be various classes:
     http://www.w3schools.com/tags/att_standard_class.asp
-  * add TOC retrieval
-    - as a tree of {list|s...
-    - using a new printer: tocPrinter ?
-    - => test genericPrinter
   * redo command line interface
     - think about passing right filename to the parser (not '<IN>')
   * in Commands, should replace `quotation (open,close) by `quotation style
