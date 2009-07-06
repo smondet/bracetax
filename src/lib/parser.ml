@@ -142,13 +142,6 @@ and parse_command printer read_fun location = (
                 match List.rev !cmd with
                 | [] ->
                     failwith "Shouldn't be here..."
-                | c :: t when c = "{" || c = "}" || c = "#" ->
-                    printer.print_text location c;
-                    if t <> [] then (
-                        printer.error (Error.mk location `warning
-                            (`command_shouldnot_have_args c));
-                    );
-                    parse_text printer read_fun location
                 | c :: t when
                     c = (str_of_raw_cmd `code) ||
                     c = (str_of_raw_cmd `bypass) ->
