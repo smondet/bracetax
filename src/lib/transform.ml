@@ -64,6 +64,11 @@ let brtx_to_latex ~writer ?doc ?use_package ?(print_comments=false)
 
 )
 
+let get_TOC ~writer ?(filename="<IN>") ~input_char () = (
+    let output_funs = TOCOutput.create () in
+    let printer = GenericPrinter.build ~writer ~output_funs () in
+    Parser.do_transformation printer input_char filename;
+)
 
 
 

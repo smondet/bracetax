@@ -4,6 +4,7 @@ Escape
 HtmlPrinter
 LatexPrinter
 GenericPrinter
+TOCOutput
 Parser
 Transform
 Signatures

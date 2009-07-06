@@ -39,6 +39,7 @@ module Options = struct
     type action_to_do = [
         | `Brtx2HTML | `Brtx2LaTeX
         | `PostPro of PostProcessor.BuiltIn.available list
+        | `GetTOC
     ]
     let todo = ref (`Brtx2HTML:action_to_do)
     let input_stream = ref stdin
@@ -55,6 +56,8 @@ module Options = struct
             ~% " Output HTML format (default)");
         ("-latex", Arg.Unit (fun () -> todo := `Brtx2LaTeX),
             ~% " Output LaTeX format");
+        ("-toc", Arg.Unit (fun () -> todo := `GetTOC),
+            ~% " Get the table of contents");
         ("-postpro", Arg.Unit (fun () -> todo := `PostPro []),
             ~% " Do post-processing");
         ("-debug", Arg.Set debug, " Debug mode");
@@ -221,6 +224,8 @@ let () = (
         PostProcessor.process (PostProcessor.BuiltIn.make_list l)
             read (Printf.fprintf o "%s\n")
     | `PostPro [] -> ()
+    | `GetTOC ->
+        Bracetax.Transform.get_TOC ~writer ~input_char:(read_char_opt i) ();
     end;
     exit !return_value_to_shell;
 )

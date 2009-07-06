@@ -69,6 +69,14 @@ module Link = struct
         (link.kind, link.linkto, str)
     )
 
+    let unparse kind target text = (
+        let skind =
+            match kind with `local -> "local:" | `generic -> "" in
+        let starget = match target with None -> "" | Some s -> s in
+        let stext = match text with None -> "" | Some s -> s in
+        Printf.sprintf "{link %s%s|%s}" skind starget stext
+    )
+
 end
 
 module Stack = struct
