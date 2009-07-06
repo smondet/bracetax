@@ -29,7 +29,6 @@ TODO:
   * redo command line interface
     - think about passing right filename to the parser (not '<IN>')
   * in Commands, should replace `quotation (open,close) by `quotation style
-  * in {Html,Latex}Printer, there no warning in case of bad quotation style
 
 MAYBE TODO:
   * ?? an {options ...} command 

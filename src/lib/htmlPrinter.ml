@@ -79,7 +79,7 @@ let sanitize_xml_attribute src =
     Escape.replace_chars ~src ~patterns
 
 
-let quotation_open_close a = (
+let quotation_open_close t a = (
     let default = ("&ldquo;", "&rdquo;") in
     try
         match List.hd a with
@@ -88,7 +88,9 @@ let quotation_open_close a = (
         | "fr" -> ("&laquo;&nbsp;", "&nbsp;&raquo;")
         | "de" -> ("&bdquo;", "&rdquo;")
         | "es" -> ("&laquo;", "&raquo;")
-        | s    ->  default
+        | s    -> 
+            t.error (Error.mk t.loc `warning (`unknown_quotation_style s));
+            default
     with
     | e -> default
 )
@@ -278,7 +280,7 @@ let start_environment ?(is_begin=false) t location name args = (
             may_start_text t;
             begin match name with
             | s when C.is_quotation s        ->
-                let op, clo = quotation_open_close args in
+                let op, clo = quotation_open_close t args in
                 t.write op;
                 `quotation (op, clo)
             | s when C.is_italic s           -> t.write "<i>"  ; `italic

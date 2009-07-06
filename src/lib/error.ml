@@ -47,6 +47,7 @@ type message = [
     | `end_of_input_not_in_text of string
     | `invalid_end_pattern of string
     | `command_shouldnot_have_args of string
+    | `unknown_quotation_style of string
 ]
 
 type location = {
@@ -103,6 +104,8 @@ let to_string (location, gravity, message) = (
             spr "Invalid end pattern: \"%S\"" s
         | `command_shouldnot_have_args s ->
             spr "This command should not have arguments: %s" s
+        | `unknown_quotation_style s ->
+            spr "Unknown quotation style \"%s\" (using default)" s
     in
     Printf.sprintf "[%s:%d%s][%s] %s"
         location.l_file location.l_line 

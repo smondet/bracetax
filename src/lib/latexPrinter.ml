@@ -151,7 +151,7 @@ let link_stop t l = (
 
 
 (* Quotations *)
-let quotation_open_close a = (
+let quotation_open_close t a = (
     let default = ("``", "''") in
     try
         match List.hd a with
@@ -160,7 +160,9 @@ let quotation_open_close a = (
         | "fr" -> ("«~", "~»")
         | "de" -> ("\\unichar{8222}", "\\unichar{8220}")
         | "es" -> ("\\unichar{171}", "\\unichar{187}")
-        | s    ->  default
+        | s    ->
+            t.error (Error.mk t.loc `warning (`unknown_quotation_style s));
+            default
     with
     | e -> default
 )
@@ -404,7 +406,7 @@ let start_environment ?(is_begin=false) t location name args = (
     let cmd name args =
         match name with
         | s when C.is_quotation s        ->
-            let op, clo = quotation_open_close args in
+            let op, clo = quotation_open_close t args in
             t.write op;
             `quotation (op, clo)
         | s when C.is_italic s      -> t.write "{\\it{}"  ; `italic
