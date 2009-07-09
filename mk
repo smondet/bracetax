@@ -4,7 +4,7 @@ build ()
 {
     TAGOPT="-tags pkg_unix"
     I_OPT="-I src/app -I src/lib"
-    ocamlbuild $I_OPT $TAGOPT src/app/main$1.byte ocamlbracetax.cma
+    ocamlbuild $I_OPT $TAGOPT -cflags -dtypes src/app/main$1.byte ocamlbracetax.cma
     rm -f brtx
     ln -s main$1.byte brtx
 }
