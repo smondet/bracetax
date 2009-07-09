@@ -16,11 +16,12 @@ OTHER: See `mk h`
 
 
 TODO:
-  * doc: postpro
   * build documentation of lib
   * doc: add git log with to explain | sed -e 's/\([{}#]\)/{\1}/g' | 
   * html: add css class_hook to command line
   * in Commands, should replace `quotation (open,close) by `quotation style
+  * Desactivation (or make "code") of bypass (because security with interpreted
+    webapps)
 
 MAYBE TODO:
   * ?? an {options ...} command 
@@ -28,7 +29,6 @@ MAYBE TODO:
   * add a hack for figure names  
     % becomes png for HTML output and pdf for LaTeX output.
   * use Dynlink for custom printers 
-  * more flexible postpros 
   * resume ConTeXt output
   * Pure Text output
   * add section numbering (for HTML, and also in TOC and for internal links)
