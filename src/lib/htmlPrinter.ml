@@ -129,7 +129,7 @@ let section_start t n l =
         | "" -> "" | s -> ~% " id=\"%s\"" s
     in
     let tag = ~% "h%d" (n + 1) in
-    ~% "</div>\n<%s %s %s>" tag lsan (AddClass.attribute t.class_hook tag)
+    ~% "</div>\n<%s%s%s>" tag lsan (AddClass.attribute t.class_hook tag)
 
 let section_stop t n l =
     ~% "</h%d>\n<div class=\"p%s\">" (n + 1) (AddClass.name t.class_hook "p")
