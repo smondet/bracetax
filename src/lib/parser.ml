@@ -51,26 +51,32 @@ let loc line file = { Error.l_line = line; l_char = -1; l_file = file }
 let incr_loc location = loc (location.Error.l_line + 1) location.Error.l_file
 let mv_loc location line = loc line location.Error.l_file
 
-let rec parse_text printer read_fun location = (
+type t = {
+    printer: Signatures.printer;
+    read_fun: unit -> char option;
+    deny_bypass: bool;
+}
+
+let rec parse_text t location = (
     let buf = Buffer.create 42 in
     let rec read_loop location = 
-        match read_fun () with
+        match t.read_fun () with
         | None ->
-            printer.print_text location (Buffer.contents buf);
-            printer.terminate location;
+            t.printer.print_text location (Buffer.contents buf);
+            t.printer.terminate location;
         | Some '\n' ->
             Buffer.add_char buf ' ';
             read_loop (incr_loc location)
         | Some '#' ->
-            printer.print_text location (Buffer.contents buf);
-            parse_comment printer read_fun location
+            t.printer.print_text location (Buffer.contents buf);
+            parse_comment t location
         | Some '{' ->
-            printer.print_text location (Buffer.contents buf);
-            parse_command printer read_fun location
+            t.printer.print_text location (Buffer.contents buf);
+            parse_command t location
         | Some '}' ->
-            printer.print_text location (Buffer.contents buf);
+            t.printer.print_text location (Buffer.contents buf);
             Buffer.reset buf;
-            printer.leave_cmd location;
+            t.printer.leave_cmd location;
             read_loop location
         | Some given_char ->
             Buffer.add_char buf given_char;
@@ -78,16 +84,16 @@ let rec parse_text printer read_fun location = (
     in
     read_loop location
 )
-and parse_comment printer read_fun location = (
+and parse_comment t location = (
     let buf = Buffer.create 42 in
     let rec read_loop location = 
-        match read_fun () with
+        match t.read_fun () with
         | None ->
-            printer.print_comment location (Buffer.contents buf);
-            printer.terminate location;
+            t.printer.print_comment location (Buffer.contents buf);
+            t.printer.terminate location;
         | Some '\n' ->
             let comment_line = (Buffer.contents buf) in
-            printer.print_comment location comment_line;
+            t.printer.print_comment location comment_line;
             let new_loc =
                 try 
                     Scanf.sscanf comment_line "line %d %S"
@@ -99,21 +105,21 @@ and parse_comment printer read_fun location = (
                         (fun i -> Printf.eprintf "%d same file...\n" i;
                         mv_loc location i)
                     with _ -> (incr_loc location)) in
-            parse_text printer read_fun new_loc
+            parse_text t new_loc
         | Some given_char ->
             Buffer.add_char buf given_char;
             read_loop location
     in
     read_loop location
 )
-and parse_command printer read_fun location = (
+and parse_command t location = (
     let buf = Buffer.create 42 in
     let cmd = ref [] in
     let rec read_loop location escaping = 
-        match read_fun () with
+        match t.read_fun () with
         | None ->
-            err printer location (`end_of_input_not_in_text "Reading Command");
-            printer.terminate location;
+            err t.printer location (`end_of_input_not_in_text "Reading Command");
+            t.printer.terminate location;
         | Some '\\' ->
             if escaping then (
                 Buffer.add_char buf '\\';
@@ -142,24 +148,26 @@ and parse_command printer read_fun location = (
                 match List.rev !cmd with
                 | [] ->
                     failwith "Shouldn't be here..."
-                | c :: t when
+                | c :: tl when
                     c = (str_of_raw_cmd `code) ||
                     c = (str_of_raw_cmd `bypass) ->
                     let endpat,args =
-                        match t with [] -> default_raw_end,[]
+                        match tl with [] -> default_raw_end,[]
                         | h :: q ->
                             if check_end_pattern h then
                                 h,q
                             else (
-                                err printer location (`invalid_end_pattern h);
+                                err t.printer location (`invalid_end_pattern h);
                                 (default_raw_end, [])
                             ) in
-                    printer.enter_raw location (raw_cmd_of_str c) args;
-                    parse_raw printer read_fun location endpat;
-                | q :: t ->
-                    printer.enter_cmd location q t;
-                    printer.leave_cmd location;
-                    parse_text printer read_fun location
+                    let kind = 
+                        if t.deny_bypass then `code else raw_cmd_of_str c in
+                    t.printer.enter_raw location kind args;
+                    parse_raw t location endpat;
+                | q :: tl ->
+                    t.printer.enter_cmd location q tl;
+                    t.printer.leave_cmd location;
+                    parse_text t location
             )
         | Some '|' ->
             if escaping then (
@@ -171,11 +179,11 @@ and parse_command printer read_fun location = (
                 | [] ->
                     failwith "Shouldn't be here..."
                 | "" :: [] ->
-                    err printer location (`unknown_command "EMPTY CMD!!!");
-                    parse_text printer read_fun location
-                | q :: t ->
-                    printer.enter_cmd location q t;
-                    parse_text printer read_fun location
+                    err t.printer location (`unknown_command "EMPTY CMD!!!");
+                    parse_text t location
+                | q :: tl ->
+                    t.printer.enter_cmd location q tl;
+                    parse_text t location
             )
         | Some given_char ->
             Buffer.add_char buf given_char;
@@ -183,7 +191,7 @@ and parse_command printer read_fun location = (
     in
     read_loop location false
 )
-and parse_raw printer read_fun location end_pattern = (
+and parse_raw t location end_pattern = (
     let buf = Buffer.create 42 in
     let last_chars str nb =
         let ls = String.length str in
@@ -202,14 +210,14 @@ and parse_raw printer read_fun location end_pattern = (
     in
 
     let rec read_loop location escaping = 
-        match read_fun () with
+        match t.read_fun () with
         | None ->
-            err printer location
+            err t.printer location
                 (`end_of_input_not_in_text "Reading Code/Bypass");
-            printer.terminate location;
+            t.printer.terminate location;
         | Some '\n' ->
             Buffer.add_char buf '\n';
-            printer.print_raw location (Buffer.contents buf);
+            t.printer.print_raw location (Buffer.contents buf);
             Buffer.reset buf;
             read_loop (incr_loc location) false
         | Some given_char ->
@@ -218,9 +226,9 @@ and parse_raw printer read_fun location end_pattern = (
                 let to_write =
                     let len = String.length end_pattern + 2 in
                     without_last_chars (Buffer.contents buf) len in
-                printer.print_raw location to_write;
-                printer.leave_raw location;
-                parse_text printer read_fun location
+                t.printer.print_raw location to_write;
+                t.printer.leave_raw location;
+                parse_text t location
             ) else
                 read_loop location false
     in
@@ -228,6 +236,8 @@ and parse_raw printer read_fun location end_pattern = (
 )
 
 
-let do_transformation printer read_fun filename = (
-    parse_text printer read_fun (loc 1 filename)
+let do_transformation ?(deny_bypass=false) printer read_fun filename = (
+    let parserator =
+        {printer = printer; read_fun = read_fun; deny_bypass = deny_bypass} in
+    parse_text parserator (loc 1 filename)
 )

@@ -57,17 +57,23 @@ let meta_open_inout io = (
 
 module CommandLine = struct
 
+    type html_latex_common = {
+        doc: bool; 
+        title: string option;
+        print_comments: bool;
+        deny_bypass: bool;
+    }
 
     type todo = [
         | `PrintVersion
         | `PrintLicense
         (* | `Help of [ `main | `html | `latex | `toc ] *)
         | `Brtx2HTML of
-            in_out * bool * string option * string option * string option * bool
-                (* inout, doc, title, css, csshook, print_comments *)
+            in_out * html_latex_common * string option * string option
+                (* inout, com, css, csshook *)
         | `Brtx2Latex of
-            in_out * bool * string option * string option * bool
-                (* inout, doc, title, package, print_comments *)
+            in_out * html_latex_common * string option
+                (* inout, com, package *)
         | `GetTOC of in_out
     ]
     let parse () : todo = (
@@ -76,6 +82,7 @@ module CommandLine = struct
         let is_doc = ref false in
         let title = ref None in
         let print_comments = ref false in
+        let deny_bypass = ref false in
         let link_css = ref None in 
         let css_hook = ref None in
         let ltx_package = ref None in 
@@ -118,6 +125,10 @@ module CommandLine = struct
                 Arg.Unit (fun () -> print_comments := true),
                 " activate the transmission of brtx comments to the output's \
                 comments (-html or -latex)");
+            ("-deny-bypass",
+                Arg.Unit (fun () -> deny_bypass := true),
+                " treat all {bypass} as {code} \
+                (security of interpreted webapps)");
         ] in
         let short_usage =
             ~% "usage: %s [-i file] [-o file] [-help]" Sys.argv.(0) in
@@ -128,11 +139,19 @@ module CommandLine = struct
         | `version -> `PrintVersion
         | `license -> `PrintLicense
         | `html ->
-            `Brtx2HTML ({file_in = !f_in; file_out = !f_out}, !is_doc, !title,
-                !link_css, !css_hook, !print_comments)
+            `Brtx2HTML (
+                {file_in = !f_in; file_out = !f_out},
+                {doc = !is_doc; title = !title; 
+                    print_comments = !print_comments;
+                    deny_bypass = !deny_bypass},
+                !link_css, !css_hook)
         | `latex ->
-            `Brtx2Latex ({file_in = !f_in; file_out = !f_out}, !is_doc, !title,
-                !ltx_package, !print_comments)
+            `Brtx2Latex (
+                {file_in = !f_in; file_out = !f_out},
+                {doc = !is_doc; title = !title; 
+                    print_comments = !print_comments;
+                    deny_bypass = !deny_bypass},
+                !ltx_package)
         | `toc ->
             `GetTOC ({file_in = !f_in; file_out = !f_out})
     )
@@ -155,16 +174,20 @@ let () = (
     | `PrintLicense ->
         p Bracetax.Info.license;
         exit 0;
-    | `Brtx2HTML (io, doc, title, css_link, class_hook, print_comments) ->
+    | `Brtx2HTML (io, common, css_link, class_hook) ->
         let input_char, filename, write = meta_open_inout io in
+        let {CommandLine.doc = doc; title = title; deny_bypass = deny_bypass;
+            print_comments = print_comments;} = common in
         let writer = Bracetax.Signatures.make_writer ~write  ~error in
-        Bracetax.Transform.brtx_to_html ~writer ~doc ?title ?css_link
+        Bracetax.Transform.brtx_to_html ~writer ~doc ?title ?css_link ~deny_bypass
             ~print_comments ~input_char ~filename ?class_hook ();
-    | `Brtx2Latex (io, doc, title, use_package, print_comments) ->
+    | `Brtx2Latex (io, common, use_package) ->
         let input_char, filename, write = meta_open_inout io in
+        let {CommandLine.doc = doc; title = title; deny_bypass = deny_bypass;
+            print_comments = print_comments;} = common in
         let writer = Bracetax.Signatures.make_writer ~write  ~error in
         Bracetax.Transform.brtx_to_latex ~writer ~doc ?title ?use_package 
-            ~print_comments ~input_char ~filename ();
+            ~print_comments ~input_char ~filename ~deny_bypass ();
     | `GetTOC io ->
         let input_char, filename, write = meta_open_inout io in
         let writer = Bracetax.Signatures.make_writer ~write  ~error in
