@@ -104,8 +104,6 @@ type t = {
     mutable output: output_t;
 }
 
-type aux = output_t
-
 module CS = Commands.Stack
 
 let spr = Printf.sprintf

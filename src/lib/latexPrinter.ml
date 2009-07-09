@@ -31,7 +31,7 @@ type t = {
     error: Error.error_fun;
     mutable loc: Error.location;
 }
-type aux = unit
+
 module CS = Commands.Stack
 
 let (~%) = Printf.sprintf
