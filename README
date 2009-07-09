@@ -18,7 +18,6 @@ OTHER: See `mk h`
 TODO:
   * build documentation of lib
   * doc: add git log with to explain | sed -e 's/\([{}#]\)/{\1}/g' | 
-  * html: add css class_hook to command line
   * in Commands, should replace `quotation (open,close) by `quotation style
   * Desactivation (or make "code") of bypass (because security with interpreted
     webapps)

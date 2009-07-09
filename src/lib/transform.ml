@@ -28,7 +28,7 @@ open Signatures
 let opt_may ~f = function None -> () | Some o -> f o
 
 let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
-?(filename="<IN>") ~input_char () = (
+?(filename="<IN>") ?class_hook ~input_char () = (
 
     if doc then (
         writer.w_write (HtmlPrinter.header
@@ -36,7 +36,7 @@ let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
             ?stylesheet_link:css_link ()
         );
     );
-    let printer = HtmlPrinter.build ~writer ~print_comments () in
+    let printer = HtmlPrinter.build ?class_hook ~writer ~print_comments () in
     Parser.do_transformation printer input_char filename;
     
     if doc then (

@@ -61,22 +61,23 @@ module CommandLine = struct
     type todo = [
         | `PrintVersion
         | `PrintLicense
-        | `Help of [ `main | `html | `latex | `toc ]
+        (* | `Help of [ `main | `html | `latex | `toc ] *)
         | `Brtx2HTML of
-            in_out * bool * string option * string option * bool
-                (* inout, doc, title, css, print_comments *)
+            in_out * bool * string option * string option * string option * bool
+                (* inout, doc, title, css, csshook, print_comments *)
         | `Brtx2Latex of
             in_out * bool * string option * string option * bool
                 (* inout, doc, title, package, print_comments *)
         | `GetTOC of in_out
     ]
-    let parse () = (
+    let parse () : todo = (
         let f_in = ref None in
         let f_out = ref None in
         let is_doc = ref false in
         let title = ref None in
         let print_comments = ref false in
         let link_css = ref None in 
+        let css_hook = ref None in
         let ltx_package = ref None in 
         let todo = ref `html in
 
@@ -102,14 +103,17 @@ module CommandLine = struct
                 " Output a complete document");
             ("-title",
                 Arg.String (fun s -> title := Some s),
-                "<url> Set the title of the document (<head><title> for XHTML,\
+                "<text> Set the title of the document ('head.title' for XHTML, \
                 PDF meta-data for LaTeX), requires -doc");
             ("-link-css",
                 Arg.String (fun s -> link_css := Some s),
-                "<url> link to a CSS (for XHTML), requires -doc");
+                "<url> link to a CSS, requires -html,-doc");
+            ("-css-hook",
+                Arg.String (fun s -> css_hook := Some s),
+                "<text> add a class=\"text...\" to all tags, requires -html");
             ("-use-package",
                 Arg.String (fun s -> ltx_package := Some s),
-                "<url> use a given package (for LaTeX), requires -doc");
+                "<name> use a given package, requires -latex,-doc");
             ("-print-comments",
                 Arg.Unit (fun () -> print_comments := true),
                 " activate the transmission of brtx comments to the output's \
@@ -125,7 +129,7 @@ module CommandLine = struct
         | `license -> `PrintLicense
         | `html ->
             `Brtx2HTML ({file_in = !f_in; file_out = !f_out}, !is_doc, !title,
-                !link_css, !print_comments)
+                !link_css, !css_hook, !print_comments)
         | `latex ->
             `Brtx2Latex ({file_in = !f_in; file_out = !f_out}, !is_doc, !title,
                 !ltx_package, !print_comments)
@@ -151,11 +155,11 @@ let () = (
     | `PrintLicense ->
         p Bracetax.Info.license;
         exit 0;
-    | `Brtx2HTML (io, doc, title, css_link, print_comments) ->
+    | `Brtx2HTML (io, doc, title, css_link, class_hook, print_comments) ->
         let input_char, filename, write = meta_open_inout io in
         let writer = Bracetax.Signatures.make_writer ~write  ~error in
         Bracetax.Transform.brtx_to_html ~writer ~doc ?title ?css_link
-            ~print_comments ~input_char ~filename ();
+            ~print_comments ~input_char ~filename ?class_hook ();
     | `Brtx2Latex (io, doc, title, use_package, print_comments) ->
         let input_char, filename, write = meta_open_inout io in
         let writer = Bracetax.Signatures.make_writer ~write  ~error in

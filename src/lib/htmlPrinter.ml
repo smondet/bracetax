@@ -555,8 +555,8 @@ let stop_raw_mode t location = (
         failwith "Shouldn't be there, Parser's fault ?";
 
 )
-let build ?(print_comments=false) ~writer () = (
-    let t = create ~writer () in
+let build ?(print_comments=false) ?class_hook ~writer () = (
+    let t = create ~writer ?class_hook () in
     let printer = {
         Signatures.
         print_comment =
