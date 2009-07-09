@@ -19,9 +19,7 @@ TODO:
   * doc: postpro
   * build documentation of lib
   * doc: add git log with to explain | sed -e 's/\([{}#]\)/{\1}/g' | 
-  * html: optionaly add class="*type" (eg -class foo  <li class="foolistitem">)
-    - there may be various classes:
-    http://www.w3schools.com/tags/att_standard_class.asp
+  * html: add css class_hook to command line
   * redo command line interface
     - think about passing right filename to the parser (not '<IN>')
   * in Commands, should replace `quotation (open,close) by `quotation style
