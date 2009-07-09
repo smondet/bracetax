@@ -20,8 +20,6 @@ TODO:
   * build documentation of lib
   * doc: add git log with to explain | sed -e 's/\([{}#]\)/{\1}/g' | 
   * html: add css class_hook to command line
-  * redo command line interface
-    - think about passing right filename to the parser (not '<IN>')
   * in Commands, should replace `quotation (open,close) by `quotation style
 
 MAYBE TODO:

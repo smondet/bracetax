@@ -174,21 +174,21 @@ and replace the catched text with its standard output:
 
 end
 
-let read_line_opt i () = try Some (input_line i) with e -> None
-let opt_may ~f = function None -> () | Some o -> f o
-
-let () = (
-    let return_value_to_shell = ref 0 in
-    let to_do, dbg, i, o =
-        match Options.get () with 
-        | `process something -> something
-        | `print_version ->
-            p (~% "brtx %s\n" version_string);
-            exit 0;
-        | `print_license ->
-            p Bracetax.Info.license;
-            exit 0;
-    in
+type in_out = {
+    file_in: string option;
+    file_out: string option;
+}
+let meta_open_inout io = (
+    let i, fi =
+        match io.file_in with
+        | None -> (stdin, "<STDIN>")
+        | Some "-" -> (stdin, "<STDIN>")
+        | Some f -> (open_in f, f) in
+    let o = 
+        match io.file_out with
+        | None -> stdout
+        | Some "-" -> stdout
+        | Some f -> open_out f in
     Sys.catch_break true;
     at_exit (fun () -> 
         close_in i;
@@ -196,36 +196,121 @@ let () = (
         close_out o;
     );
     let write = output_string o in
-    let writer =
-        let error = 
-            function
+    let read_char_opt i () = try Some (input_char i) with e -> None in
+    (read_char_opt i, fi, write)
+)
+
+
+module CommandLine = struct
+
+
+    type todo = [
+        | `PrintVersion
+        | `PrintLicense
+        | `Help of [ `main | `html | `latex | `toc ]
+        | `Brtx2HTML of
+            in_out * bool * string option * string option * bool
+                (* inout, doc, title, css, print_comments *)
+        | `Brtx2Latex of
+            in_out * bool * string option * string option * bool
+                (* inout, doc, title, package, print_comments *)
+        | `GetTOC of in_out
+    ]
+    let parse () = (
+        let f_in = ref None in
+        let f_out = ref None in
+        let is_doc = ref false in
+        let title = ref None in
+        let print_comments = ref false in
+        let link_css = ref None in 
+        let ltx_package = ref None in 
+        let todo = ref `html in
+
+        let options = Arg.align [
+            ("-version", Arg.Unit (fun () -> todo := `version),
+                " Print version and exit");
+            ("-license", Arg.Unit (fun () -> todo := `license), 
+                " Print license and exit");
+            ("-html", Arg.Unit (fun () -> todo := `html),
+                ~% " Output HTML format (default)");
+            ("-latex", Arg.Unit (fun () -> todo := `latex),
+                ~% " Output LaTeX format");
+            ("-toc", Arg.Unit (fun () -> todo := `toc),
+                ~% " Get the table of contents");
+            ("-i",
+            Arg.String (fun s -> f_in := Some s), 
+                "<file> input file (default or \"-\" is standard input)");
+            ("-o",
+                Arg.String (fun s -> f_out := Some s), 
+                "<file> output file (default or \"-\" is standard output)");
+            ("-doc",
+                Arg.Unit (fun () -> is_doc := true),
+                " Output a complete document");
+            ("-title",
+                Arg.String (fun s -> title := Some s),
+                "<url> Set the title of the document (<head><title> for XHTML,\
+                PDF meta-data for LaTeX), requires -doc");
+            ("-link-css",
+                Arg.String (fun s -> link_css := Some s),
+                "<url> link to a CSS (for XHTML), requires -doc");
+            ("-use-package",
+                Arg.String (fun s -> ltx_package := Some s),
+                "<url> use a given package (for LaTeX), requires -doc");
+            ("-print-comments",
+                Arg.Unit (fun () -> print_comments := true),
+                " activate the transmission of brtx comments to the output's \
+                comments (-html or -latex)");
+        ] in
+        let short_usage =
+            ~% "usage: %s [-i file] [-o file] [-help]" Sys.argv.(0) in
+        let anon_fun s =
+            prerr_string (~% "Warning argument %s is ignored\n" s) in
+        Arg.parse options anon_fun short_usage;
+        match !todo with
+        | `version -> `PrintVersion
+        | `license -> `PrintLicense
+        | `html ->
+            `Brtx2HTML ({file_in = !f_in; file_out = !f_out}, !is_doc, !title,
+                !link_css, !print_comments)
+        | `latex ->
+            `Brtx2Latex ({file_in = !f_in; file_out = !f_out}, !is_doc, !title,
+                !ltx_package, !print_comments)
+        | `toc ->
+            `GetTOC ({file_in = !f_in; file_out = !f_out})
+    )
+end
+
+let () = (
+    let return_value_to_shell = ref 0 in
+    let to_do = CommandLine.parse () in
+        let error = function
             | `undefined s ->
                 return_value_to_shell := 2;
                 prerr_string (s ^ "\n")
             | `message msg ->
                 return_value_to_shell := 2;
-                prerr_string ((Bracetax.Error.to_string msg) ^ "\n")
-        in
-        Bracetax.Signatures.make_writer ~write  ~error in
-    let read = read_line_opt i in
-    let read_char_opt i () = try Some (input_char i) with e -> None in
+                prerr_string ((Bracetax.Error.to_string msg) ^ "\n") in
     begin match to_do with
-    | `Brtx2HTML ->
-        Bracetax.Transform.brtx_to_html
-            ~writer ?doc:!Options.header_footer
-            ?css_link:!Options.stylesheet_link
-            ~input_char:(read_char_opt i) ();
-    | `Brtx2LaTeX ->
-        Bracetax.Transform.brtx_to_latex
-            ~writer ?doc:!Options.header_footer
-            ?use_package:!Options.stylesheet_link
-            ~input_char:(read_char_opt i) ();
-    | `PostPro (t :: q as l) ->
-        PostProcessor.process (PostProcessor.BuiltIn.make_list l)
-            read (Printf.fprintf o "%s\n")
-    | `PostPro [] -> ()
-    | `GetTOC ->
-        Bracetax.Transform.get_TOC ~writer ~input_char:(read_char_opt i) ();
+    | `PrintVersion ->
+        p (~% "brtx %s\n" version_string);
+        exit 0;
+    | `PrintLicense ->
+        p Bracetax.Info.license;
+        exit 0;
+    | `Brtx2HTML (io, doc, title, css_link, print_comments) ->
+        let input_char, filename, write = meta_open_inout io in
+        let writer = Bracetax.Signatures.make_writer ~write  ~error in
+        Bracetax.Transform.brtx_to_html ~writer ~doc ?title ?css_link
+            ~print_comments ~input_char ~filename ();
+    | `Brtx2Latex (io, doc, title, use_package, print_comments) ->
+        let input_char, filename, write = meta_open_inout io in
+        let writer = Bracetax.Signatures.make_writer ~write  ~error in
+        Bracetax.Transform.brtx_to_latex ~writer ~doc ?title ?use_package 
+            ~print_comments ~input_char ~filename ();
+    | `GetTOC io ->
+        let input_char, filename, write = meta_open_inout io in
+        let writer = Bracetax.Signatures.make_writer ~write  ~error in
+        Bracetax.Transform.get_TOC ~writer ~input_char ();
     end;
     exit !return_value_to_shell;
 )

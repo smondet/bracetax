@@ -27,38 +27,38 @@ open Signatures
 
 let opt_may ~f = function None -> () | Some o -> f o
 
-let brtx_to_html ~writer ?doc ?css_link ?(print_comments=false)
+let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
 ?(filename="<IN>") ~input_char () = (
 
-    opt_may doc ~f:(fun title ->
+    if doc then (
         writer.w_write (HtmlPrinter.header
-            ~comment:"Generated with BraceTax" ~title
+            ~comment:"Generated with BraceTax" ?title
             ?stylesheet_link:css_link ()
         );
     );
     let printer = HtmlPrinter.build ~writer ~print_comments () in
     Parser.do_transformation printer input_char filename;
     
-    opt_may doc ~f:(fun _ ->
+    if doc then (
         writer.w_write (HtmlPrinter.footer ());
     );
 
 )
 
 
-let brtx_to_latex ~writer ?doc ?use_package ?(print_comments=false)
-?(filename="<IN>") ~input_char () = (
+let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package
+    ?(print_comments=false) ?(filename="<IN>") ~input_char () = (
 
-    opt_may doc ~f:(fun title ->
+    if doc then (
         writer.w_write (LatexPrinter.header
-            ~comment:"Generated with BraceTax" ~title
+            ~comment:"Generated with BraceTax" ?title
             ?stylesheet_link:use_package ()
         );
     );
     let printer = LatexPrinter.build ~writer ~print_comments () in
     Parser.do_transformation printer input_char filename;
     
-    opt_may doc ~f:(fun _ ->
+    if doc then (
         writer.w_write (LatexPrinter.footer ());
     );
 
