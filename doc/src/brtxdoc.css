@@ -1,13 +1,13 @@
 
 body {
-	background-color: #FAF7E4;
-	color: black;
-	/*font-family: sans-serif;*/
-	position: relative;
-	left: 15%;
-	width: 70%;
+    background-color: #FAFAFA;
+    color: black;
+    font-family: sans-serif;
+    position: relative;
+    left: 5%;
+    width: 70%;
     text-align: justify;
-	/*font-size: 12px;*/
+    font-size: 90%;
 }
 
 div.p {
@@ -18,14 +18,14 @@ div.p {
 div.p + div.p { padding-top: 1.5em; }
 
 div.header {
-    text-align: center;
-    border: #3E0C0C solid;
+    /* text-align: center; */
+    /* border: #3E0C0C solid; */
     padding-top:    2.1em;
     padding-bottom: 2.05em;
 }
-h1 {           font-size: 300%; font-variant: small-caps; }
+h1 {           font-size: 300%; font-variant: small-caps; color: #AA0000;}
 div.authors {  font-size: 200%; line-height: 200%; }
-div.subtitle { font-size: 180%; font-style: italic; }
+div.subtitle { font-size: 150%; font-style: italic; }
 h2 {           font-size: 210%; /* border-bottom: 1px solid #000; */ }
 h3 {           font-size: 180%; padding-top: 0.1em;padding-bottom: 0.05em;}
 h4 {           font-size: 150%; padding-top: 0.1em;padding-bottom: 0.05em;}

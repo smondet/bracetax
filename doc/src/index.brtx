@@ -55,9 +55,8 @@ We use the {link bracetax_syntax.html|Bracetax syntax} document, here we can see
 {section 2|One example of authoring}
 
 Using M4 
-({link http://en.wikipedia.org/wiki/M4_(computer_language)|wikipedia})
-and {t|brtx}'s {link brtx_app.html#sec_postpro|post-processor}, we get
-a {q|self-documenting document}:
+({link http://en.wikipedia.org/wiki/M4_(computer_language)|wikipedia}),
+we get a {q|self-documenting document}:
 {list|
     {*} the generated {link ./example_m4pp/main.html|HTML};
     {*} the {link ./example_m4pp/main.brtx|source}

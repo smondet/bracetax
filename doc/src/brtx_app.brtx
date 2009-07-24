@@ -21,26 +21,29 @@ see {q|{t|mk h}} for more options ({i|e.g.} compilation without
 
 Here is the usage information:
 {code}
-usage: brtx [-i file] [-o file] [-help]
-  -html                  Output HTML format (default)
-  -latex                 Output LaTeX format
-  -postpro               Do post-processing
-  -debug                 Debug mode
-  -doc                   Output a complete document
-  -version               Print version and exit
-  -license               Print license and exit
-  -i <file>              input file (default is standard input)
-  -o <file>              output file (default is standard output)
-  -link-stylesheet <url> link to a stylesheet (CSS for XHTML), needs -doc
-  -pp <name>             Add postpro plugin (try `brtx -postpro -pp help')
-  -help                  Display this list of options
-  --help                 Display this list of options
+usage: /Users/seb/bin/brtx [-i file] [-o file] [-help]
+  -version            Print version and exit
+  -license            Print license and exit
+  -html               Output HTML format (default)
+  -latex              Output LaTeX format
+  -toc                Get the table of contents
+  -i <file>           input file (default or "-" is standard input)
+  -o <file>           output file (default or "-" is standard output)
+  -doc                Output a complete document
+  -title <text>       Set the title of the document ('head.title' for XHTML, PDF meta-data for LaTeX), requires -doc
+  -link-css <url>     link to a CSS, requires -html,-doc
+  -css-hook <text>    add a class="text..." to all tags, requires -html
+  -use-package <name> use a given package, requires -latex,-doc
+  -print-comments     activate the transmission of brtx comments to the output's comments (-html or -latex)
+  -deny-bypass        treat all {bypass} as {code} (security of interpreted webapps)
+  -help               Display this list of options
+  --help              Display this list of options
 {end}
 
 
 {section 2|Examples}
 
-{section 3|Transform {i|bracetax} syntax}
+#{section 3|Transform {i|bracetax} syntax}
 
 Convert a bracetax file to XHTML:
 {code}
@@ -66,10 +69,4 @@ Transform any string:
 <p>I say <b>Hello</b> <i>world</i>&nbsp;!!</p>
 {end}
 
-{section 3 sec_postpro|Post-processor}
-
-For now please refer to:
-{code e}
-brtx -postpro -pp help
-{e}
 
