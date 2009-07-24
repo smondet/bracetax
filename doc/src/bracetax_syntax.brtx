@@ -28,9 +28,9 @@ and {t|{{}{#}{}}}.
 All whitespace characters are considered as a space ({t|' '}).
 {p}
 A command has the form:
-{verbatim}
+{code}
 {cmd arg1 arg2 arg3|concerned text}
-{endverbatim}
+{end}
 Between the {t|{{}} and the {t||}, it's the command mode:
 {begin list}
     {*} {t|'\\'} escapes the backslash (used as escaper)
@@ -53,7 +53,7 @@ values).
 {section 1|Comments}
 
 Are only allowed in {i|text mode}:
-{verbatim e}
+{code e}
 Text # Comments...
 {cmd arg|
     Text # Also comments...
@@ -67,7 +67,7 @@ Text # Comments...
 {section 2|Characters}
 
 Example:
-{verbatim e}
+{code e}
 Those are {{}, {}}, {#}, Unbreakable->{~}<-space,
 horizontal{...}ellipsis and {utf 0x42}, {utf 339}.
 {e}
@@ -77,44 +77,63 @@ horizontal{...}ellipsis and {utf 0x42}, {utf 339}.
 {section 2|Header}
 
 To have a title bloc in you document:
-{verbatim e}
+{code e}
 {begin header}
     Ignored text !!
     {title|Bracetax}
-    {authors|{link http://sebmdt.googlepages.com|Sebastien Mondet}}
+    {authors|{link http://seb.mondet.org|Sebastien Mondet}}
     {subtitle|A simple syntax for wikis and more...}
 {end}
 {e}
 
 {section 2 sec_verbatim|Non parsed blocs}
 
-# We use the 'e' end tag so we are able to put {endverbatim} inside a verbatim
+{section 3 sec_code|The code command}
+# We use the 'e' end tag so we are able to put {end} inside a code 
 # environment:
 The default case:
-{verbatim e}
-{verbatim}
+{code e}
+{code}
 My free    form {{ } {|} c
   code
-{endverbatim}
+{end}
 {e}
 
 But you can set the {i|end tag}:
-{verbatim e}
-{verbatim AnotherEndTag}
+{code e}
+{code AnotherEndTag}
  Still Free
  form
 with:
-{endverbatim}
+{end}
 inside the bloc
 {AnotherEndTag}
 {e}
 
-{link local:sec_plugins|Plugin's} are also based on {i|non-parsed blocks}
+Those blocs will be rendered as {t|<pre>} or {t|\begin{{}verbatim{}}}.
+
+{section 3 sec_bypass|The bypass command}
+
+The command {t|{{}bypass{}}} has the same syntax than {t|{{}code{}}} but is
+used to output directly some content, e.g.:
+{code}
+{bypass endtag}Some <i>HTML</i>{endtag}
+{end}
+It can be used by preprocessors to implement special commands.
+
+{p}
+
+For security reasons, this command can be disabled (actually treated as the
+{{}code{}} command) in {t|ocamlbracetax} and in {t|brtx} (option
+{t|-deny-bypass}).
+Using {{}bypass{}} with a web application written with an interpreted language
+could lead to code injection issues{...}
+
 
 {section 2|Formating}
 
 Some basic formatting:
-{verbatim e}
+{code e}
 {i|italic}, {b|bold},
 {i|italo{b|bold}},
 {t|mono-spaced},
@@ -125,7 +144,7 @@ sub{sub|script}
 
 {section 2|Quoting}
 
-{verbatim e}
+{code e}
 Quotes:
     {q|default},
     {q '|single},
@@ -145,7 +164,7 @@ Paragraph: {t|{{}p{}}}, Line-break: {t|{{}br{}}}
 {section 2|Sections}
 
 The syntax is:
-{verbatim e}
+{code e}
 {section level label|Title of the section}
 {e}
 The {t|level} is an integer: 1, 2, 3 or 4 (default is 1){br}
@@ -155,7 +174,7 @@ The {t|label} is a string for local {link local:sec_links|links}/references.
 
 A list can be {t|item} (default) or {t|enum}, a new item begins with
 {t|{{}*{}}}:
-{verbatim e}
+{code e}
 {begin list enum}
   {*} The one
   {*} Two
@@ -175,34 +194,34 @@ A list can be {t|item} (default) or {t|enum}, a new item begins with
 {section 2 sec_links|Links}
 
 Local links:
-{verbatim e}
+{code e}
 The {t|label} is a string for local {link local:sec_links|links}/references.
 ...
 {section 2 sec_links|Links}
 {e}
 Other:
-{verbatim e}
+{code e}
 There's a {link http://www.vim.org|Vim} syntax file.
 {e}
-(don't forget the {t|http://} because {q|{t|www.any-site.bouh}} can be
-interpreted as a {t|./} link)
+but don't forget the {t|http://} because {q|{t|www.any-site.bouh}} can be
+interpreted as a local (i.e. {t|./}) link.
 {p}
 A link may not have contents:
-{verbatim e}
-{link http://sebmdt.googlepages.com}
+{code e}
+{link http://seb.mondet.org}
 {e}
 Will give:
-{link http://sebmdt.googlepages.com}
+{link http://seb.mondet.org}
 
 {section 2|Figures}
 
 The syntax for images is:
-{verbatim e}
+{code e}
 {image <src> [<w>px|<w>%] <label>|Caption text}
 {e}
 
 For example {link local:img:foundbyfind|this image}:
-{verbatim e}
+{code e}
 {image
     found_image.png
     150px
@@ -221,35 +240,47 @@ For example {link local:img:foundbyfind|this image}:
 {section 2|Tables}
 
 For table we have two commands, the {t|table}:
-{verbatim e}
-{table <nb of columns> <label>|Caption and cells} 
+{code e}
+{table <nb-of-columns> <label> <default-align>|Caption and cells} 
 {e}
 and the cell:
-{verbatim e}
-{c <format>|content}
+{code e}
+{c <format> <size>|content}
 {e}
-The {t|<format>} is the alignment ('l', 'r' or 'c'), the number of columns
-occupied, and the optional {q|is header ?} ('h'), in any order.
+The {t|<format>} is the alignment ('l', 'r' or 'c'), the optional {q|is header
+?} ('h'), in any order ({t|'_'} means {q|default}).{br}
+The {t|<size>} argument is either the number of columns occupied or the total
+size {i|r}x{i|c} (numbers of rows and columns).
 
 Example:
+{code endtablecode}
+{begin table 4 tab:example r} 
+{c|Simple cell} {c h|Header cell} {c rh|Header right cell} {c r|Right cell}
+{c c|Center cell} {c l|Left cell} {c r 2|Right double cell} 
+{c lh|Left header cell} {c c 2|Center double cell}  {c hl|Left header cell}
+{c l 2x3|Two rows, three columns, left} {c|Default, fourth in the row}
+                                        {c h|Header, 4th in the row}
+{c|Default, 1st} {c|Default, 2nd} {c _ 2x2|2 rows, 2 columns, default} 
+{c _ 2|Default, 1st and 2nd}                                           
+{c|Simple cell} {c h|Header cell} {c rh|Header right cell} {c r|Right cell}
+Caption of the table, default align is right
+{end}
+{endtablecode}
 
-{verbatim e}
-{table 3  tab_example|
-    Some text with {i|commands},
-    {c|The first cell} which {c h2|A long header cell on 2 columns} 
-    {c| Normal cell} {c|Normal {i|with} {b|some} {t|markup}} {c|A Normal cell}
-    {c c| center} will be {c l|left} {c r|right} in
-    {c l3|All the last row...} the caption
-}
-{e}
-{table 3  tab_example|
-    Some text with {i|commands},
-    {c|The first cell} which {c h2|A long header cell on 2 columns} 
-    {c| Normal cell} {c|Normal {i|with} {b|some} {t|markup}} {c|A Normal cell}
-    {c c| center} will be {c l|left} {c r|right} in
-    {c l3|All the last row...} the caption
-}
+{begin table 4 tab:example r} 
+{c|Simple cell} {c h|Header cell} {c rh|Header right cell} {c r|Right cell}
+{c c|Center cell} {c l|Left cell} {c r 2|Right double cell} 
+{c lh|Left header cell} {c c 2|Center double cell}  {c hl|Left header cell}
+{c l 2x3|Two rows, three columns, left} {c|Default, fourth in the row}
+                                        {c h|Header, 4th in the row}
+{c|Default, 1st} {c|Default, 2nd} {c _ 2x2|2 rows, 2 columns, default} 
+{c _ 2|Default, 1st and 2nd}                                           
+{c|Simple cell} {c h|Header cell} {c rh|Header right cell} {c r|Right cell}
+Caption of the table, default align is right
+{end}
+
 {p}
+
 {b|Note:} The alignment doesn't seem to be in XHTML, so we use a {b|{t|style}}
 attribute {i|and} a {b|{t|class}} attribute ({i|e.g.}
 {t|<td class="centeralign" style="text-align:center;">}).
@@ -258,35 +289,35 @@ attribute {i|and} a {b|{t|class}} attribute ({i|e.g.}
 
 Notes are {t|\footnote}'s{note|In LaTeX} or {i|sidenotes}{note|In XHTML... with
 a CSS}
-{verbatim e this_is_brtx_code}
+{code e this_is_brtx_code}
 Notes are {t|\footnote}'s{note|In LaTeX}
 {e}
 
 {section 1 sec_plugins|Post-processing plugin system}
 
-With the {t|verbatim} environment you can also prepare post-processing:
-{verbatim e brtxcode}
-{verbatim end_tag name_for_the_plugin}
+With the {t|code} environment you can also prepare post-processing:
+{code e brtxcode}
+{code end_tag name_for_the_plugin}
 A   non - parsed    {b|block}
 {end_tag}
 {e}
 Will add {t|verbatimbegin/end} comments, {i|e.g.} for XHTML:
-{verbatim}
+{code}
 <!--verbatimbegin:name_for_the_plugin -->
 <pre>
 A   non - parsed    {b|block}
 </pre>
 <!--verbatimend:name_for_the_plugin -->
-{endverbatim}
+{end}
 or for LaTeX{note|The space between '\' and 'end' is due the impossibility to
 put '{t|\end{{}verbatim{}}}' in a LaTeX {t|verbatim} evironment}:
-{verbatim end latexcode}
+{code end latexcode}
 %verbatimbegin:name_for_the_plugin
-\begin{verbatim}
+\begin{code}
 A   non - parsed    {b|block}
-\ end{verbatim}
+\ end{code}
 %verbatimend:name_for_the_plugin
 {end}
-
+Then you can post-process your output searching for those {q|comment-tags}.
 
 
