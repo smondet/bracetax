@@ -14,7 +14,7 @@ just load it: {q|{t|:source ./tools/bracetax_syntax.vim}}
 
 After compiling, in the {t|ocaml} toplevel, you can load the library and the
 post-processor:
-{verbatim e}
+{code e}
 #use "tools/top.ml";;
 {e}
 

@@ -19,9 +19,9 @@ nopdf: $(EXAMPLE_SITE_HTML) $(EXAMPLE_SITE_VIM)
 HEVEA_OR_NOT= hevea || echo NoHeveaFound
 main.html: main.brtx
 	m4 -D_todaydate="`date`" -D_output_format="HTML" main.brtx > main.brtx.tmp
-	$(BRTX2HTML) -doc "Bracetax Example" -link-stylesheet ../$(CSS)  -i main.brtx.tmp -o $@.pp
-	brtx -postpro -pp inlinehtml -pp latex2html:"$(HEVEA_OR_NOT)" -i $@.pp -o $@
-	rm main.brtx.tmp  $@.pp
+	$(BRTX2HTML) -doc -title "Bracetax Example" -link-css ../$(CSS) \
+	    -i main.brtx.tmp -o $@
+	rm main.brtx.tmp
 
 
 #
@@ -31,9 +31,8 @@ main.html: main.brtx
 #
 main.tex: main.brtx
 	m4 -D_todaydate="`date`" -D_output_format="LATEX" main.brtx > main.brtx.tmp
-	brtx -doc "Self Documenting Example" -latex  -i main.brtx.tmp -o main.tex.pp
-	brtx -postpro -pp inlinelatex -i main.tex.pp -o main.tex
-	rm main.brtx.tmp  main.tex.pp
+	brtx -doc -title "Self Documenting Example" -latex  -i main.brtx.tmp -o main.tex
+	rm main.brtx.tmp 
 
 #
 # A PDF with pdflatex

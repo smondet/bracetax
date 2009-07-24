@@ -155,7 +155,8 @@ Quotes:
     {q brout|unknown is default}
 {e}
 Quotes: {q|default}, {q '|single}, {q es|españolas}, {q fr|françaises},
-{q en|English}, {q de|Deutsch} and {q brout|unknown is default}
+{q en|English}, {q de|Deutsch} and {q|unknown is default}
+# {q en|English}, {q de|Deutsch} and {q brout|unknown is default}
 
 {section 2|Paragraphs and line-breaks}
 

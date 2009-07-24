@@ -7,9 +7,9 @@
 {section 1|Build {t|brtx}}
 
 Just need {link http://www.ocaml.org|OCamL} (at least version 3.09), and run:
-{verbatim}
+{code}
 ./mk
-{endverbatim}
+{end}
 And then copy {t|main.native} somewhere in your {t|$PATH} as {t|brtx}. Please
 see {q|{t|mk h}} for more options ({i|e.g.} compilation without
 {t|ocamlbuild}, documentation generation{...}).
@@ -20,7 +20,7 @@ see {q|{t|mk h}} for more options ({i|e.g.} compilation without
 {section 2|Options}
 
 Here is the usage information:
-{verbatim}
+{code}
 usage: brtx [-i file] [-o file] [-help]
   -html                  Output HTML format (default)
   -latex                 Output LaTeX format
@@ -35,7 +35,7 @@ usage: brtx [-i file] [-o file] [-help]
   -pp <name>             Add postpro plugin (try `brtx -postpro -pp help')
   -help                  Display this list of options
   --help                 Display this list of options
-{endverbatim}
+{end}
 
 
 {section 2|Examples}
@@ -43,33 +43,33 @@ usage: brtx [-i file] [-o file] [-help]
 {section 3|Transform {i|bracetax} syntax}
 
 Convert a bracetax file to XHTML:
-{verbatim}
+{code}
 brtx -html -i README.brtx -o README.html
-{endverbatim}
+{end}
 {p}
 Convert a file to LaTeX:
-{verbatim}
+{code}
 brtx -latex -i README.brtx -o README.html
-{endverbatim}
+{end}
 {p}
 
 The option {t|-doc} adds header and footer (for both HTML and LaTeX):
-{verbatim e}
+{code e}
 brtx -html -i README.brtx -o README.html -doc
 {e}
 will provide the {t|<!DOCTYPE html ...} etc...
 {p}
 
 Transform any string:
-{verbatim}
+{code}
  $ echo 'I say {b|Hello} {i|world}{~}!!' | brtx -html
 <p>I say <b>Hello</b> <i>world</i>&nbsp;!!</p>
-{endverbatim}
+{end}
 
 {section 3 sec_postpro|Post-processor}
 
 For now please refer to:
-{verbatim e}
+{code e}
 brtx -postpro -pp help
 {e}
 

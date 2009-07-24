@@ -1,6 +1,6 @@
 export CSS=brtxdoc.css
 export BRTX2HTML=brtx -html 
-export BRTX2HTMLDOC=brtx -html -link-stylesheet $(CSS)
+export BRTX2HTMLDOC=brtx -html -link-css $(CSS)
 
 TMPTEXDIR=/tmp/tmptex/
 TMPTEXNAME=tmporary
@@ -47,11 +47,11 @@ site/$(CSS): site/ src/$(CSS)
 	cp src/$(CSS) site/
 
 site/bracetax_syntax_raw.html: src/bracetax_syntax.brtx site/found_image.png
-	$(BRTX2HTML) -doc "$(BRTX_STX_TITLE)" -i $< -o $@
+	$(BRTX2HTML) -doc -title "$(BRTX_STX_TITLE)" -i $< -o $@
 
 site/bracetax_syntax_latex.pdf: src/bracetax_syntax.brtx site/found_image.png
 	mkdir -p $(TMPTEXDIR) && \
-	brtx -doc "$(BRTX_STX_TITLE)" -latex -i $< -o $(TMPTEX) && \
+	brtx -doc -title "$(BRTX_STX_TITLE)" -latex -i $< -o $(TMPTEX) && \
 	cp site/found_image.png $(TMPTEXDIR) && cd $(TMPTEXDIR) && \
 	pdflatex  $(TMPTEX) && pdflatex  $(TMPTEX) && \
 	cd - && mv $(TMPTEXDIR)/$(TMPTEXNAME).pdf $@ && rm -rf $(TMPTEXDIR)
@@ -59,7 +59,8 @@ site/bracetax_syntax_latex.pdf: src/bracetax_syntax.brtx site/found_image.png
 site/bracetax_syntax_latex_style.pdf: \
 		src/bracetax_syntax.brtx site/found_image.png src/bracetaxdoc.sty
 	mkdir -p $(TMPTEXDIR) && cp src/bracetaxdoc.sty  $(TMPTEXDIR) && \
-	brtx -doc "$(BRTX_STX_TITLE)" -latex -i $< -o $(TMPTEX) -link-stylesheet bracetaxdoc && \
+	brtx -doc -title "$(BRTX_STX_TITLE)" -latex -i $< -o $(TMPTEX) \
+	-use-package bracetaxdoc && \
 	cp site/found_image.png $(TMPTEXDIR) && cd $(TMPTEXDIR) && \
 	pdflatex  $(TMPTEX) && pdflatex  $(TMPTEX) && \
 	cd - && mv $(TMPTEXDIR)/$(TMPTEXNAME).pdf $@ && rm -rf $(TMPTEXDIR)
@@ -76,7 +77,7 @@ site/bracetax_syntax.brtx.html: src/bracetax_syntax.brtx site/found_image.png
 
 
 site/%.html:src/%.brtx
-	$(BRTX2HTMLDOC) -doc "Bracetax - $*" -i $< -o $@
+	$(BRTX2HTMLDOC) -doc -title "Bracetax - $*" -i $< -o $@
 
 site/found_image.png:
 	cp `find /usr/share -name "*.png" | head -n 1` site/found_image.png
