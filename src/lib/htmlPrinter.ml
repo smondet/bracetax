@@ -546,7 +546,7 @@ let stop_raw_mode t location = (
         t.write "</pre>";
         begin match args with
         | q :: _ ->
-            t.write (~% "<!--verbatimend:%s -->\n" (sanitize_comments q))
+            t.write (~% "\n<!--verbatimend:%s -->\n" (sanitize_comments q))
         | _ -> ()
         end;
     | Some `bypass -> ()
