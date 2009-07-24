@@ -4,30 +4,40 @@ build ()
 {
     TAGOPT="-tags pkg_unix"
     I_OPT="-I src/app -I src/lib"
-    ocamlbuild $I_OPT $TAGOPT src/app/main$1.byte ocamlbracetax.cma
+    ocamlbuild $I_OPT $TAGOPT -cflags -dtypes src/app/main$1.byte ocamlbracetax.cma
     rm -f brtx
     ln -s main$1.byte brtx
 }
 build_no_ocamlbuild ()
 {
+    rm -fr _build
+    mkdir _build
+    cp -r src _build
+    cd _build
     CCLIB="ocamlc -for-pack Bracetax -c -I src/lib/"
-    $CCLIB    src/lib/signatures.ml
-    $CCLIB    src/lib/escape.ml
-    $CCLIB    src/lib/commands.ml
-    $CCLIB    src/lib/transformer.ml
-    $CCLIB    src/lib/latexPrinter.ml
-    $CCLIB    src/lib/htmlPrinter.ml
-    $CCLIB    src/lib/info.ml
-    ocamlc -pack -o bracetax.cmo  \
-      src/lib/signatures.cmo \
-      src/lib/escape.cmo \
-      src/lib/commands.cmo \
-      src/lib/transformer.cmo \
-      src/lib/latexPrinter.cmo \
-      src/lib/htmlPrinter.cmo \
-      src/lib/info.cmo
+    LIBMODS="
+        src/lib/error
+        src/lib/signatures
+        src/lib/escape
+        src/lib/commands
+        src/lib/parser
+        src/lib/latexPrinter
+        src/lib/genericPrinter
+        src/lib/htmlPrinter
+        src/lib/TOCOutput
+        src/lib/transform
+        src/lib/info
+        "
+    CMOS=""
+    for mod in $LIBMODS ; do
+        CMOS="$CMOS $mod.cmo"
+        $CCLIB $mod.ml
+    done;
+    ocamlc -pack -o bracetax.cmo  $CMOS
     ocamlc -o brtx -I src/app/ -I . -I src/lib/ unix.cma bracetax.cmo \
-        src/app/postProcessor.ml src/app/main.ml
+        src/app/main.ml
+    cd -
+    echo "--> _build/brtx"
 }
 
 echo_help ()

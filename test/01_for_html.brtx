@@ -14,7 +14,7 @@
 Some text... <dlfsd>SDAF &adffd; lkjdf s <<>>>
 And more text
 
-{verbatim brout  arg1  arg2 }
+{code brout  arg1  arg2 }
 Some  kd dfg <pre> &nbsp;dfg</pre> sdffs
 code sls  skks skkk asdfa
  as
@@ -41,7 +41,7 @@ one{sub|sub}, one{sup|sup}, {i|italic{sub|sub}}, {i|italic{sup|sup}}
 {b|bold{sub|sub}}, {b|bold{sup|sup}}
 
 
-{begin list  enum }
+{begin list  enum}
   {*} The one
   {*} Two
   {*} Three
@@ -53,7 +53,7 @@ one{sub|sub}, one{sup|sup}, {i|italic{sub|sub}}, {i|italic{sup|sup}}
 
 {section 2| An {i|H3}}
 bla bla
-{section 2  2nd_h3| Another {i|H3}}
+{section 2 2nd_h3| Another {i|H3}}
 bla bla
 {section 1  An\ ugly\ "\ lks\ <id>\ &ff;|{i|Another} h2...}
 bla bla

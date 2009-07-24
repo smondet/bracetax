@@ -1,5 +1,5 @@
 (******************************************************************************)
-(*      Copyright (c) 2008, Sebastien MONDET                                  *)
+(*      Copyright (c) 2008, 2009, Sebastien MONDET                            *)
 (*                                                                            *)
 (*      Permission is hereby granted, free of charge, to any person           *)
 (*      obtaining a copy of this software and associated documentation        *)
@@ -34,6 +34,7 @@ type message = [
     | `ignored_text_after_verbatim_begin of string (* the ignored text *)
     | `malformed_verbatim_begin
     | `cell_out_of_table
+    | `cell_inside_cell
     | `unknown_command of string
     | `begin_without_arg
     | `non_matching_end
@@ -43,6 +44,10 @@ type message = [
     | `terminating_with_open_environments of string list
     | `bad_size_specification_in_image of string
     | `unknown_list_style of string
+    | `end_of_input_not_in_text of string
+    | `invalid_end_pattern of string
+    | `command_shouldnot_have_args of string
+    | `unknown_quotation_style of string
 ]
 
 type location = {
@@ -78,6 +83,7 @@ let to_string (location, gravity, message) = (
             spr "Text after {verbatim ...} will be ignored: %s" s
         | `malformed_verbatim_begin -> "Malformed begin of verbatim environment"
         | `cell_out_of_table -> "Cell (\"{c ...}\") command not in table"
+        | `cell_inside_cell -> "Cell (\"{c ...}\") command inside another cell"
         | `unknown_command s -> spr "Unknown command: %s" s
         | `begin_without_arg -> "{begin} without argument"
         | `non_matching_end -> "{end} does not match a {begin}"
@@ -92,9 +98,18 @@ let to_string (location, gravity, message) = (
             spr "Bad size specification in image: \"%s\"" s
         | `unknown_list_style s ->
             spr "Unknown list syle: \"%s\"" s
+        | `end_of_input_not_in_text s ->
+            spr "Reached end of input in wrong state... \"%s\"" s
+        | `invalid_end_pattern s ->
+            spr "Invalid end pattern: \"%S\"" s
+        | `command_shouldnot_have_args s ->
+            spr "This command should not have arguments: %s" s
+        | `unknown_quotation_style s ->
+            spr "Unknown quotation style \"%s\" (using default)" s
     in
-    Printf.sprintf "[L:%d,C:%d][%s] %s"
-        location.l_line location.l_char
+    Printf.sprintf "[%s:%d%s][%s] %s"
+        location.l_file location.l_line 
+        (if location.l_char = -1 then "" else (spr ",%d" location.l_char))
         gravity_str message_str
 )
 

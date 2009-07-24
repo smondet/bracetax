@@ -1,5 +1,5 @@
 (******************************************************************************)
-(*      Copyright (c) 2008, 2009, Sebastien MONDET                            *)
+(*      Copyright (c) 2009, Sebastien MONDET                                  *)
 (*                                                                            *)
 (*      Permission is hereby granted, free of charge, to any person           *)
 (*      obtaining a copy of this software and associated documentation        *)
@@ -23,31 +23,53 @@
 (*      OTHER DEALINGS IN THE SOFTWARE.                                       *)
 (******************************************************************************)
 
-let version = "0.2"
+open Signatures
 
-let license = "\
-Copyright (c) 2008, 2009, Sebastien MONDET                         \n\
-\n\
-Permission is hereby granted, free of charge, to any person        \n\
-obtaining a copy of this software and associated documentation     \n\
-files (the \"Software\"), to deal in the Software without            \n\
-restriction, including without limitation the rights to use,       \n\
-copy, modify, merge, publish, distribute, sublicense, and/or sell  \n\
-copies of the Software, and to permit persons to whom the          \n\
-Software is furnished to do so, subject to the following           \n\
-conditions:                                                        \n\
-\n\
-The above copyright notice and this permission notice shall be     \n\
-included in all copies or substantial portions of the Software.    \n\
-\n\
-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,    \n\
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES    \n\
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND           \n\
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT        \n\
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,       \n\
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING       \n\
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR      \n\
-OTHER DEALINGS IN THE SOFTWARE.                                    \n\
-"
+let opt_may ~f = function None -> () | Some o -> f o
+
+let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
+?(filename="<IN>") ?class_hook ~input_char ?(deny_bypass=false) () = (
+
+    if doc then (
+        writer.w_write (HtmlPrinter.header
+            ~comment:"Generated with BraceTax" ?title
+            ?stylesheet_link:css_link ()
+        );
+    );
+    let printer = HtmlPrinter.build ?class_hook ~writer ~print_comments () in
+    Parser.do_transformation ~deny_bypass printer input_char filename;
+    
+    if doc then (
+        writer.w_write (HtmlPrinter.footer ());
+    );
+
+)
+
+
+let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
+    ?(print_comments=false) ?(filename="<IN>") ~input_char () = (
+
+    if doc then (
+        writer.w_write (LatexPrinter.header
+            ~comment:"Generated with BraceTax" ?title
+            ?stylesheet_link:use_package ()
+        );
+    );
+    let printer = LatexPrinter.build ~writer ~print_comments () in
+    Parser.do_transformation ~deny_bypass printer input_char filename;
+    
+    if doc then (
+        writer.w_write (LatexPrinter.footer ());
+    );
+
+)
+
+let get_TOC ~writer ?(filename="<IN>") ~input_char () = (
+    let output_funs = TOCOutput.create () in
+    let printer = GenericPrinter.build ~writer ~output_funs () in
+    Parser.do_transformation printer input_char filename;
+)
+
+
 
 

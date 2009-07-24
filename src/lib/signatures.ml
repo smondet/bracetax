@@ -1,5 +1,5 @@
 (******************************************************************************)
-(*      Copyright (c) 2008, Sebastien MONDET                                  *)
+(*      Copyright (c) 2008, 2009, Sebastien MONDET                            *)
 (*                                                                            *)
 (*      Permission is hereby granted, free of charge, to any person           *)
 (*      obtaining a copy of this software and associated documentation        *)
@@ -23,8 +23,6 @@
 (*      OTHER DEALINGS IN THE SOFTWARE.                                       *)
 (******************************************************************************)
 
-type location = Error.location
-
 type writer = {
     w_write: string -> unit;
     w_error: Error.error -> unit;
@@ -36,20 +34,19 @@ let make_writer ~write  ~error = (
     }
 )
 
-module type PRINTER = sig
-    type t
-    type aux
-    val create: writer:writer -> aux -> t
-    val handle_comment_line: t -> location -> string -> unit
-    val handle_text: t -> location -> string -> unit
-    val start_command: t -> location -> string -> string list -> unit
-    val stop_command: t -> location -> unit
-    val terminate: t -> location -> unit
+type raw_t = [ `bypass | `code ]
 
-    val enter_verbatim: t -> location -> string list -> unit
-    val handle_verbatim_line: t -> location -> string -> unit
-    val exit_verbatim: t -> location -> unit
-end
+type printer = {
+    print_comment: Error.location -> string -> unit;
+    print_text:    Error.location -> string -> unit;
+    enter_cmd:     Error.location -> string -> string list -> unit;
+    leave_cmd:     Error.location -> unit;
+    terminate:     Error.location -> unit;
 
+    enter_raw:     Error.location -> raw_t -> string list -> unit;
+    print_raw:     Error.location -> string -> unit;
+    leave_raw:     Error.location -> unit;
+    error: Error.error -> unit;
+}
 
 

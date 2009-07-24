@@ -1,5 +1,5 @@
 (******************************************************************************)
-(*      Copyright (c) 2008, Sebastien MONDET                                  *)
+(*      Copyright (c) 2008, 2009, Sebastien MONDET                            *)
 (*                                                                            *)
 (*      Permission is hereby granted, free of charge, to any person           *)
 (*      obtaining a copy of this software and associated documentation        *)
@@ -33,13 +33,28 @@ type t = {
     mutable current_table: Commands.Table.table option;
     error: Error.error -> unit;
     mutable loc: Error.location;
+    class_hook: string option;
 }
-type aux = unit
+
 module CS = Commands.Stack
 
 let (~%) = Printf.sprintf
 
-let create ~writer () =  (
+module AddClass = struct
+    let name add style = (
+        match add with
+        | None -> ""
+        | Some s -> ~% " %s%s" s style
+    )
+    let attribute add style = (
+        match add with
+        | None -> ""
+        | Some s -> ~% " class=\"%s%s\"" s style
+    )
+
+end
+
+let create ~writer ?class_hook () =  (
     let module S = Signatures in
     let write = writer.S.w_write in
     {
@@ -52,6 +67,7 @@ let create ~writer () =  (
         current_table = None;
         error = writer.S.w_error;
         loc = {Error.l_line = -1; l_char = -1; l_file = "NO FILE";};
+        class_hook = class_hook;
     }
 )
 
@@ -79,7 +95,7 @@ let sanitize_xml_attribute src =
     Escape.replace_chars ~src ~patterns
 
 
-let quotation_open_close a = (
+let quotation_open_close t a = (
     let default = ("&ldquo;", "&rdquo;") in
     try
         match List.hd a with
@@ -88,29 +104,35 @@ let quotation_open_close a = (
         | "fr" -> ("&laquo;&nbsp;", "&nbsp;&raquo;")
         | "de" -> ("&bdquo;", "&rdquo;")
         | "es" -> ("&laquo;", "&raquo;")
-        | s    ->  default
+        | s    -> 
+            t.error (Error.mk t.loc `warning (`unknown_quotation_style s));
+            default
     with
     | e -> default
 )
 
-let list_start =
-    function `itemize -> "\n<ul>\n" | `numbered -> "\n<ol>\n"
-let list_item = 
-    function `itemize -> "</li>\n<li>" | `numbered -> "</li>\n<li>"
-let list_firstitem = 
-    function `itemize -> "<li>" | `numbered -> "<li>"
-let list_stop = 
+let list_start t =
+    function `itemize -> ~% "\n<ul%s>\n" (AddClass.attribute t.class_hook "ul")
+    | `numbered -> ~%  "\n<ol%s>\n" (AddClass.attribute t.class_hook "ol")
+let list_item t = function
+    | `itemize -> ~% "</li>\n<li%s>" (AddClass.attribute t.class_hook "li")
+    | `numbered -> ~% "</li>\n<li%s>"  (AddClass.attribute t.class_hook "li")
+let list_firstitem t = 
+    function `itemize -> ~% "<li%s>" (AddClass.attribute t.class_hook "li")
+    | `numbered -> ~% "<li%s>" (AddClass.attribute t.class_hook "li")
+let list_stop t = 
     function `itemize -> "</li>\n</ul>\n" | `numbered -> "</li>\n</ol>\n"
 
-let section_start n l =
+let section_start t n l =
     let lsan =
         match sanitize_xml_attribute l with
-        | "" -> "" | s -> ~% "name=\"%s\" id=\"%s\"" s s
+        | "" -> "" | s -> ~% " id=\"%s\"" s
     in
-    ~% "</div>\n<h%d><a %s>" (n + 1) lsan
+    let tag = ~% "h%d" (n + 1) in
+    ~% "</div>\n<%s%s%s>" tag lsan (AddClass.attribute t.class_hook tag)
 
-let section_stop n l =
-    ~% "</a></h%d>\n<div class=\"p\">" (n + 1)
+let section_stop t n l =
+    ~% "</h%d>\n<div class=\"p%s\">" (n + 1) (AddClass.name t.class_hook "p")
 
 let link_start t args = (
     let link, new_write = Commands.Link.start args in
@@ -124,9 +146,10 @@ let link_stop t l = (
     let target_str = 
         (match target with Some s -> s | None -> "#") in
     t.write (
-        ~% "<a href=\"%s%s\">%s</a>" 
+        ~% "<a href=\"%s%s\"%s>%s</a>" 
             (match kind with `local -> "#" | `generic -> "")
             (sanitize_xml_attribute target_str)
+            (AddClass.attribute t.class_hook "a")
             (match text with Some s -> s | None -> sanitize_pcdata target_str)
     );
 )
@@ -148,9 +171,11 @@ let image_start t args = (
         match sanitize_xml_attribute lbl with 
         | "" -> "" | s -> ~% "id=\"%s\" " s in
     t.write (~%
-        "\n<div class=\"figure\" %s>\n  <a href=\"%s\">\
-        \n    <img src=\"%s\" %s %s alt=\"%s\"/>\n  </a><br/>\n"
+        "\n<div class=\"figure%s\" %s>\n  <a href=\"%s\">\
+        \n    <img src=\"%s\" %s %s alt=\"%s\"%s/>\n  </a><br/>\n"
+        (AddClass.name t.class_hook "figure")
         sanlbl sansrc sansrc opts_str sanlbl sansrc
+        (AddClass.attribute t.class_hook "img")
     );
     `image (src, opts, lbl)
 )
@@ -158,19 +183,25 @@ let image_stop = "</div>"
 
 let header_start t = (
     t.inside_header <- true; 
-    ~% "%s\n<div class=\"header\">\n" (if t.started_text then "</div>" else "")
+    ~% "%s\n<div class=\"header%s\">\n"
+        (if t.started_text then "</div>" else "")
+        (AddClass.name t.class_hook "header")
 )
 let header_stop t = (
     t.inside_header <- false;
     t.started_text <- true; (* we put the <p> *)
-    "</div> <!-- END HEADER -->\n<div class=\"p\">\n"
+    ~% "</div> <!-- END HEADER -->\n<div class=\"p%s\">\n"
+        (AddClass.name t.class_hook "p")
 )
 
-let title_start = "\n  <h1>"
+let title_start t =
+    ~% "\n  <h1%s>" (AddClass.attribute t.class_hook "h1")
 let title_stop = "</h1>\n"
-let authors_start = "  <div class=\"authors\">"
+let authors_start t =
+    ~% "  <div class=\"authors%s\">" (AddClass.name t.class_hook "authors")
 let authors_stop = "</div>\n"
-let subtitle_start = "  <div class=\"subtitle\">"
+let subtitle_start t =
+    ~% "  <div class=\"subtitle%s\">" (AddClass.name t.class_hook "subtitle")
 let subtitle_stop = "</div>\n"
 
 let table_start t args = (
@@ -181,42 +212,60 @@ let table_start t args = (
     t.write <- new_write;
     to_stack
 )
-let print_table write table = (
+let print_table t table = (
     let module CT = Commands.Table in
+    let write = t.write in
     let lbl_str =
         match table.CT.label with
         | None -> ""
         | Some s -> (~% "id=\"%s\"" (sanitize_xml_attribute s))
     in
     write (~% 
-        "<div class=\"tablefigure\">\n\
-        <table class=\"tablefigure\"  border=\"1\" %s >\n"
+        "<div class=\"tablefigure%s\">\n\
+        <table class=\"tablefigure%s\"  border=\"1\" %s >\n"
+        (AddClass.name t.class_hook "tablefigure")
+        (AddClass.name t.class_hook "table")
         lbl_str);
-    write (~% "<caption  class=\"tablefigure\" %s>%s</caption>\n<tr>"
+    write (~% "<caption  class=\"tablefigure%s\" %s>%s</caption>\n<tr>"
+        (AddClass.name t.class_hook "p")
         lbl_str (Buffer.contents table.CT.caption));
-    let rec write_cells cells count =
+
+    let riddle = CT.Util.make_riddle table in
+
+    let rec write_cells cells cur_row cur_col =
         match cells with
         | [] -> (* fill the gap + warning *)
             ()
-        | c :: t ->
-            if count <> 0 && count mod table.CT.col_nb = 0 then (
-                write "</tr>\n<tr>"
-            );
+        | c :: tl ->
             let typ_of_cell = if c.CT.is_head then "h" else "d" in
             let alignement =
                 match c.CT.align with
-                | `right -> "class=\"rightalign\" style=\"text-align:right;\""
-                | `center -> "class=\"centeralign\" style=\"text-align:center;\""
-                | `left -> "class=\"leftalign\" style=\"text-align:left;\""
-                | `default -> ""
+                | `right ->
+                    ~% "class=\"rightalign%s\" style=\"text-align:right;\""
+                        (AddClass.name t.class_hook "cellrightalign")
+                | `center ->
+                    ~% "class=\"centeralign%s\" style=\"text-align:center;\""
+                        (AddClass.name t.class_hook "cellcenteralign")
+                | `left ->
+                    ~% "class=\"leftalign%s\" style=\"text-align:left;\""
+                        (AddClass.name t.class_hook "cellleftalign")
             in
-            write (~% "<t%s colspan=\"%d\" %s >%s</t%s>"
-                typ_of_cell c.CT.cols_used alignement
+            write (~% "<t%s  rowspan=\"%d\" colspan=\"%d\" %s >%s</t%s>"
+                typ_of_cell c.CT.rows_used c.CT.cols_used alignement
                 (Buffer.contents c.CT.cell_text)
                 typ_of_cell);
-            write_cells t (count + c.CT.cols_used)
+            CT.Util.fill_riddle riddle
+                cur_row cur_col c.CT.rows_used c.CT.cols_used;
+            let next_row, next_col = 
+                CT.Util.next_coordinates riddle table cur_row cur_col in
+            if cur_row <> next_row then (
+                write "</tr>\n";
+                if tl <> [] then
+                    write (~% "<tr%s>" (AddClass.attribute t.class_hook "tr"));
+            );
+            write_cells tl next_row next_col
     in
-    write_cells (List.rev table.CT.cells) 0;
+    write_cells (List.rev table.CT.cells) 0 0;
     write "</tr></table></div>\n"
 )
 
@@ -227,34 +276,38 @@ let table_stop t = (
         (* p (~% "End of table: %s\n" (Buffer.contents tab.caption)); *)
         t.write <- Stack.pop t.write_mem;
         t.current_table <- None;
-        print_table t.write tab;
+        print_table t tab;
 )
 let cell_start t args = (
-    let head, cnb, align = Commands.Table.cell_args args in
-    let def_cell = `cell (head, cnb, align) in
     match t.current_table with
     | None ->
         t.error (Error.mk t.loc `error `cell_out_of_table);
-        def_cell
-    | Some tab -> Commands.Table.cell_start ~error:t.error tab args
+        `cell (false, 1, `center)
+    | Some tab ->
+        Commands.Table.cell_start ~loc:t.loc ~error:t.error tab args
 )
 let cell_stop t env = (
     match t.current_table with
     | None -> (* Already warned *) ()
-    | Some tab -> Commands.Table.cell_stop ~error:t.error tab
+    | Some tab -> Commands.Table.cell_stop ~loc:t.loc ~error:t.error tab
 )
 
 let note_start t = (
-    t.write "<small class=\"notebegin\"> (</small>\
-        <small class=\"note\">";
+    t.write (~% 
+        "<small class=\"notebegin%s\"> (</small><small class=\"note%s\">"
+        (AddClass.name t.class_hook "notebegin")
+        (AddClass.name t.class_hook "note")
+    );
     `note
 )
-let note_stop = "</small><small class=\"noteend\">) </small>"
+let note_stop t =
+    ~% "</small><small class=\"noteend%s\">) </small>"
+        (AddClass.name t.class_hook "noteend")
 
 let may_start_text t = (
     if not t.started_text && not t.inside_header then (
         t.started_text <- true;
-        t.write "<div class=\"p\">";
+        t.write (~% "<div class=\"p%s\">" (AddClass.name t.class_hook "p"));
     );
 )
 
@@ -264,21 +317,31 @@ let start_environment ?(is_begin=false) t location name args = (
     let cmd name args =
         match name with
         | s when C.is_header s -> t.write (header_start t); `header
-        | s when C.is_title s -> t.write title_start; `title
-        | s when C.is_subtitle s -> t.write subtitle_start; `subtitle
-        | s when C.is_authors s -> t.write authors_start; `authors
+        | s when C.is_title s -> t.write (title_start t); `title
+        | s when C.is_subtitle s -> t.write (subtitle_start t); `subtitle
+        | s when C.is_authors s -> t.write (authors_start t); `authors
         | _ ->
             may_start_text t;
             begin match name with
             | s when C.is_quotation s        ->
-                let op, clo = quotation_open_close args in
+                let op, clo = quotation_open_close t args in
                 t.write op;
                 `quotation (op, clo)
-            | s when C.is_italic s           -> t.write "<i>"  ; `italic
-            | s when C.is_bold s             -> t.write "<b>"  ; `bold
-            | s when C.is_mono_space s       -> t.write "<tt>" ; `mono_space
-            | s when C.is_superscript s      -> t.write "<sup>"; `superscript
-            | s when C.is_subscript s        -> t.write "<sub>"; `subscript
+            | s when C.is_italic s ->
+                t.write (~% "<i%s>" (AddClass.attribute t.class_hook "i"));
+                `italic
+            | s when C.is_bold s ->
+                t.write (~% "<b%s>" (AddClass.attribute t.class_hook "b"));
+                `bold
+            | s when C.is_mono_space s ->
+                t.write (~% "<tt%s>" (AddClass.attribute t.class_hook "tt"));
+                `mono_space
+            | s when C.is_superscript s ->
+                t.write (~% "<sup%s>" (AddClass.attribute t.class_hook "sup"));
+                `superscript
+            | s when C.is_subscript s ->
+                t.write (~% "<sub%s>" (AddClass.attribute t.class_hook "sub"));
+                `subscript
             | s when (C.is_end s)           -> `cmd_end
             | s when C.is_list s             ->
                 let style, other_args, waiting =
@@ -286,12 +349,12 @@ let start_environment ?(is_begin=false) t location name args = (
                     match args with
                     | [] -> (`itemize, [], ref true)
                     | h :: t -> (C.list_style error_msg h, t, ref true) in
-                t.write (list_start style);
+                t.write (list_start t style);
                 `list (style, other_args, waiting)
             | s when C.is_item s -> `item
             | s when C.is_section s -> 
                 let level, label = C.section_params args in
-                t.write (section_start level label);
+                t.write (section_start t level label);
                 `section (level, label)
             | s when C.is_link s -> (link_start t args)
             | s when C.is_image s -> image_start t args
@@ -321,8 +384,6 @@ let start_environment ?(is_begin=false) t location name args = (
     );
 )
 
-(* ==== PRINTER module type's functions ==== *)
-
 let start_command t location name args = (
     t.loc <- location;
     (* p (~% "Command: \"%s\"(%s)\n" name (String.concat ", " args)); *)
@@ -348,8 +409,11 @@ let stop_command t location = (
         | `cmd_begin (nam, args) ->
             (* p (~% "cmd begin %s(%s)\n" nam (String.concat ", " args)); *)
             start_environment ~is_begin:true t location nam args;
-        | `paragraph -> t.write "</div>\n<div class=\"p\">"
-        | `new_line -> t.write "<br/>\n"
+        | `paragraph ->
+            t.write (~% "</div>\n<div class=\"p%s\">"
+                (AddClass.name t.class_hook "p"))
+        | `new_line -> 
+            t.write (~% "<br%s/>\n" (AddClass.attribute t.class_hook "br"))
         | `non_break_space -> t.write "&nbsp;"
         | `horizontal_ellipsis -> t.write "&hellip;"
         | `open_brace -> t.write "{"
@@ -362,16 +426,16 @@ let stop_command t location = (
         | `mono_space   ->  t.write "</tt>" 
         | `superscript  ->  t.write "</sup>"
         | `subscript    ->  t.write "</sub>"
-        | `list (style, _, r) -> t.write (list_stop style)
+        | `list (style, _, r) -> t.write (list_stop t style)
         | `item ->
             begin match CS.head t.stack with
             | Some (`list (style, _, r))
             | Some (`cmd_inside (`list (style, _, r))) ->
                 if !r then (
-                    t.write (list_firstitem style);
+                    t.write (list_firstitem t style);
                     r := false;
                 ) else (
-                    t.write (list_item style);
+                    t.write (list_item t style);
                 );
             | Some c ->
                 t.error (Error.mk t.loc `error `item_out_of_list);
@@ -380,7 +444,7 @@ let stop_command t location = (
                 t.error (Error.mk t.loc `error `item_out_of_list);
             end
         | `section (level, label) ->
-            t.write (section_stop level label);
+            t.write (section_stop t level label);
         | `link l -> link_stop t l;
         | `image _ -> t.write image_stop;
         | `header ->  t.write (header_stop t);
@@ -389,7 +453,7 @@ let stop_command t location = (
         | `authors -> t.write authors_stop;
         | `table _ -> table_stop t
         | `cell _ as c -> cell_stop t c
-        | `note -> t.write note_stop
+        | `note -> t.write (note_stop t)
         | `cmd_inside c ->
             t.error (Error.mk t.loc `error `closing_brace_matching_begin);
         | `unknown c -> () (* Already "t.error-ed" in start_environment *)
@@ -448,39 +512,68 @@ let terminate t location = (
     t.write "</div>\n";
 ) 
 
-let enter_verbatim t location args = (
-    CS.push t.stack (`verbatim args);
-    begin match args with
-    | q :: _ ->
-        t.write (~% "\n<!--verbatimbegin:%s -->\n" (sanitize_comments q))
-    | _ -> ()
-    end;
-    t.write "<pre>\n";
+
+(* ==== Directly exported functions ==== *)
+let start_raw_mode t location kind args = (
     t.current_line <- location.Error.l_line;
-)
-let exit_verbatim t location = (
-    let env =  (CS.pop t.stack) in
-    match env with
-    | Some (`verbatim args) ->
-        t.write "</pre>\n";
+    match kind with
+    | `code ->
+        CS.push t.stack (`code args);
         begin match args with
         | q :: _ ->
-            t.write (~% "<!--verbatimend:%s -->\n" (sanitize_comments q))
+            t.write (~% "\n<!--verbatimbegin:%s -->\n" (sanitize_comments q))
         | _ -> ()
         end;
-        t.current_line <- location.Error.l_line;
+        t.write (~% "<pre%s>"  (AddClass.attribute t.class_hook "pre"));
+    | `bypass ->
+        CS.push t.stack (`bypass);
+)
+let handle_raw_text t location text = (
+    t.current_line <- location.Error.l_line;
+    match CS.head t.stack with
+    | Some (`code args) ->
+        let pcdata = sanitize_pcdata text in
+        t.write (~% "%s" pcdata);
+    | Some `bypass ->
+        t.write text;
+    | _ ->
+        failwith "handle_raw_text: Shouldn't be there, Parser's fault ?";
+)
+let stop_raw_mode t location = (
+    t.current_line <- location.Error.l_line;
+    match CS.pop t.stack with
+    | Some (`code args) ->
+        t.write "</pre>";
+        begin match args with
+        | q :: _ ->
+            t.write (~% "\n<!--verbatimend:%s -->\n" (sanitize_comments q))
+        | _ -> ()
+        end;
+    | Some `bypass -> ()
     | _ ->
         (* warning ? error ? anyway, *)
         failwith "Shouldn't be there, Parser's fault ?";
-)
 
-let handle_verbatim_line t location line = (
-    let pcdata = sanitize_pcdata line in
-    t.write (~% "%s\n" pcdata);
-    t.current_line <- location.Error.l_line;
 )
-
-(* ==== Directly exported functions ==== *)
+let build ?(print_comments=false) ?class_hook ~writer () = (
+    let t = create ~writer ?class_hook () in
+    let printer = {
+        Signatures.
+        print_comment =
+            if print_comments then 
+                (handle_comment_line t)
+            else 
+                (fun a b -> ());
+        print_text =    handle_text t;
+        enter_cmd =     start_command t;
+        leave_cmd =     stop_command t;
+        terminate =     terminate t;
+        enter_raw =     start_raw_mode t;
+        print_raw =     handle_raw_text t;
+        leave_raw =     stop_raw_mode t;
+        error = writer.Signatures.w_error; } in
+    printer
+)
 
 let header ?(title="") ?(comment="") ?stylesheet_link () = (
     let css_str =

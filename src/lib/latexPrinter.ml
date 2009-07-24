@@ -1,5 +1,5 @@
 (******************************************************************************)
-(*      Copyright (c) 2008, Sebastien MONDET                                  *)
+(*      Copyright (c) 2008, 2009, Sebastien MONDET                            *)
 (*                                                                            *)
 (*      Permission is hereby granted, free of charge, to any person           *)
 (*      obtaining a copy of this software and associated documentation        *)
@@ -31,7 +31,7 @@ type t = {
     error: Error.error_fun;
     mutable loc: Error.location;
 }
-type aux = unit
+
 module CS = Commands.Stack
 
 let (~%) = Printf.sprintf
@@ -151,7 +151,7 @@ let link_stop t l = (
 
 
 (* Quotations *)
-let quotation_open_close a = (
+let quotation_open_close t a = (
     let default = ("``", "''") in
     try
         match List.hd a with
@@ -160,7 +160,9 @@ let quotation_open_close a = (
         | "fr" -> ("«~", "~»")
         | "de" -> ("\\unichar{8222}", "\\unichar{8220}")
         | "es" -> ("\\unichar{171}", "\\unichar{187}")
-        | s    ->  default
+        | s    ->
+            t.error (Error.mk t.loc `warning (`unknown_quotation_style s));
+            default
     with
     | e -> default
 )
@@ -237,38 +239,69 @@ let print_table write table = (
         \    \\begin{tabular}{%s}\n\
         \    \\hline " table_format
     );
-    let rec write_cells cells count =
-        match cells with
-        | [] -> (* fill the gap + warning *)
-            ()
-        | c :: t ->
-            if count <> 0 then (
-                if count mod table.CT.col_nb = 0 then (
-                    write "\\\\\n      \\hline "
-                ) else (
-                    write " & "
-                );
+    let nb_rows, nb_cols, matrix = 
+        CT.Util.cells_to_matrix table in
+    let string_of_cell c =
+        let text = (Buffer.contents c.CT.cell_text) in
+        let text_with_type =
+            if c.CT.is_head then ~% "\\textbf{%s}" text else text in
+        let text_with_type_and_rows =
+            if c.CT.rows_used <> 1 then 
+                ~% "\\multirow{%d}{*}{%s}" c.CT.rows_used text_with_type
+            else
+                text_with_type in
+        let alignment =
+            match c.CT.align with
+            | `right -> "r"
+            | `center -> "c"
+            | `left -> "l"
+        in
+        let multicol = 
+            (~% "\\multicolumn{%d}{|%s|}{%s}"
+                c.CT.cols_used alignment text_with_type_and_rows)
+        in
+        multicol
+    in 
+    let empty_multicol cols = (~% "\\multicolumn{%d}{|c|}{}" cols) in
+    let separator cur_col cols_used nb_cols =
+        if cur_col + cols_used - 1 <> nb_cols - 1 then " & " else " \\\\\n" in
+    let str_matrix = Array.make_matrix nb_rows nb_cols "" in
+    let lines_matrix = Array.make_matrix nb_rows nb_cols false in
+    for row = 0 to nb_rows - 1 do
+        for col = 0 to nb_cols - 1 do
+            begin match matrix.(row).(col) with
+            | `none -> ()
+            | `cell c ->
+                let the_cell =
+                    (string_of_cell c) ^ (separator col c.CT.cols_used nb_cols) in
+                str_matrix.(row).(col) <- the_cell;
+                for i = row + 1 to row + c.CT.rows_used - 1 do
+                    str_matrix.(i).(col) <- 
+                        (empty_multicol c.CT.cols_used) 
+                        ^ (separator col c.CT.cols_used nb_cols);
+                done;
+                for i = col to col + c.CT.cols_used - 1 do
+                    lines_matrix.(row + c.CT.rows_used - 1).(i) <- true;
+                done;
+            | `filled (r, c) -> ()
+            end;
+        done;
+    done;
+    for row = 0 to nb_rows - 1 do
+        let buf_separ = Buffer.create 42 in
+        let buf_row = Buffer.create 42 in
+        for col = 0 to nb_cols - 1 do
+            Buffer.add_string buf_row str_matrix.(row).(col);
+            if (lines_matrix.(row).(col)) then (
+                Buffer.add_string buf_separ
+                    (~% " \\cline{%d-%d}" (col + 1) (col + 1));
             );
-            let text = (Buffer.contents c.CT.cell_text) in
-            let text_with_type =
-                if c.CT.is_head then ~% "\\textbf{%s}" text else text in
-            let alignment =
-                match c.CT.align with
-                | `right -> "r"
-                | `center -> "c"
-                | `left -> "l"
-                | `default -> "c"
-            in
-            let multicol = 
-                (~% "\\multicolumn{%d}{|%s|}{%s}"
-                    c.CT.cols_used alignment text_with_type)
-            in
-            (*write (~% "%s %s" ""[>TODO alignement<] multicol);*)
-            write multicol;
-            write_cells t (count + c.CT.cols_used);
-    in
-    write_cells (List.rev table.CT.cells) 0;
-    write (~% "\\\\\n    \\hline\n\
+        done;
+        write (Buffer.contents buf_row);
+        write (Buffer.contents buf_separ);
+        write "\n";
+    done;
+    write (~% "\n\
         \  \\end{tabular}\n\
         \  \\end{center}\n\
         \  \\caption{%s%s}\n\
@@ -286,13 +319,11 @@ let table_stop t = (
         print_table t.write tab;
 )
 let cell_start t args = (
-    let head, cnb, align = Commands.Table.cell_args args in
-    let def_cell = `cell (head, cnb, align) in
     match t.current_table with
     | None ->
         t.error (Error.mk t.loc `error `cell_out_of_table);
-        def_cell
-    | Some tab -> Commands.Table.cell_start ~error:t.error tab args
+        `cell (false, 1, `center)
+    | Some tab -> Commands.Table.cell_start ~loc:t.loc ~error:t.error tab args
 )
 let cell_stop t env = (
     match t.current_table with
@@ -300,7 +331,7 @@ let cell_stop t env = (
         (* Already warned: *)
         (* t.error (Error.mk t.loc `warning `cell_out_of_table); *)
         ()
-    | Some tab -> Commands.Table.cell_stop ~error:t.error tab
+    | Some tab -> Commands.Table.cell_stop ~loc:t.loc ~error:t.error tab
 )
 
 
@@ -337,8 +368,6 @@ let stop_subsup t = (
     t.write "}}$"
 )
 
-(* ==== PRINTER module type's functions ==== *)
-
 let handle_text t location line = (
     t.loc <- location;
 
@@ -363,33 +392,6 @@ let handle_comment_line t location line = (
         (debugstr t location "Comment") (sanitize_comments line));
 )
 
-let enter_verbatim t location args = (
-    t.loc <- location;
-    CS.push t.stack (`verbatim args);
-    begin match args with
-    | q :: _ -> t.write (~% "%%\n%%verbatimbegin:%s\n\\begin{verbatim}\n" q)
-    | _ -> t.write "%\n\\begin{verbatim}\n";
-    end;
-)
-let exit_verbatim t location = (
-    t.loc <- location;
-    let env =  (CS.pop t.stack) in
-    match env with
-    | Some (`verbatim args) ->
-        t.write "\\end{verbatim}\n";
-        begin match args with
-        | q :: _ -> t.write (~% "%%verbatimend:%s\n" q)
-        | _ -> ()
-        end;
-    | _ ->
-        (* warning ? error ? anyway, *)
-        failwith "Shouldn't be there, Parser's fault ?";
-)
-let handle_verbatim_line t location line = (
-    t.loc <- location;
-    t.write (~% "%s\n" line);
-)
-
 let terminate t location = (
     t.loc <- location;
     if (CS.to_list t.stack) <> [] then (
@@ -404,7 +406,7 @@ let start_environment ?(is_begin=false) t location name args = (
     let cmd name args =
         match name with
         | s when C.is_quotation s        ->
-            let op, clo = quotation_open_close args in
+            let op, clo = quotation_open_close t args in
             t.write op;
             `quotation (op, clo)
         | s when C.is_italic s      -> t.write "{\\it{}"  ; `italic
@@ -537,9 +539,59 @@ let stop_command t location = (
         t.error (Error.mk t.loc `error `nothing_to_end_with_brace);
 )
 
+let start_raw_mode t location kind args = (
+    t.loc <- location;
+    match kind with
+    | `code ->
+        CS.push t.stack (`code args);
+        begin match args with
+        | q :: _ -> t.write (~% "%%\n%%verbatimbegin:%s\n\\begin{verbatim}" q)
+        | _ -> t.write "%\n\\begin{verbatim}";
+        end;
+    | `bypass ->
+        CS.push t.stack (`bypass);
+)
+let handle_raw_text t location text = (
+    t.loc <- location;
+    t.write text;
+)
+let stop_raw_mode t location = (
+    t.loc <- location;
+    match CS.pop t.stack with
+    | Some (`code args) ->
+        t.write "\\end{verbatim}";
+        begin match args with
+        | q :: _ -> t.write (~% "\n%%verbatimend:%s\n" q)
+        | _ -> ()
+        end;
+    | Some `bypass -> ()
+    | _ ->
+        (* warning ? error ? anyway, *)
+        failwith "Shouldn't be there, Parser's fault ?";
+
+)
 
 (* ==== Directly exported functions ==== *)
 
+let build ?(print_comments=false) ~writer () = (
+    let t = create ~writer () in
+    let printer = {
+        Signatures.
+        print_comment =
+            if print_comments then 
+                (handle_comment_line t)
+            else 
+                (fun a b -> ());
+        print_text =    handle_text t;
+        enter_cmd =     start_command t;
+        leave_cmd =     stop_command t;
+        terminate =     terminate t;
+        enter_raw =     start_raw_mode t;
+        print_raw =     handle_raw_text t;
+        leave_raw =     stop_raw_mode t;
+        error = writer.Signatures.w_error; } in
+    printer
+)
 let header ?(title="") ?(comment="") ?stylesheet_link () = (
     let package_str =
         match stylesheet_link with
@@ -554,6 +606,7 @@ let header ?(title="") ?(comment="") ?stylesheet_link () = (
     \n\
     \\usepackage[T1]{fontenc}\n\
     \\usepackage[english]{babel}\n\
+    \\usepackage{multirow}\n\
     \\usepackage{ucs}\n\
     \\usepackage[utf8x,utf8]{inputenc}\n\
     \\usepackage[                         \n\

@@ -1,5 +1,5 @@
 (******************************************************************************)
-(*      Copyright (c) 2008, Sebastien MONDET                                  *)
+(*      Copyright (c) 2008, 2009, Sebastien MONDET                            *)
 (*                                                                            *)
 (*      Permission is hereby granted, free of charge, to any person           *)
 (*      obtaining a copy of this software and associated documentation        *)
@@ -69,6 +69,14 @@ module Link = struct
         (link.kind, link.linkto, str)
     )
 
+    let unparse kind target text = (
+        let skind =
+            match kind with `local -> "local:" | `generic -> "" in
+        let starget = match target with None -> "" | Some s -> s in
+        let stext = match text with None -> "" | Some s -> s in
+        Printf.sprintf "{link %s%s|%s}" skind starget stext
+    )
+
 end
 
 module Stack = struct
@@ -100,7 +108,8 @@ module Stack = struct
         | `close_brace
         | `sharp
         | `utf8_char of int
-        | `verbatim of string list
+        | `code of string list
+        | `bypass
         | `list of [`itemize | `numbered ] * string list * bool ref
         | `item
         | `section of int * string
@@ -111,7 +120,7 @@ module Stack = struct
         | `authors
         | `subtitle
         | `table of int * string option
-        | `cell of bool * int * [`right | `center | `left | `default]
+        | `cell of bool * int * [`right | `center | `left]
         | `note
     ]
 
@@ -248,7 +257,8 @@ let rec env_to_string (e:Stack.environment) = (
     | `close_brace               -> spr "close_brace (})"
     | `sharp                     -> spr "sharp (#)"
     | `utf8_char i               -> spr "utf8_char 0x%x" i
-    | `verbatim l                -> spr "verbatim"
+    | `code l                    -> spr "code"
+    | `bypass                    -> spr "bypass"
     | `list l                    -> spr "list"
     | `item                      -> spr "item (*)"
     | `section (n, l)            -> spr "section %d" n
@@ -264,53 +274,89 @@ let rec env_to_string (e:Stack.environment) = (
 )
 
 module Table = struct
+    (* New version target:
+       {begin table 4 label defalign}
+           {c lrch 2|on two columns}
+           {c r3| for backward compat}
+           {c r 2x3|new multirow format}
+           {c _ 2x3|multirow, with default align}
+       {end}
+       *)
+    type alignment = [`right | `center | `left ]
+
     type cell = {
         is_head: bool;
         cols_used: int;
-        align: [`right | `center | `left | `default];
+        rows_used: int;
+        align: alignment;
         cell_text: Buffer.t;
     }
 
+    let default_default_align = `left
     type table = {
         col_nb: int;
         label: string option;
         mutable cells: cell list;
         mutable current_cell: cell option;
         caption: Buffer.t;
+        default_align: alignment;
     }
 
     let table_args =
         let default = 1 in
         let parse_int i = try int_of_string i with e -> default in
+        let parse_align str = 
+            match str.[0] with
+            | 'r' -> `right
+            | 'l' -> `left
+            | 'c' -> `center
+            | _   -> (* TODO warning *) default_default_align in
         function
-        | [] -> (default, None)
-        | [s] -> (parse_int s, None)
-        | s :: o :: t -> (parse_int s, Some o)
+        | [] -> (default, None, default_default_align)
+        | s :: [] | s :: _ :: [] -> (parse_int s, None, default_default_align)
+        | s :: l :: a :: _ -> (parse_int s, Some l, parse_align a)
 
-    let cell_args args =
-        let head = ref false in
-        let cols = ref 1 in
-        let alig = ref `default in
-        let rec parse_str str =
-            if str = "" then ()
-            else (
-                try Scanf.sscanf str "%d%s" (fun c s -> cols := c; parse_str s)
-                with
-                e ->
-                    begin match str.[0] with
-                    | 'h' -> head := true;
-                    | 'r' -> alig := `right;
-                    | 'l' -> alig := `left;
-                    | 'c' -> alig := `center;
-                    | _   -> ()
-                    end;
-                    parse_str (String.sub str 1 (String.length str - 1));
-            )
-        in
-        if args <> [] then (
-            parse_str (List.hd args);
-        );
-        (!head, !cols, !alig)
+    let cell_arguments tab args =
+        let parse_1arg str =
+            let head = ref false in
+            let cols = ref 1 in
+            let alig = ref tab.default_align in
+            let rec p str =
+                if str = "" then ()
+                else (
+                    try Scanf.sscanf
+                        str "%d%s" (fun c s -> cols := c; p s)
+                    with
+                    e ->
+                        begin match str.[0] with
+                        | 'h' -> head := true;
+                        | 'r' -> alig := `right;
+                        | 'l' -> alig := `left;
+                        | 'c' -> alig := `center;
+                        | '_' -> ()
+                        | _   -> (* TODO warning *) ()
+                        end;
+                        p (String.sub str 1 (String.length str - 1));
+                );
+            in
+            p str;
+            (!head, 1, !cols, !alig) in
+        let parse_2args a1 a2 =
+            let h, _, _, a = parse_1arg a1 in
+            let r, c =
+                try 
+                    (try Scanf.sscanf a2 "%dx%d" (fun r c -> (r, c))
+                        with e -> Scanf.sscanf a2 "%d" (fun c -> (1, c)))
+                with e ->
+                    (* TODO: Warning *) (1, 1)
+            in
+            (h, r, c, a) in
+        match args with
+        | [] -> (false, 1, 1, tab.default_align)
+        | arg :: [] ->
+            (parse_1arg arg)
+        | arg1 :: arg2 :: _ ->
+            (parse_2args arg1 arg2)
 
     let write table str = (
         let the_buffer =
@@ -322,27 +368,29 @@ module Table = struct
     )
     
     let start args = (
-        let col_nb, label = table_args args in
+        let col_nb, label, def_alig = table_args args in
         let table = {
             col_nb = col_nb;
             label = label;
             cells = [];
             current_cell = None;
             caption = Buffer.create 64;
+            default_align = def_alig;
         } in
         (table, `table (col_nb, label), write table)
     )
-    let cell_start ~(error:Error.error_fun) tab args = (
-        let head, cnb, align = cell_args args in
+    let cell_start ~loc ~(error:Error.error_fun) tab args = (
+        let head, rnb, cnb, align = cell_arguments tab args in
         let def_cell = `cell (head, cnb, align) in
         begin match tab.current_cell with
         | Some c -> 
-            error (`undefined "Warning: no use for a cell inside a cell !\n");
+            error (Error.mk loc `error `cell_inside_cell);
             def_cell
         | None ->
             let cell_t = {
                 is_head= head;
                 cols_used = cnb;
+                rows_used = rnb;
                 align = align;
                 cell_text = Buffer.create 64;
             } in
@@ -351,18 +399,102 @@ module Table = struct
         end
     )
 
-    let cell_stop ~(error:Error.error_fun) tab = (
+    let cell_stop ~loc ~(error:Error.error_fun) tab = (
         begin match tab.current_cell with
         | Some c -> 
             tab.cells <- c :: tab.cells;
             tab.current_cell <- None;
         | None ->
-            error (`undefined
-                "Should not be there... unless you already know you shouldn't \
-                cells put in cells...\n");
+            (* already errored *)
+            ()
         end
     )
 
+    (* Utilities for printing table without too much headache *)
+    module Util = struct
+        let nb_rows table = (
+            let nb_cells = 
+                List.fold_left
+                    (fun sum cell ->
+                        sum + (cell.cols_used * cell.rows_used))
+                    0 table.cells in
+            nb_cells / table.col_nb
+        )
+
+        let make_riddle table =
+            let rows, cols = nb_rows table, table.col_nb in
+            (* one row too much to simplify next_coordinates *)
+            Array.make_matrix (rows + 1) (cols) (-1, -1)
+
+        let fill_riddle riddle from_row from_col offset_row offset_col = (
+            for i = 1 to offset_row do
+                for j = 1 to offset_col do
+                    riddle.(from_row + i - 1).(from_col + j - 1) <- 
+                        (from_row, from_col);
+                done;
+            done;
+        )
+
+        (* Find next false in riddle *)
+        let next_coordinates riddle table prev_row prev_col = (
+            let row = ref prev_row in
+            let col = ref prev_col in
+            let next_coord () =
+                if !col = table.col_nb - 1 then
+                    (col := 0; incr row;) else (incr col;) in
+            next_coord ();
+            while riddle.(!row).(!col) <> (-1, -1) do
+                next_coord ();
+            done;
+            (!row, !col)
+        )
+
+
+        type in_table = [
+            | `none
+            | `cell of cell
+            | `filed of int * int
+        ]
+        let matrix_next_coordinates mat table prev_row prev_col = (
+            let row = ref prev_row in
+            let col = ref prev_col in
+            let next_coord () =
+                if !col = table.col_nb - 1 then
+                    (col := 0; incr row;) else (incr col;) in
+            next_coord ();
+            while mat.(!row).(!col) <> `none do
+                next_coord ();
+            done;
+            (!row, !col)
+        )
+        let cells_to_matrix table = (
+            let rows, cols = nb_rows table, table.col_nb in
+            let mat = Array.make_matrix (rows + 1) (cols) `none in
+            let rec iter_on_cells cur_row cur_col = function
+                | [] -> ()
+                | cell :: t ->
+(* Printf.eprintf "===mat.(%d).(%d) <- `cell str_cell;\n%!" cur_row cur_col; *)
+(* Printf.eprintf "   rows: %d, cols: %d\n" cell.rows_used cell.cols_used; *)
+                    for i = 0 to cell.rows_used - 1 do
+                        for j = 0 to cell.cols_used - 1 do
+(* Printf.eprintf "     at.( %d + %d , %d + %d\n" cur_row i cur_col j; *)
+                            if i = 0 && j = 0 then (
+                                mat.(cur_row).(cur_col) <- `cell cell;
+                            ) else (
+                                mat.(cur_row + i).(cur_col + j) <- 
+                                    `filled (cur_row, cur_col);
+                            );
+                        done;
+                    done;
+                    let next_row, next_col = 
+                        matrix_next_coordinates mat table cur_row cur_col in
+                    iter_on_cells next_row next_col t
+            in
+            iter_on_cells 0 0 (List.rev table.cells);
+            (rows, cols, mat)
+        )
+
+    end
 
 
 end

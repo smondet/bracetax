@@ -1,5 +1,5 @@
 (******************************************************************************)
-(*      Copyright (c) 2008, Sebastien MONDET                                  *)
+(*      Copyright (c) 2008, 2009, Sebastien MONDET                            *)
 (*                                                                            *)
 (*      Permission is hereby granted, free of charge, to any person           *)
 (*      obtaining a copy of this software and associated documentation        *)
@@ -32,14 +32,15 @@ type output_t = {
 
     start_text: string_fun;
     terminate: string_fun;
-    start_verbatim: string option -> string;
-    verbatim_line: transform_string_fun;
-    stop_verbatim: string option -> string;
+    start_code: string option -> string;
+    code_line: transform_string_fun;
+    stop_code: string option -> string;
 
     line: transform_string_fun;
     comment_line: transform_string_fun;
 
-    quotation_open_close: string list -> (string * string);
+    quotation_open:  string -> string;
+    quotation_close: string -> string;
     
     start_italic: string_fun;
     start_bold:   string_fun;
@@ -103,8 +104,6 @@ type t = {
     mutable output: output_t;
 }
 
-type aux = output_t
-
 module CS = Commands.Stack
 
 let spr = Printf.sprintf
@@ -133,10 +132,12 @@ let start_environment ?(is_begin=false) t location name args = (
     let module C = Commands.Names in
     let cmd name args =
         match name with
-        | s when C.is_quotation s        ->
-            let op, clo = o.quotation_open_close args in
+        | s when C.is_quotation s ->
+            let style =
+                match args with [] -> "" | h :: q -> h in
+            let op = o.quotation_open style in
             t.write op;
-            `quotation (op, clo)
+            `quotation (op, style)
         | s when C.is_italic s      -> wr (o.start_italic ()); `italic
         | s when C.is_bold s        -> wr (o.start_bold   ()); `bold
         | s when C.is_mono_space s  -> wr (o.start_type   ()); `mono_space
@@ -180,13 +181,11 @@ let start_environment ?(is_begin=false) t location name args = (
             t.write <- new_write;
             to_stack
         | s when C.is_cell s ->
-            let head, cnb, align = Commands.Table.cell_args args in
-            let def_cell = `cell (head, cnb, align) in
             begin match t.current_table with
             | None ->
                 t.error (Error.mk t.loc `error `cell_out_of_table);
-                def_cell
-            | Some tab -> Commands.Table.cell_start ~error:t.error tab args
+                `cell (false, 1, `center)
+            | Some tab -> Commands.Table.cell_start ~loc:t.loc ~error:t.error tab args
             end;
         | s when C.is_note s -> t.write (o.start_note ()); `note
         | s ->
@@ -210,9 +209,6 @@ let start_environment ?(is_begin=false) t location name args = (
         CS.push t.stack the_cmd;
     );
 )
-
-
-(* ==== PRINTER module type's functions ==== *)
 
 let start_command t location name args = (
     t.loc <- location;
@@ -248,7 +244,7 @@ let stop_command t location = (
         | `close_brace -> t.write (o.close_brace ())
         | `sharp -> t.write (o.sharp ())
         | (`utf8_char i) -> t.write (o.utf8_char i)
-        | (`quotation (op, clo)) -> t.write clo
+        | (`quotation (op, style)) -> t.write (o.quotation_close style)
         | `italic       ->  t.write (o.stop_italic ())
         | `bold         ->  t.write (o.stop_bold   ())
         | `mono_space   ->  t.write (o.stop_type   ())
@@ -294,7 +290,7 @@ let stop_command t location = (
         | `cell _ ->
             begin match t.current_table with
             | None -> (* Already warned: *) ()
-            | Some tab -> Commands.Table.cell_stop ~error:t.error tab
+            | Some tab -> Commands.Table.cell_stop ~loc:t.loc ~error:t.error tab
             end;
         | `note -> t.write (o.stop_note ())
         | `cmd_inside c ->
@@ -350,19 +346,19 @@ let terminate t location = (
     );  
     t.write (t.output.terminate ());
 ) 
-
-let enter_verbatim t location args = (
-    CS.push t.stack (`verbatim args);
+(*
+let start_raw_mode t location args = (
+    CS.push t.stack (`code args);
     let postpro =
         match args with
         | q :: _ -> Some q | _ -> None
     in
     t.write (t.output.start_verbatim postpro);
 )
-let exit_verbatim t location = (
+let stop_raw_mode t location = (
     let env =  (CS.pop t.stack) in
     match env with
-    | Some (`verbatim args) ->
+    | Some (`code args) ->
         let postpro =
             match args with
             | q :: _ -> Some q | _ -> None
@@ -373,7 +369,65 @@ let exit_verbatim t location = (
         failwith "Shouldn't be there, Parser's fault ?";
 )
 
-let handle_verbatim_line t location line = (
+let handle_raw_text t location line = (
     t.write (t.output.verbatim_line line);
+)
+*)
+let start_raw_mode t location kind args = (
+    t.loc <- location;
+    match kind with
+    | `code ->
+        CS.push t.stack (`code args);
+        begin match args with
+            | q :: _ -> t.write (t.output.start_code (Some q))
+        | _ -> t.write (t.output.start_code None);
+        end;
+    | `bypass ->
+        CS.push t.stack (`bypass);
+)
+let handle_raw_text t location text = (
+    t.loc <- location;
+    if CS.head t.stack = (Some `bypass) then (
+        t.write text;
+    ) else (
+        t.write (t.output.code_line text);
+    );
+)
+let stop_raw_mode t location = (
+    t.loc <- location;
+    match CS.pop t.stack with
+    | Some (`code args) ->
+        begin match args with
+        | q :: _ -> t.write (t.output.stop_code (Some q))
+        | _ -> t.write (t.output.stop_code None)
+        end;
+    | Some `bypass -> ()
+    | _ ->
+        (* warning ? error ? anyway, *)
+        failwith "Shouldn't be there, Parser's fault ?";
+
+)
+
+
+(* ==== Directly exported functions ==== *)
+
+let build ?(print_comments=false) ~writer ~output_funs () = (
+    let t = create ~writer output_funs in
+    let printer = {
+        Signatures.
+        print_comment =
+            if print_comments then 
+                (handle_comment_line t)
+            else 
+                (fun a b -> ());
+        print_text =    handle_text t;
+        enter_cmd =     start_command t;
+        leave_cmd =     stop_command t;
+        terminate =     terminate t;
+        enter_raw =     start_raw_mode t;
+        print_raw =     handle_raw_text t;
+        leave_raw =     stop_raw_mode t;
+        error = writer.Signatures.w_error; } in
+    printer
 )
 

@@ -4,24 +4,22 @@
 {b|bold} {i|italo{b|bold}}
 # More comments...
 {t|type-writer text}
-A sharp: {#} A {{}Command{}} {cmd arg1    arg\\2 arg\ 3 a\|aa| The lkj fdg# comment
+A sharp: {#} A {{}Command{} strang_arg} {cmd arg1    arg\\2 arg\ 3 a\|aa| The lkj fdg# comment
 }
 {cmd fssf
 sd \|\|\|\| \\\\\|
 s \{fd\} }
 
 
-{verbatim end_token option2}
+{code end_token option2}
 That's {verbatim} {}, {{}
 {end_token}
 
-{verbatim end option2 option3}
-That's {verbatim} again {}, {{}
-{end} # the default end_token
+And now {i|{bypass end option2 option3}That's {bypass}{end}} # the default end_token
 
-{verbatim}
+{code}
 That's {it:still} {verbatim} {}, {{}
-{endverbatim} # the default end_token
+{end} # the default end_token
 
 
 

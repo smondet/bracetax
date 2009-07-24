@@ -12,3 +12,21 @@ And open doc/site/index.html
 
 OTHER: See `mk h`
 
+
+
+
+TODO:
+  * build documentation of lib
+  * doc: add git log with to explain | sed -e 's/\([{}#]\)/{\1}/g' | 
+  * in Commands, should replace `quotation (open,close) by `quotation style
+
+MAYBE TODO:
+  * ?? an {options ...} command 
+    with default language, etc… also parametrable from command line…
+  * add a hack for figure names  
+    % becomes png for HTML output and pdf for LaTeX output.
+  * use Dynlink for custom printers 
+  * resume ConTeXt output
+  * Pure Text output
+  * add section numbering (for HTML, and also in TOC and for internal links)
+
