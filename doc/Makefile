@@ -9,13 +9,14 @@ TMPTEX=$(TMPTEXDIR)/$(TMPTEXNAME).tex
 BRTX_STX_TITLE=Bracetax - Syntax
 
 HTML_PAGES=site/ site/$(CSS)\
-		   site/index.html \
-		   site/brtx_app.html \
-		   site/bracetax_syntax.html \
-		   site/found_image.png \
-		   site/bracetax_syntax_raw.html \
-		   site/bracetax_syntax.brtx.html \
-		   site/tools.html
+		site/index.html \
+		site/brtx_app.html \
+		site/bracetax_syntax.html \
+		site/found_image.png \
+		site/bracetax_syntax_raw.html \
+		site/bracetax_syntax.brtx.html \
+		site/git_log.html \
+		site/tools.html
 
 WHOLE_SITE=$(HTML_PAGES) \
 		   site/bracetax_syntax_latex.pdf \
@@ -74,6 +75,15 @@ site/bracetax_syntax.brtx.html: src/bracetax_syntax.brtx site/found_image.png
 		-c TOhtml -c 'w! $@.tmp' -c 'qa!' && \
 	sed -e 's/<title>.*<\/title>/<title>Bracetax Syntax - source<\/title>/' $@.tmp > $@
 	rm -f $@.tmp
+
+site/git_log.html: site/
+	git log | sed -e 's/\([{}#]\)/{\1}/g' | awk '\
+		/^commit / {print "{p}{t|{b|Commit:} "$$2"}{br}"} \
+		/^Author/  {print "{t|{b|Author:} " $$2 " " $$3 "}{br}"} \
+		/^Date/    {print "{b|{t|" $$0 "}}{br}"} \
+		/^    .+/    {if ($$0 !~ /.*git-svn-id.*/) { print "{t|{i|" $$0 "}}{br}" }} \
+		/^   /    {if ($$0 ~ /.*git-svn-id.*/) print "{b|Git-SVN:}" $$2 "{br}"} \
+		' | $(BRTX2HTMLDOC) -doc -title "Bracetax - git-log" -o $@
 
 
 site/%.html:src/%.brtx

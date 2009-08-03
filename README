@@ -17,7 +17,6 @@ OTHER: See `mk h`
 
 TODO:
   * build documentation of lib
-  * doc: add git log with to explain | sed -e 's/\([{}#]\)/{\1}/g' | 
   * in Commands, should replace `quotation (open,close) by `quotation style
   * doc: Update whole documentation...
 

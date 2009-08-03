@@ -39,9 +39,31 @@ For now the documentations are:
 
 {section|Examples}
 
+{section 2 sec_exmple_gitlog|Git Log}
+
+One of the key features of this syntax is that there are only 3 special
+characters, hence you can sanitize any output with a simple `sed' filter:{br}
+{t|| sed -e 's/\([{{}{}}{#}]\)/{{}\1{}}/g' |}
+
+{p}
+
+For example, this HTML {link git_log.html|git-log} has been generated with the
+command:
+{code}
+git log | sed -e 's/\([{}#]\)/{\1}/g' | awk '\
+    /^commit / {print "{p}{t|{b|Commit:} "$2"}{br}"} \
+    /^Author/  {print "{t|{b|Author:} " $2 " " $3 "}{br}"} \
+    /^Date/    {print "{b|{t|" $0 "}}{br}"} \
+    /^    .+/    {if ($0 !~ /.*git-svn-id.*/) { print "{t|{i|" $0 "}}{br}" }} \
+    /^   /    {if ($0 ~ /.*git-svn-id.*/) print "{b|Git-SVN:}" $2 "{br}"} \
+    ' | brtx -link-css brtxdoc.css -html -doc \
+          -title "Bracetax - git-log" -o git_log.html
+{end}
+
 {section 2 sec_example_core|Complete example of core bracetax}
 
-We use the {link bracetax_syntax.html|Bracetax syntax} document, here we can see:
+We use the {link bracetax_syntax.html|Bracetax syntax} document as a complete example,
+here we can see:
 {begin list}
     {*} the {link bracetax_syntax.brtx.html|source}
         (colored by Vim, c.f. {link tools.html#sec_vimsyntaxfile|tools});
