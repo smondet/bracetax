@@ -313,7 +313,8 @@ module Table = struct
             | _   -> (* TODO warning *) default_default_align in
         function
         | [] -> (default, None, default_default_align)
-        | s :: [] | s :: _ :: [] -> (parse_int s, None, default_default_align)
+        | s :: [] -> (parse_int s, None, default_default_align)
+        | s :: l :: [] -> (parse_int s, Some l, default_default_align)
         | s :: l :: a :: _ -> (parse_int s, Some l, parse_align a)
 
     let cell_arguments tab args =
