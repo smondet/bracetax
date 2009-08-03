@@ -12,7 +12,7 @@ HTML_PAGES=site/ site/$(CSS)\
 		site/index.html \
 		site/brtx_app.html \
 		site/bracetax_syntax.html \
-		site/found_image.png \
+		site/logo.png \
 		site/bracetax_syntax_raw.html \
 		site/bracetax_syntax.brtx.html \
 		site/git_log.html \
@@ -47,27 +47,30 @@ site/:
 site/$(CSS): site/ src/$(CSS)
 	cp src/$(CSS) site/
 
-site/bracetax_syntax_raw.html: src/bracetax_syntax.brtx site/found_image.png
+site/logo.png: site/ logo/logo_a.png
+	cp logo/logo_a.png site/logo.png
+
+site/bracetax_syntax_raw.html: src/bracetax_syntax.brtx
 	$(BRTX2HTML) -doc -title "$(BRTX_STX_TITLE)" -i $< -o $@
 
-site/bracetax_syntax_latex.pdf: src/bracetax_syntax.brtx site/found_image.png
+site/bracetax_syntax_latex.pdf: src/bracetax_syntax.brtx site/logo.png
 	mkdir -p $(TMPTEXDIR) && \
 	brtx -doc -title "$(BRTX_STX_TITLE)" -latex -i $< -o $(TMPTEX) && \
-	cp site/found_image.png $(TMPTEXDIR) && cd $(TMPTEXDIR) && \
+	cp site/logo.png $(TMPTEXDIR) && cd $(TMPTEXDIR) && \
 	pdflatex  $(TMPTEX) && pdflatex  $(TMPTEX) && \
 	cd - && mv $(TMPTEXDIR)/$(TMPTEXNAME).pdf $@ && rm -rf $(TMPTEXDIR)
 
 site/bracetax_syntax_latex_style.pdf: \
-		src/bracetax_syntax.brtx site/found_image.png src/bracetaxdoc.sty
+		src/bracetax_syntax.brtx site/logo.png src/bracetaxdoc.sty
 	mkdir -p $(TMPTEXDIR) && cp src/bracetaxdoc.sty  $(TMPTEXDIR) && \
 	brtx -doc -title "$(BRTX_STX_TITLE)" -latex -i $< -o $(TMPTEX) \
 	-use-package bracetaxdoc && \
-	cp site/found_image.png $(TMPTEXDIR) && cd $(TMPTEXDIR) && \
+	cp site/logo.png $(TMPTEXDIR) && cd $(TMPTEXDIR) && \
 	pdflatex  $(TMPTEX) && pdflatex  $(TMPTEX) && \
 	cd - && mv $(TMPTEXDIR)/$(TMPTEXNAME).pdf $@ && rm -rf $(TMPTEXDIR)
 
 
-site/bracetax_syntax.brtx.html: src/bracetax_syntax.brtx site/found_image.png
+site/bracetax_syntax.brtx.html: src/bracetax_syntax.brtx
 	vim -f -R $< \
 		-c "sy on" \
 		-c 'colorscheme darkblue' \
@@ -89,8 +92,6 @@ site/git_log.html: site/
 site/%.html:src/%.brtx
 	$(BRTX2HTMLDOC) -doc -title "Bracetax - $*" -i $< -o $@
 
-site/found_image.png:
-	cp `find /usr/share -name "*.png" | head -n 1` site/found_image.png
 
 
 clean:

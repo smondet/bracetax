@@ -221,21 +221,20 @@ The syntax for images is:
 {image <src> [<w>px|<w>%] <label>|Caption text}
 {e}
 
-For example {link local:img:foundbyfind|this image}:
+For example {link local:img:logo_candidate|this image}:
 {code e}
 {image
-    found_image.png
-    150px
-    img:foundbyfind
-    |An image found by {tt|find /usr/share -name "*.png" | head -n 1}
-}
+    logo.png
+    100px
+    img:logo_candidate
+    |An image; for now it is the only logo candidate{...}}
 {e}
 {image
-    found_image.png
-    150px
-    img:foundbyfind
-    |An image found by {t|find /usr/share -name "*.png" | head -n 1}
-}
+    logo.png
+    100px
+    img:logo_candidate
+    |An image; for now it is the only logo candidate{...}}
+
 
 
 {section 2|Tables}
