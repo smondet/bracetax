@@ -1,4 +1,11 @@
 
+{begin table 2 nocaption}
+{c|one cell}{c|second one}
+# just white space:
+   
+{end}
+
+
 {begin table 3 old:style}
 {c|Simple cell} {c h|Header cell} {c rh|Header right cell}
 {c r|Right cell} {c c|Center cell} {c l|Left cell}
