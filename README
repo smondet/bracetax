@@ -19,7 +19,6 @@ TODO:
   * build documentation of lib
   * doc: add git log with to explain | sed -e 's/\([{}#]\)/{\1}/g' | 
   * in Commands, should replace `quotation (open,close) by `quotation style
-  * add option -no-warn-error (to return 0 to the shell)
   * doc: Update whole documentation...
 
 MAYBE TODO:

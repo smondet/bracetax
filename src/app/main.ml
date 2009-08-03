@@ -57,6 +57,10 @@ let meta_open_inout io = (
 
 module CommandLine = struct
 
+    type io_common = {
+        in_out: in_out;
+        warn_error: bool; (* default to true *)
+    }
     type html_latex_common = {
         doc: bool; 
         title: string option;
@@ -69,12 +73,12 @@ module CommandLine = struct
         | `PrintLicense
         (* | `Help of [ `main | `html | `latex | `toc ] *)
         | `Brtx2HTML of
-            in_out * html_latex_common * string option * string option
+            io_common * html_latex_common * string option * string option
                 (* inout, com, css, csshook *)
         | `Brtx2Latex of
-            in_out * html_latex_common * string option
+            io_common * html_latex_common * string option
                 (* inout, com, package *)
-        | `GetTOC of in_out
+        | `GetTOC of io_common
     ]
     let parse () : todo = (
         let f_in = ref None in
@@ -87,6 +91,7 @@ module CommandLine = struct
         let css_hook = ref None in
         let ltx_package = ref None in 
         let todo = ref `html in
+        let warn_error = ref true in
 
         let options = Arg.align [
             ("-version", Arg.Unit (fun () -> todo := `version),
@@ -129,6 +134,12 @@ module CommandLine = struct
                 Arg.Unit (fun () -> deny_bypass := true),
                 " treat all {bypass} as {code} \
                 (security of interpreted webapps)");
+            ("-no-warn-error",
+                Arg.Unit (fun () -> warn_error := false),
+                " Do not treat warnings as errors (return 0 to shell/make/...)");
+            ("-warn-error",
+                Arg.Unit (fun () -> warn_error := true),
+                " Treat warnings as errors (default, return 2 to shell)");
         ] in
         let short_usage =
             ~% "usage: %s [-i file] [-o file] [-help]" Sys.argv.(0) in
@@ -140,32 +151,41 @@ module CommandLine = struct
         | `license -> `PrintLicense
         | `html ->
             `Brtx2HTML (
-                {file_in = !f_in; file_out = !f_out},
+                {in_out = {file_in = !f_in; file_out = !f_out};
+                    warn_error = !warn_error},
                 {doc = !is_doc; title = !title; 
                     print_comments = !print_comments;
                     deny_bypass = !deny_bypass},
                 !link_css, !css_hook)
         | `latex ->
             `Brtx2Latex (
-                {file_in = !f_in; file_out = !f_out},
+                {in_out = {file_in = !f_in; file_out = !f_out};
+                    warn_error = !warn_error},
                 {doc = !is_doc; title = !title; 
                     print_comments = !print_comments;
                     deny_bypass = !deny_bypass},
                 !ltx_package)
         | `toc ->
-            `GetTOC ({file_in = !f_in; file_out = !f_out})
+            `GetTOC (
+                {in_out = {file_in = !f_in; file_out = !f_out};
+                    warn_error = !warn_error})
     )
 end
 
 let () = (
+    let module CL = CommandLine in
     let return_value_to_shell = ref 0 in
+    let warn_error = ref true in
     let to_do = CommandLine.parse () in
         let error = function
             | `undefined s ->
                 return_value_to_shell := 2;
                 prerr_string (s ^ "\n")
-            | `message msg ->
-                return_value_to_shell := 2;
+            | `message ((_, gravity, _) as msg) ->
+                if gravity <> `warning || (!warn_error && gravity = `warning)
+                then (
+                    return_value_to_shell := 2;
+                );
                 prerr_string ((Bracetax.Error.to_string msg) ^ "\n") in
     begin match to_do with
     | `PrintVersion ->
@@ -175,21 +195,24 @@ let () = (
         p Bracetax.Info.license;
         exit 0;
     | `Brtx2HTML (io, common, css_link, class_hook) ->
-        let input_char, filename, write = meta_open_inout io in
+        let input_char, filename, write = meta_open_inout io.CL.in_out in
+        warn_error := io.CL.warn_error;
         let {CommandLine.doc = doc; title = title; deny_bypass = deny_bypass;
             print_comments = print_comments;} = common in
         let writer = Bracetax.Signatures.make_writer ~write  ~error in
-        Bracetax.Transform.brtx_to_html ~writer ~doc ?title ?css_link ~deny_bypass
-            ~print_comments ~input_char ~filename ?class_hook ();
+        Bracetax.Transform.brtx_to_html ~writer ~doc ?title ?css_link
+            ~deny_bypass ~print_comments ~input_char ~filename ?class_hook ();
     | `Brtx2Latex (io, common, use_package) ->
-        let input_char, filename, write = meta_open_inout io in
+        let input_char, filename, write = meta_open_inout io.CL.in_out in
+        warn_error := io.CL.warn_error;
         let {CommandLine.doc = doc; title = title; deny_bypass = deny_bypass;
             print_comments = print_comments;} = common in
         let writer = Bracetax.Signatures.make_writer ~write  ~error in
         Bracetax.Transform.brtx_to_latex ~writer ~doc ?title ?use_package 
             ~print_comments ~input_char ~filename ~deny_bypass ();
     | `GetTOC io ->
-        let input_char, filename, write = meta_open_inout io in
+        let input_char, filename, write = meta_open_inout io.CL.in_out in
+        warn_error := io.CL.warn_error;
         let writer = Bracetax.Signatures.make_writer ~write  ~error in
         Bracetax.Transform.get_TOC ~writer ~input_char ();
     end;
