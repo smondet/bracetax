@@ -39,7 +39,7 @@ For now the documentations are:
 
 {section|Examples}
 
-{section 2 sec_exmple_gitlog|Git Log}
+{section 2 sec_example_gitlog|Git Log}
 
 One of the key features of this syntax is that there are only 3 special
 characters, hence you can sanitize any output with a simple `sed' filter:{br}
