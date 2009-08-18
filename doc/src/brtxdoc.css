@@ -45,15 +45,16 @@ code, pre {
 	letter-spacing: 1px;
 }
 pre {
-	border: dashed;
+/*	border: dashed;
 	border-width: thin;
     border-color: #dddddd;
-	position: relative;
     background-color: #eeeeee;
-	left: 8%;
-	width: 70%;
-    clear: both;
-	/*padding-bottom: 1em;*/
+ */
+    position: relative;
+    left: 8%;
+    width: 70%;
+    /* clear: both; */
+    /*padding-bottom: 1em;*/
 }
 
 ul, ol {
