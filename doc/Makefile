@@ -82,8 +82,8 @@ site/bracetax_syntax.brtx.html: src/bracetax_syntax.brtx
 site/git_log.html: site/
 	git log | sed -e 's/\([{}#]\)/{\1}/g' | awk '\
 		/^commit / {print "{p}{t|{b|Commit:} "$$2"}{br}"} \
-		/^Author/  {print "{t|{b|Author:} " $$2 " " $$3 "}{br}"} \
-		/^Date/    {print "{b|{t|" $$0 "}}{br}"} \
+		/^Author/  {print "   {t|{b|Author:} " $$2 " " $$3 "}{br}"} \
+		/^Date/    {print "   {t|{b|Date:}" substr($$0,6,length($$0) - 3) "}{br}"} \
 		/^    .+/    {if ($$0 !~ /.*git-svn-id.*/) { print "{t|{i|" $$0 "}}{br}" }} \
 		/^   /    {if ($$0 ~ /.*git-svn-id.*/) print "{b|Git-SVN:}" $$2 "{br}"} \
 		' | $(BRTX2HTMLDOC) -doc -title "Bracetax - git-log" -o $@
