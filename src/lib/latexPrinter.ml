@@ -30,6 +30,7 @@ type t = {
     mutable current_table: Commands.Table.table option;
     error: Error.error_fun;
     mutable loc: Error.location;
+    opt_href_footnote: bool;
 }
 
 module CS = Commands.Stack
@@ -37,7 +38,7 @@ module CS = Commands.Stack
 let (~%) = Printf.sprintf
 let p = print_string
 
-let create ~writer () =  (
+let create ~writer ?(href_is_footnote=false) () =  (
     let module S = Signatures in
     let write = writer.S.w_write in
     {
@@ -48,6 +49,7 @@ let create ~writer () =  (
         current_table = None;
         error = writer.S.w_error;
         loc = {Error.l_line = -1; l_char = -1;l_file = "NO FILE";};
+        opt_href_footnote = href_is_footnote;
     }
 )
 
@@ -99,6 +101,8 @@ let sanitize_url line = (
         ('}' , "" );
         ('\\', "" );
         ('^' , "" );
+        ('%' , "\\%" );
+        ('#' , "\\#" );
     ] in
     Escape.replace_chars ~src:line ~patterns
 )
@@ -142,10 +146,18 @@ let link_stop t l = (
             | Some s ->  ~% "%s (\\ref{%s})" s target
             | None ->  ~% "\\ref{%s}" target)
         | _ ->
-            ~% "\\href{%s}{%s}" 
-                (sanitize_url target_str)
-                (match text with
-                Some s -> s | None -> sanitize_text target_str)
+            if not t.opt_href_footnote then
+                (~% "\\href{%s}{%s}" 
+                    (sanitize_url target_str)
+                    (match text with
+                    Some s -> s | None -> sanitize_text target_str))
+            else
+                let san_text =
+                    (match text with
+                    Some s -> s | None -> sanitize_text target_str) in
+                (~% "%s\\footnote{ \\href{%s}{%s}}" 
+                    san_text (sanitize_url target_str)
+                    (sanitize_text target_str))
     );
 )
 
@@ -573,8 +585,8 @@ let stop_raw_mode t location = (
 
 (* ==== Directly exported functions ==== *)
 
-let build ?(print_comments=false) ~writer () = (
-    let t = create ~writer () in
+let build ?(print_comments=false) ?href_is_footnote ~writer () = (
+    let t = create ~writer ?href_is_footnote () in
     let printer = {
         Signatures.
         print_comment =

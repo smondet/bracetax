@@ -47,7 +47,8 @@ let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
 
 
 let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
-    ?(print_comments=false) ?(filename="<IN>") ~input_char () = (
+    ?(print_comments=false) ?(href_is_footnote=false)
+    ?(filename="<IN>") ~input_char () = (
 
     if doc then (
         writer.w_write (LatexPrinter.header
@@ -55,7 +56,8 @@ let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
             ?stylesheet_link:use_package ()
         );
     );
-    let printer = LatexPrinter.build ~writer ~print_comments () in
+    let printer =
+        LatexPrinter.build ~writer ~print_comments ~href_is_footnote () in
     Parser.do_transformation ~deny_bypass printer input_char filename;
     
     if doc then (

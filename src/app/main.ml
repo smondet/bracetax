@@ -76,8 +76,8 @@ module CommandLine = struct
             io_common * html_latex_common * string option * string option
                 (* inout, com, css, csshook *)
         | `Brtx2Latex of
-            io_common * html_latex_common * string option
-                (* inout, com, package *)
+            io_common * html_latex_common * string option * bool
+                (* inout, com, package, href_is_footnote *)
         | `GetTOC of io_common
     ]
     let parse () : todo = (
@@ -90,6 +90,7 @@ module CommandLine = struct
         let link_css = ref None in 
         let css_hook = ref None in
         let ltx_package = ref None in 
+        let href_is_footnote = ref false in
         let todo = ref `html in
         let warn_error = ref true in
 
@@ -126,6 +127,9 @@ module CommandLine = struct
             ("-use-package",
                 Arg.String (fun s -> ltx_package := Some s),
                 "<name> use a given package, requires -latex,-doc");
+            ("-href-footnote",
+                Arg.Unit (fun s -> href_is_footnote := true),
+                " treat links as LaTeX footnotes with URLs, requires -latex");
             ("-print-comments",
                 Arg.Unit (fun () -> print_comments := true),
                 " activate the transmission of brtx comments to the output's \
@@ -164,7 +168,7 @@ module CommandLine = struct
                 {doc = !is_doc; title = !title; 
                     print_comments = !print_comments;
                     deny_bypass = !deny_bypass},
-                !ltx_package)
+                !ltx_package, !href_is_footnote)
         | `toc ->
             `GetTOC (
                 {in_out = {file_in = !f_in; file_out = !f_out};
@@ -202,13 +206,14 @@ let () = (
         let writer = Bracetax.Signatures.make_writer ~write  ~error in
         Bracetax.Transform.brtx_to_html ~writer ~doc ?title ?css_link
             ~deny_bypass ~print_comments ~input_char ~filename ?class_hook ();
-    | `Brtx2Latex (io, common, use_package) ->
+    | `Brtx2Latex (io, common, use_package, href_is_footnote) ->
         let input_char, filename, write = meta_open_inout io.CL.in_out in
         warn_error := io.CL.warn_error;
         let {CommandLine.doc = doc; title = title; deny_bypass = deny_bypass;
             print_comments = print_comments;} = common in
         let writer = Bracetax.Signatures.make_writer ~write  ~error in
         Bracetax.Transform.brtx_to_latex ~writer ~doc ?title ?use_package 
+            ~href_is_footnote
             ~print_comments ~input_char ~filename ~deny_bypass ();
     | `GetTOC io ->
         let input_char, filename, write = meta_open_inout io.CL.in_out in
