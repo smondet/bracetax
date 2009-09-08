@@ -67,11 +67,12 @@ let sanitize_text line = (
     let patterns = [
         ('$' , "\\$" );
         ('-' , "-{}" );
-        ('&' , "\\&" );
+        ('&' , "\\&\\linebreak[0]" );
         ('%' , "\\%" );
         ('#' , "\\#" );
         ('{' , "\\{" );
         ('}' , "\\}" );
+        ('/' , "\\slash{}\\linebreak[0]" );
         ('_' , "\\_" );
         ('\\', "\\textbackslash{}" );
         ('^' , "\\textasciicircum{}" );
@@ -146,18 +147,25 @@ let link_stop t l = (
             | Some s ->  ~% "%s (\\ref{%s})" s target
             | None ->  ~% "\\ref{%s}" target)
         | _ ->
+            let san_urltxt url =
+                let patterns = [
+                    ('?',"?\\linebreak[0]");
+                    ('.',".\\linebreak[0]");
+                    ('=',"=\\linebreak[0]"); ] in
+                let src = sanitize_text url in
+                Escape.replace_chars ~src ~patterns in
             if not t.opt_href_footnote then
                 (~% "\\href{%s}{%s}" 
                     (sanitize_url target_str)
                     (match text with
-                    Some s -> s | None -> sanitize_text target_str))
+                    Some s -> s | None -> san_urltxt target_str))
             else
                 let san_text =
                     (match text with
-                    Some s -> s | None -> sanitize_text target_str) in
+                    Some s -> s | None -> san_urltxt target_str) in
                 (~% "%s\\footnote{ \\href{%s}{%s}}" 
                     san_text (sanitize_url target_str)
-                    (sanitize_text target_str))
+                    (san_urltxt target_str))
     );
 )
 
