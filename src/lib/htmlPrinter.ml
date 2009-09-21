@@ -35,6 +35,7 @@ type t = {
     mutable loc: Error.location;
     class_hook: string option;
     url_hook: string -> string;
+    img_hook: string -> string;
 }
 
 module CS = Commands.Stack
@@ -55,7 +56,8 @@ module AddClass = struct
 
 end
 
-let create ~writer ?class_hook ?(url_hook=fun s -> s) () =  (
+let create
+~writer ?class_hook ?(img_hook=fun s -> s) ?(url_hook=fun s -> s) () =  (
     let module S = Signatures in
     let write = writer.S.w_write in
     {
@@ -70,6 +72,7 @@ let create ~writer ?class_hook ?(url_hook=fun s -> s) () =  (
         loc = {Error.l_line = -1; l_char = -1; l_file = "NO FILE";};
         class_hook = class_hook;
         url_hook = url_hook;
+        img_hook = img_hook;
     }
 )
 
@@ -159,7 +162,8 @@ let link_stop t l = (
 let image_start t args = (
     (* http://www.w3.org/Style/Examples/007/figures *)
     let error_msg m = t.error (Error.mk t.loc `error m) in
-    let src, opts, lbl = Commands.Names.image_params error_msg args in
+    let src, opts, lbl =
+        Commands.Names.image_params ~img_hook:t.img_hook error_msg args in
     let opts_str =
         match opts with
         | `wpx px -> (~% "width=\"%dpx\""  px)
@@ -560,8 +564,8 @@ let stop_raw_mode t location = (
         failwith "Shouldn't be there, Parser's fault ?";
 
 )
-let build ?(print_comments=false) ?url_hook ?class_hook ~writer () = (
-    let t = create ~writer ?class_hook ?url_hook () in
+let build ?(print_comments=false) ?img_hook ?url_hook ?class_hook ~writer () = (
+    let t = create ~writer ?class_hook ?img_hook ?url_hook () in
     let printer = {
         Signatures.
         print_comment =

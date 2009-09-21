@@ -187,7 +187,7 @@ module Names = struct
     let is_link = (=) "link"
 
     let is_image = (=) "image"
-    let image_params error_msg =
+    let image_params ?(img_hook=fun s -> s) error_msg =
         let parse_options str =
             (* let l = String.length l in *)
             (* if str.[l - 1] = '%' then ( *)
@@ -199,9 +199,9 @@ module Names = struct
         in
         function
         | [] -> ("", `none, "")
-        | [s] -> (s, `none, "")
-        | s :: o :: [] -> (s, parse_options o, "")
-        | s :: o :: l :: t -> (s, parse_options o, l)
+        | [s] -> (img_hook s, `none, "")
+        | s :: o :: [] -> (img_hook s, parse_options o, "")
+        | s :: o :: l :: t -> (img_hook s, parse_options o, l)
 
     let is_header = (=) "header"
     let is_title  = (=) "title"

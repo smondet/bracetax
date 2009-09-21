@@ -32,6 +32,7 @@ type t = {
     mutable loc: Error.location;
     opt_href_footnote: bool;
     url_hook: string -> string;
+    img_hook: string -> string;
 }
 
 module CS = Commands.Stack
@@ -39,7 +40,9 @@ module CS = Commands.Stack
 let (~%) = Printf.sprintf
 let p = print_string
 
-let create ~writer ?(href_is_footnote=false) ?(url_hook=fun s -> s) () =  (
+let create
+~writer ?(href_is_footnote=false) ?(img_hook=fun s -> s)
+?(url_hook=fun s -> s) () =  (
     let module S = Signatures in
     let write = writer.S.w_write in
     {
@@ -52,6 +55,7 @@ let create ~writer ?(href_is_footnote=false) ?(url_hook=fun s -> s) () =  (
         loc = {Error.l_line = -1; l_char = -1;l_file = "NO FILE";};
         opt_href_footnote = href_is_footnote;
         url_hook = url_hook;
+        img_hook = img_hook;
     }
 )
 
@@ -211,7 +215,8 @@ let subtitle_stop = "}\n"
 (* Images *)
 let image_start t args = (
     let error_msg m = t.error (Error.mk t.loc `error m) in
-    let src, opts, lbl = Commands.Names.image_params error_msg args in
+    let src, opts, lbl =
+        Commands.Names.image_params ~img_hook:t.img_hook error_msg args in
     let opts_str =
         match opts with
         | `wpx w -> (~% "[width=%dpt]"  w)
@@ -595,8 +600,9 @@ let stop_raw_mode t location = (
 
 (* ==== Directly exported functions ==== *)
 
-let build ?(print_comments=false) ?url_hook ?href_is_footnote ~writer () = (
-    let t = create ~writer ?href_is_footnote ?url_hook () in
+let build
+?(print_comments=false) ?img_hook ?url_hook ?href_is_footnote ~writer () = (
+    let t = create ~writer ?href_is_footnote ?img_hook ?url_hook () in
     let printer = {
         Signatures.
         print_comment =

@@ -18,21 +18,31 @@ let writer =
     Bracetax.Signatures.make_writer ~write:print_string ~error
 ;;
 
-let input_char str =
+let input_char_of_str str =
     let b = ref 0 in
     let e = String.length str - 1 in
-    fun () -> if !b > e then None else let c = str.[!b] in incr b; Some c
+    fun () -> if !b > e then (b := 0; None) else (let c = str.[!b] in incr b; Some c)
 
 ;;
 
 let () = (
-    printf "==== URL HOOKS ====\n"
+    let input_char =
+        input_char_of_str "{i|Italic {link link/to/|Thing}}, {image path/image}" in
+    printf "==== URL HOOKS ====\n";
     let url_hook = String.uppercase in
-    b2h ~writer ~input_char:(input_char "{i|Italic {link link/to/|Thing}}") ~url_hook ();
-    b2l ~writer ~input_char:(input_char "{i|Italic {link link/to/|Thing}}") ~url_hook ();
+    b2h ~writer ~input_char ~url_hook ();
+    b2l ~writer ~input_char ~url_hook ();
     printf "\n";
     let url_hook = (^) "local:" in
-    b2h ~writer ~input_char:(input_char "{i|Italic {link link/to/|Thing}}") ~url_hook ();
-    b2l ~writer ~input_char:(input_char "{i|Italic {link link/to/|Thing}}") ~url_hook ();
+    b2h ~writer ~input_char ~url_hook ();
+    b2l ~writer ~input_char ~url_hook ();
+    printf "\n";
+    printf "==== IMAGE HOOKS ====\n";
+    let img_hook = String.uppercase in
+    b2h ~writer ~input_char ~img_hook ();
+    b2l ~writer ~input_char ~img_hook ();
+    printf "\n";
+    let img_hook s = s ^ ".png" in b2h ~writer ~input_char ~img_hook ();
+    let img_hook s = s ^ ".pdf" in b2l ~writer ~input_char ~img_hook ();
     printf "\n";
 );;

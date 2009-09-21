@@ -28,7 +28,8 @@ open Signatures
 let opt_may ~f = function None -> () | Some o -> f o
 
 let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
-?(filename="<IN>") ?class_hook ?url_hook ~input_char ?(deny_bypass=false) () = (
+?(filename="<IN>") ?class_hook ?img_hook ?url_hook ~input_char
+?(deny_bypass=false) () = (
 
     if doc then (
         writer.w_write (HtmlPrinter.header
@@ -37,7 +38,8 @@ let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
         );
     );
     let printer =
-        HtmlPrinter.build ?class_hook ?url_hook ~writer ~print_comments () in
+        HtmlPrinter.build ?class_hook ?img_hook ?url_hook
+            ~writer ~print_comments () in
     Parser.do_transformation ~deny_bypass printer input_char filename;
     
     if doc then (
@@ -48,7 +50,7 @@ let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
 
 
 let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
-    ?(print_comments=false) ?(href_is_footnote=false) ?url_hook
+    ?(print_comments=false) ?(href_is_footnote=false) ?img_hook ?url_hook
     ?(filename="<IN>") ~input_char () = (
 
     if doc then (
@@ -59,7 +61,7 @@ let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
     );
     let printer =
         LatexPrinter.build
-            ~writer ~print_comments ~href_is_footnote ?url_hook () in
+            ~writer ~print_comments ~href_is_footnote ?img_hook ?url_hook () in
     Parser.do_transformation ~deny_bypass printer input_char filename;
     
     if doc then (
