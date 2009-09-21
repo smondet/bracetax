@@ -181,16 +181,16 @@ let () = (
     let return_value_to_shell = ref 0 in
     let warn_error = ref true in
     let to_do = CommandLine.parse () in
-        let error = function
-            | `undefined s ->
+    let error = function
+        | `undefined s ->
+            return_value_to_shell := 2;
+            prerr_string (s ^ "\n")
+        | `message ((_, gravity, _) as msg) ->
+            if gravity <> `warning || (!warn_error && gravity = `warning)
+            then (
                 return_value_to_shell := 2;
-                prerr_string (s ^ "\n")
-            | `message ((_, gravity, _) as msg) ->
-                if gravity <> `warning || (!warn_error && gravity = `warning)
-                then (
-                    return_value_to_shell := 2;
-                );
-                prerr_string ((Bracetax.Error.to_string msg) ^ "\n") in
+            );
+            prerr_string ((Bracetax.Error.to_string msg) ^ "\n") in
     begin match to_do with
     | `PrintVersion ->
         p (~% "brtx %s\n" version_string);

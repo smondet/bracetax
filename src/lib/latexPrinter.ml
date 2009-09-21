@@ -31,6 +31,7 @@ type t = {
     error: Error.error_fun;
     mutable loc: Error.location;
     opt_href_footnote: bool;
+    url_hook: string -> string;
 }
 
 module CS = Commands.Stack
@@ -38,7 +39,7 @@ module CS = Commands.Stack
 let (~%) = Printf.sprintf
 let p = print_string
 
-let create ~writer ?(href_is_footnote=false) () =  (
+let create ~writer ?(href_is_footnote=false) ?(url_hook=fun s -> s) () =  (
     let module S = Signatures in
     let write = writer.S.w_write in
     {
@@ -50,6 +51,7 @@ let create ~writer ?(href_is_footnote=false) () =  (
         error = writer.S.w_error;
         loc = {Error.l_line = -1; l_char = -1;l_file = "NO FILE";};
         opt_href_footnote = href_is_footnote;
+        url_hook = url_hook;
     }
 )
 
@@ -129,7 +131,7 @@ let section_stop n l = (
 
 (* Links *)
 let link_start t args = (
-    let link, new_write = Commands.Link.start args in
+    let link, new_write = Commands.Link.start ~url_hook:t.url_hook args in
     Stack.push t.write t.write_mem;
     t.write <- new_write;
     link
@@ -593,8 +595,8 @@ let stop_raw_mode t location = (
 
 (* ==== Directly exported functions ==== *)
 
-let build ?(print_comments=false) ?href_is_footnote ~writer () = (
-    let t = create ~writer ?href_is_footnote () in
+let build ?(print_comments=false) ?url_hook ?href_is_footnote ~writer () = (
+    let t = create ~writer ?href_is_footnote ?url_hook () in
     let printer = {
         Signatures.
         print_comment =

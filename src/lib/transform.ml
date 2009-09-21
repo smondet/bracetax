@@ -28,7 +28,7 @@ open Signatures
 let opt_may ~f = function None -> () | Some o -> f o
 
 let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
-?(filename="<IN>") ?class_hook ~input_char ?(deny_bypass=false) () = (
+?(filename="<IN>") ?class_hook ?url_hook ~input_char ?(deny_bypass=false) () = (
 
     if doc then (
         writer.w_write (HtmlPrinter.header
@@ -36,7 +36,8 @@ let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
             ?stylesheet_link:css_link ()
         );
     );
-    let printer = HtmlPrinter.build ?class_hook ~writer ~print_comments () in
+    let printer =
+        HtmlPrinter.build ?class_hook ?url_hook ~writer ~print_comments () in
     Parser.do_transformation ~deny_bypass printer input_char filename;
     
     if doc then (
@@ -47,7 +48,7 @@ let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
 
 
 let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
-    ?(print_comments=false) ?(href_is_footnote=false)
+    ?(print_comments=false) ?(href_is_footnote=false) ?url_hook
     ?(filename="<IN>") ~input_char () = (
 
     if doc then (
@@ -57,7 +58,8 @@ let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
         );
     );
     let printer =
-        LatexPrinter.build ~writer ~print_comments ~href_is_footnote () in
+        LatexPrinter.build
+            ~writer ~print_comments ~href_is_footnote ?url_hook () in
     Parser.do_transformation ~deny_bypass printer input_char filename;
     
     if doc then (

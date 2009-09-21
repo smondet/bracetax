@@ -34,6 +34,7 @@ type t = {
     error: Error.error -> unit;
     mutable loc: Error.location;
     class_hook: string option;
+    url_hook: string -> string;
 }
 
 module CS = Commands.Stack
@@ -54,7 +55,7 @@ module AddClass = struct
 
 end
 
-let create ~writer ?class_hook () =  (
+let create ~writer ?class_hook ?(url_hook=fun s -> s) () =  (
     let module S = Signatures in
     let write = writer.S.w_write in
     {
@@ -68,6 +69,7 @@ let create ~writer ?class_hook () =  (
         error = writer.S.w_error;
         loc = {Error.l_line = -1; l_char = -1; l_file = "NO FILE";};
         class_hook = class_hook;
+        url_hook = url_hook;
     }
 )
 
@@ -135,7 +137,7 @@ let section_stop t n l =
     ~% "</h%d>\n<div class=\"p%s\">" (n + 1) (AddClass.name t.class_hook "p")
 
 let link_start t args = (
-    let link, new_write = Commands.Link.start args in
+    let link, new_write = Commands.Link.start ~url_hook:t.url_hook args in
     Stack.push t.write t.write_mem;
     t.write <- new_write;
     link
@@ -558,8 +560,8 @@ let stop_raw_mode t location = (
         failwith "Shouldn't be there, Parser's fault ?";
 
 )
-let build ?(print_comments=false) ?class_hook ~writer () = (
-    let t = create ~writer ?class_hook () in
+let build ?(print_comments=false) ?url_hook ?class_hook ~writer () = (
+    let t = create ~writer ?class_hook ?url_hook () in
     let printer = {
         Signatures.
         print_comment =

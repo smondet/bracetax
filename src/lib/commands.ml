@@ -50,11 +50,11 @@ module Link = struct
         other_args = other_args; contents = Buffer.create 42;
     }
 
-    let start args = (
+    let start ?(url_hook=fun (s:string) -> s) args = (
         let l =
             match args with
             | link :: other_args ->
-                let kind, linkto = get_kind link in
+                let kind, linkto = get_kind (url_hook link) in
                 create ~kind ~linkto ~other_args ()
             | [] -> create ()
         in
