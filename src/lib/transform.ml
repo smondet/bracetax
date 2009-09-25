@@ -27,6 +27,21 @@ open Signatures
 
 let opt_may ~f = function None -> () | Some o -> f o
 
+let string_io in_string out_buf err_buf = (
+    let error = function
+        | `undefined s ->
+            Buffer.add_string err_buf (s ^ "\n");
+        | `message ((_, gravity, _) as msg) ->
+            Buffer.add_string err_buf ((Error.to_string msg) ^ "\n"); in
+    let write = Buffer.add_string out_buf in
+    let read_char_opt =
+        let cpt = ref (-1) in
+        (fun () ->
+            try Some (incr cpt; in_string.[!cpt]) with e -> None) in
+    let writer = Signatures.make_writer ~write  ~error in
+    (writer, read_char_opt)
+)
+
 let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
 ?(filename="<IN>") ?class_hook ?img_hook ?url_hook ~input_char
 ?(deny_bypass=false) () = (
