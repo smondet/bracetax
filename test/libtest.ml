@@ -27,7 +27,8 @@ let input_char_of_str str =
 
 let () = (
     let input_char =
-        input_char_of_str "{i|Italic {link link/to/|Thing}}, {image path/image}" in
+        input_char_of_str
+            "{i|Italic {link link/to/|Thing}}, {image path/image}" in
     printf "==== URL HOOKS ====\n";
     let url_hook = String.uppercase in
     b2h ~writer ~input_char ~url_hook ();
@@ -45,4 +46,20 @@ let () = (
     let img_hook s = s ^ ".png" in b2h ~writer ~input_char ~img_hook ();
     let img_hook s = s ^ ".pdf" in b2l ~writer ~input_char ~img_hook ();
     printf "\n";
+    printf "==== Header separation ====\n";
+    let input_char = 
+        input_char_of_str
+            "{header|{title|TI{~}TLE}{authors|Auth%}Ingored} {b|bold text}" in
+    let separate_header = ref ("","","") in
+    b2l ~writer ~input_char (); printf "\n";
+    let t,a,s = !separate_header in printf "T:%s\nA:%s\nS:%s\n" t a s;
+    let separate_header = ref ("","","") in
+    b2l ~writer ~input_char ~separate_header (); printf "\n";
+    let t,a,s = !separate_header in printf "T:%s\nA:%s\nS:%s\n" t a s;
+    let separate_header = ref ("","","") in
+    b2h ~writer ~input_char (); printf "\n";
+    let t,a,s = !separate_header in printf "T:%s\nA:%s\nS:%s\n" t a s;
+    let separate_header = ref ("","","") in
+    b2h ~writer ~input_char ~separate_header (); printf "\n";
+    let t,a,s = !separate_header in printf "T:%s\nA:%s\nS:%s\n" t a s;
 );;

@@ -33,6 +33,7 @@ type t = {
     opt_href_footnote: bool;
     url_hook: string -> string;
     img_hook: string -> string;
+    separate_header: (string * string * string) ref option;
 }
 
 module CS = Commands.Stack
@@ -41,7 +42,7 @@ let (~%) = Printf.sprintf
 let p = print_string
 
 let create
-~writer ?(href_is_footnote=false) ?(img_hook=fun s -> s)
+~writer ?(href_is_footnote=false) ?separate_header ?(img_hook=fun s -> s)
 ?(url_hook=fun s -> s) () =  (
     let module S = Signatures in
     let write = writer.S.w_write in
@@ -56,6 +57,7 @@ let create
         opt_href_footnote = href_is_footnote;
         url_hook = url_hook;
         img_hook = img_hook;
+        separate_header = separate_header;
     }
 )
 
@@ -197,19 +199,37 @@ let quotation_open_close t a = (
 (* Header: *)
 let header_start t = (
     t.inside_header <- true; 
-    ~% "%% HEADER:\n\\date{}"
+    begin match t.separate_header with
+    | None ->
+        t.write (~% "%% HEADER:\n\\date{}");
+    | Some r ->
+        Stack.push t.write t.write_mem;
+        t.write <- (fun str -> 
+            begin match CS.head t.stack with
+            | Some `title    -> let t,a,s = !r in r := (t ^ str, a, s);
+            | Some `authors  -> let t,a,s = !r in r := (t, a ^ str, s);
+            | Some `subtitle -> let t,a,s = !r in r := (t, a, s ^ str);
+            | _ -> ()
+            end;
+        );
+    end;
 )
 let header_stop t = (
     t.inside_header <- false;
-    "\\maketitle\n\n\n"
+    begin match t.separate_header with
+    | None ->
+        t.write "\\maketitle\n\n\n";
+    | Some r ->
+        t.write <- Stack.pop t.write_mem;
+    end;
 )
 
-let title_start = "\\title{"
-let title_stop = "}\n"
-let authors_start = "\\author{"
-let authors_stop = "}\n"
-let subtitle_start = "\\date{"
-let subtitle_stop = "}\n"
+let title_start t = t.write "\\title{"
+let title_stop t = t.write "}\n"
+let authors_start t = t.write "\\author{"
+let authors_stop t = t.write "}\n"
+let subtitle_start t = t.write "\\date{"
+let subtitle_stop t = t.write "}\n"
 
 
 (* Images *)
@@ -457,10 +477,10 @@ let start_environment ?(is_begin=false) t location name args = (
             `section (level, label)
         | s when C.is_link s -> (link_start t args)
         | s when C.is_image s -> image_start t args
-        | s when C.is_header s -> t.write (header_start t); `header
-        | s when C.is_title s -> t.write title_start; `title
-        | s when C.is_subtitle s -> t.write subtitle_start; `subtitle
-        | s when C.is_authors s -> t.write authors_start; `authors
+        | s when C.is_header s -> header_start t; `header
+        | s when C.is_title s -> title_start t; `title
+        | s when C.is_subtitle s -> subtitle_start t; `subtitle
+        | s when C.is_authors s -> authors_start t; `authors
         | s when C.is_table s -> table_start t args
         | s when C.is_cell s -> cell_start t args
         | s when C.is_note s -> t.write "\\footnote{" ; `note
@@ -545,10 +565,10 @@ let stop_command t location = (
         | `section (level, label) -> t.write (section_stop level label);
         | `link l -> link_stop t l;
         | `image _ -> t.write image_stop;
-        | `header ->  t.write (header_stop t);
-        | `title -> t.write title_stop;
-        | `subtitle -> t.write subtitle_stop;
-        | `authors -> t.write authors_stop;
+        | `header ->  header_stop t;
+        | `title -> title_stop t;
+        | `subtitle -> subtitle_stop t;
+        | `authors -> authors_stop t;
         | `table _ -> table_stop t
         | `cell _ as c -> cell_stop t c
         | `note -> t.write "}"
@@ -601,8 +621,11 @@ let stop_raw_mode t location = (
 (* ==== Directly exported functions ==== *)
 
 let build
-?(print_comments=false) ?img_hook ?url_hook ?href_is_footnote ~writer () = (
-    let t = create ~writer ?href_is_footnote ?img_hook ?url_hook () in
+?(print_comments=false) ?separate_header 
+?img_hook ?url_hook ?href_is_footnote ~writer () = (
+    let t =
+        create ~writer ?href_is_footnote
+            ?separate_header ?img_hook ?url_hook () in
     let printer = {
         Signatures.
         print_comment =

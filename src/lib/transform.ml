@@ -44,7 +44,7 @@ let string_io in_string out_buf err_buf = (
 
 let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
 ?(filename="<IN>") ?class_hook ?img_hook ?url_hook ~input_char
-?(deny_bypass=false) () = (
+?separate_header ?(deny_bypass=false) () = (
 
     if doc then (
         writer.w_write (HtmlPrinter.header
@@ -53,7 +53,7 @@ let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
         );
     );
     let printer =
-        HtmlPrinter.build ?class_hook ?img_hook ?url_hook
+        HtmlPrinter.build ?class_hook ?img_hook ?url_hook ?separate_header
             ~writer ~print_comments () in
     Parser.do_transformation ~deny_bypass printer input_char filename;
     
@@ -65,8 +65,9 @@ let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
 
 
 let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
-    ?(print_comments=false) ?(href_is_footnote=false) ?img_hook ?url_hook
-    ?(filename="<IN>") ~input_char () = (
+?(print_comments=false) ?(href_is_footnote=false) ?img_hook ?url_hook
+?separate_header
+?(filename="<IN>") ~input_char () = (
 
     if doc then (
         writer.w_write (LatexPrinter.header
@@ -76,7 +77,8 @@ let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
     );
     let printer =
         LatexPrinter.build
-            ~writer ~print_comments ~href_is_footnote ?img_hook ?url_hook () in
+            ~writer ~print_comments ~href_is_footnote
+            ?separate_header ?img_hook ?url_hook () in
     Parser.do_transformation ~deny_bypass printer input_char filename;
     
     if doc then (

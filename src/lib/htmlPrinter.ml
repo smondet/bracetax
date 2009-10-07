@@ -36,6 +36,7 @@ type t = {
     class_hook: string option;
     url_hook: string -> string;
     img_hook: string -> string;
+    separate_header: (string * string * string) ref option;
 }
 
 module CS = Commands.Stack
@@ -57,7 +58,8 @@ module AddClass = struct
 end
 
 let create
-~writer ?class_hook ?(img_hook=fun s -> s) ?(url_hook=fun s -> s) () =  (
+~writer ?class_hook ?separate_header 
+?(img_hook=fun s -> s) ?(url_hook=fun s -> s) () =  (
     let module S = Signatures in
     let write = writer.S.w_write in
     {
@@ -73,6 +75,7 @@ let create
         class_hook = class_hook;
         url_hook = url_hook;
         img_hook = img_hook;
+        separate_header = separate_header;
     }
 )
 
@@ -189,26 +192,46 @@ let image_stop = "</div>"
 
 let header_start t = (
     t.inside_header <- true; 
-    ~% "%s\n<div class=\"header%s\">\n"
-        (if t.started_text then "</div>" else "")
-        (AddClass.name t.class_hook "header")
+    begin match t.separate_header with
+    | None ->
+        t.write (~% "%s\n<div class=\"header%s\">\n"
+            (if t.started_text then "</div>" else "")
+            (AddClass.name t.class_hook "header"))
+    | Some r ->
+        Stack.push t.write t.write_mem;
+        t.write <- (fun str -> 
+            begin match CS.head t.stack with
+            | Some `title    -> let t,a,s = !r in r := (t ^ str, a, s);
+            | Some `authors  -> let t,a,s = !r in r := (t, a ^ str, s);
+            | Some `subtitle -> let t,a,s = !r in r := (t, a, s ^ str);
+            | _ -> ()
+            end;
+        );
+    end;
 )
 let header_stop t = (
     t.inside_header <- false;
     t.started_text <- true; (* we put the <p> *)
-    ~% "</div> <!-- END HEADER -->\n<div class=\"p%s\">\n"
-        (AddClass.name t.class_hook "p")
+    begin match t.separate_header with
+    | None ->
+        t.write (~% "</div> <!-- END HEADER -->\n<div class=\"p%s\">\n"
+            (AddClass.name t.class_hook "p"))
+    | Some r ->
+        t.write <- Stack.pop t.write_mem;
+    end;
 )
 
 let title_start t =
-    ~% "\n  <h1%s>" (AddClass.attribute t.class_hook "h1")
-let title_stop = "</h1>\n"
+    t.write (~% "\n  <h1%s>" (AddClass.attribute t.class_hook "h1"))
+let title_stop t = t.write "</h1>\n"
 let authors_start t =
-    ~% "  <div class=\"authors%s\">" (AddClass.name t.class_hook "authors")
-let authors_stop = "</div>\n"
+    t.write (~% "  <div class=\"authors%s\">"
+        (AddClass.name t.class_hook "authors"))
+let authors_stop t = t.write "</div>\n"
 let subtitle_start t =
-    ~% "  <div class=\"subtitle%s\">" (AddClass.name t.class_hook "subtitle")
-let subtitle_stop = "</div>\n"
+    t.write (~% "  <div class=\"subtitle%s\">"
+        (AddClass.name t.class_hook "subtitle"))
+let subtitle_stop t = t.write "</div>\n"
 
 let table_start t args = (
     (* http://www.topxml.com/xhtml/articles/xhtml_tables/ *)
@@ -325,10 +348,10 @@ let start_environment ?(is_begin=false) t location name args = (
     let module C = Commands.Names in
     let cmd name args =
         match name with
-        | s when C.is_header s -> t.write (header_start t); `header
-        | s when C.is_title s -> t.write (title_start t); `title
-        | s when C.is_subtitle s -> t.write (subtitle_start t); `subtitle
-        | s when C.is_authors s -> t.write (authors_start t); `authors
+        | s when C.is_header s -> (header_start t); `header
+        | s when C.is_title s ->  (title_start t); `title
+        | s when C.is_subtitle s -> (subtitle_start t); `subtitle
+        | s when C.is_authors s -> (authors_start t); `authors
         | _ ->
             may_start_text t;
             begin match name with
@@ -456,10 +479,10 @@ let stop_command t location = (
             t.write (section_stop t level label);
         | `link l -> link_stop t l;
         | `image _ -> t.write image_stop;
-        | `header ->  t.write (header_stop t);
-        | `title -> t.write title_stop;
-        | `subtitle -> t.write subtitle_stop;
-        | `authors -> t.write authors_stop;
+        | `header ->  (header_stop t);
+        | `title -> title_stop t;
+        | `subtitle -> subtitle_stop t;
+        | `authors -> authors_stop t;
         | `table _ -> table_stop t
         | `cell _ as c -> cell_stop t c
         | `note -> t.write (note_stop t)
@@ -564,8 +587,10 @@ let stop_raw_mode t location = (
         failwith "Shouldn't be there, Parser's fault ?";
 
 )
-let build ?(print_comments=false) ?img_hook ?url_hook ?class_hook ~writer () = (
-    let t = create ~writer ?class_hook ?img_hook ?url_hook () in
+let build ?(print_comments=false)
+?separate_header ?img_hook ?url_hook ?class_hook ~writer () = (
+    let t =
+        create ~writer ?class_hook ?separate_header ?img_hook ?url_hook () in
     let printer = {
         Signatures.
         print_comment =
