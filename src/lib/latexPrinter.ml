@@ -73,15 +73,15 @@ let sanitize_comments line = line
 
 let sanitize_text line = (
     let patterns = [
-        ('$' , "\\$" );
+        ('$' , "\\${}" );
         ('-' , "-{}" );
         ('&' , "\\&\\linebreak[0]" );
-        ('%' , "\\%" );
-        ('#' , "\\#" );
+        ('%' , "\\%{}" );
+        ('#' , "\\#{}" );
         ('{' , "\\{" );
         ('}' , "\\}" );
         ('/' , "\\slash{}\\linebreak[0]" );
-        ('_' , "\\_" );
+        ('_' , "\\_{}" );
         ('\\', "\\textbackslash{}" );
         ('^' , "\\textasciicircum{}" );
         ('~' , "\\textasciitilde{}" );
@@ -536,13 +536,13 @@ let stop_command t location = (
         | `cmd_begin (nam, args) ->
             (* p (~% "cmd begin %s(%s)\n" nam (String.concat ", " args)); *)
             start_environment ~is_begin:true t location nam args;
-        | `paragraph -> t.write "\\par\n"
-        | `new_line -> t.write "\\\\\n"
+        | `paragraph -> t.write "\\par{}\n"
+        | `new_line -> t.write "\\\\{}\n"
         | `non_break_space -> t.write "~"
         | `horizontal_ellipsis -> t.write "\\ldots{}"
         | `open_brace -> t.write "\\{"
         | `close_brace -> t.write "\\}"
-        | `sharp -> t.write "\\#"
+        | `sharp -> t.write "\\#{}"
         | (`utf8_char i) -> t.write (~% "\\unichar{%d}" i)
         | (`quotation (op, clo)) -> t.write clo
         | `italic       ->  t.write "}"  
