@@ -386,7 +386,7 @@ let cell_stop t env = (
 let list_start = function
     | `itemize -> "\n\\begin{itemize}\n"
     | `numbered -> "\n\\begin{enumerate}\n"
-let list_item = "\n    \\item "
+let list_item = "\n    \\item{} "
 let list_stop = function
     | `itemize -> "\n\\end{itemize}\n"
     | `numbered -> "\n\\end{enumerate}\n"
