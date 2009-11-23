@@ -64,7 +64,7 @@ let rec parse_text t location = (
         | None ->
             t.printer.print_text location (Buffer.contents buf);
             t.printer.terminate location;
-        | Some '\n' ->
+        | Some '\n' | Some '\r' ->
             Buffer.add_char buf ' ';
             read_loop (incr_loc location)
         | Some '#' ->
@@ -126,7 +126,7 @@ and parse_command t location = (
                 read_loop location false
             ) else
                 read_loop location true
-        | Some c when c = ' ' || c = '\t' || c = '\n' ->
+        | Some c when c = ' ' || c = '\t' || c = '\n' || c = '\r' ->
             let loc = if c = '\n' then (incr_loc location) else location in
             if escaping then (
                 Buffer.add_char buf c;
