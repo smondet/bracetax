@@ -51,8 +51,9 @@ build_no_ocamlbuild ()
         CMOS="$CMOS $mod.cmo"
         $CCLIB $mod.ml
     done;
-    ocamlc -pack -o bracetax.cmo  $CMOS
-    ocamlc -o brtx -I src/app/ -I . -I src/lib/ unix.cma bracetax.cmo \
+    ocamlc -pack -o src/lib/bracetax.cmo  $CMOS
+    ocamlc -a -o src/lib/ocamlbracetax.cma src/lib/bracetax.cmo
+    ocamlc -o brtx -I src/app/ -I . -I src/lib/ unix.cma ocamlbracetax.cma \
         src/app/main.ml
     cd -
     echo "--> _build/brtx"
