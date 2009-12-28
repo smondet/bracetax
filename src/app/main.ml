@@ -66,6 +66,7 @@ module CommandLine = struct
         title: string option;
         print_comments: bool;
         deny_bypass: bool;
+        ignore_header: bool;
     }
 
     type todo = [
@@ -93,6 +94,7 @@ module CommandLine = struct
         let href_is_footnote = ref false in
         let todo = ref `html in
         let warn_error = ref true in
+        let ignore_header = ref false in
 
         let options = Arg.align [
             ("-version", Arg.Unit (fun () -> todo := `version),
@@ -138,6 +140,9 @@ module CommandLine = struct
                 Arg.Unit (fun () -> deny_bypass := true),
                 " treat all {bypass} as {code} \
                 (security of interpreted webapps)");
+            (   "-ignore-header",
+                Arg.Unit (fun () -> ignore_header := true),
+                " Do not process the {header| ... } part");
             ("-no-warn-error",
                 Arg.Unit (fun () -> warn_error := false),
                 " Do not treat warnings as errors (return 0 to shell/make/...)");
@@ -159,7 +164,8 @@ module CommandLine = struct
                     warn_error = !warn_error},
                 {doc = !is_doc; title = !title; 
                     print_comments = !print_comments;
-                    deny_bypass = !deny_bypass},
+                    deny_bypass = !deny_bypass;
+                    ignore_header = !ignore_header},
                 !link_css, !css_hook)
         | `latex ->
             `Brtx2Latex (
@@ -167,7 +173,8 @@ module CommandLine = struct
                     warn_error = !warn_error},
                 {doc = !is_doc; title = !title; 
                     print_comments = !print_comments;
-                    deny_bypass = !deny_bypass},
+                    deny_bypass = !deny_bypass;
+                    ignore_header = !ignore_header},
                 !ltx_package, !href_is_footnote)
         | `toc ->
             `GetTOC (
@@ -201,18 +208,28 @@ let () = (
     | `Brtx2HTML (io, common, css_link, class_hook) ->
         let input_char, filename, write = meta_open_inout io.CL.in_out in
         warn_error := io.CL.warn_error;
-        let {CommandLine.doc = doc; title = title; deny_bypass = deny_bypass;
-            print_comments = print_comments;} = common in
+        let {CommandLine.doc = doc; title = title;
+             deny_bypass = deny_bypass;
+             print_comments = print_comments;
+             ignore_header = ignore_header} = common in
         let writer = Bracetax.Signatures.make_writer ~write  ~error in
+        let separate_header = 
+            if ignore_header then Some (ref ("", "", "")) else None in
         Bracetax.Transform.brtx_to_html ~writer ~doc ?title ?css_link
+            ?separate_header
             ~deny_bypass ~print_comments ~input_char ~filename ?class_hook ();
     | `Brtx2Latex (io, common, use_package, href_is_footnote) ->
         let input_char, filename, write = meta_open_inout io.CL.in_out in
         warn_error := io.CL.warn_error;
-        let {CommandLine.doc = doc; title = title; deny_bypass = deny_bypass;
-            print_comments = print_comments;} = common in
+        let {CommandLine.doc = doc; title = title;
+             deny_bypass = deny_bypass;
+             print_comments = print_comments;
+             ignore_header = ignore_header} = common in
         let writer = Bracetax.Signatures.make_writer ~write  ~error in
+        let separate_header = 
+            if ignore_header then Some (ref ("", "", "")) else None in
         Bracetax.Transform.brtx_to_latex ~writer ~doc ?title ?use_package 
+            ?separate_header
             ~href_is_footnote
             ~print_comments ~input_char ~filename ~deny_bypass ();
     | `GetTOC io ->
