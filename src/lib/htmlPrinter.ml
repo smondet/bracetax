@@ -211,13 +211,13 @@ let header_start t = (
 )
 let header_stop t = (
     t.inside_header <- false;
-    t.started_text <- true; (* we put the <p> *)
     begin match t.separate_header with
     | None ->
-        t.write (~% "</div> <!-- END HEADER -->\n<div class=\"p%s\">\n"
-            (AddClass.name t.class_hook "p"))
+          t.started_text <- true; (* we put the <p> *)
+          t.write (~% "</div> <!-- END HEADER -->\n<div class=\"p%s\">\n"
+                       (AddClass.name t.class_hook "p"))
     | Some r ->
-        t.write <- Stack.pop t.write_mem;
+          t.write <- Stack.pop t.write_mem;
     end;
 )
 
