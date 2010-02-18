@@ -1,0 +1,4 @@
+description = "Bracetax - library for the Bracetax text-processing syntax"
+version="1"
+archive(byte)="ocamlbracetax.cma"
+archive(native)="ocamlbracetax.cmxa"

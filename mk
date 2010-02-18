@@ -59,6 +59,14 @@ build_no_ocamlbuild ()
     echo "--> _build/brtx"
 }
 
+install_library() {
+    ocamlfind install bracetax src/lib/META \
+        _build/src/lib/ocamlbracetax.* _build/src/lib/*.cm[iox]
+}
+
+
+
+
 echo_help ()
 {
     echo "\
@@ -67,6 +75,8 @@ b: Build brtx (default action)
 bg: Build brtx with debug symbols
 o: Build brtx with native compilation
 bc: Build brtx without ocamlfind and ocamlbuild (e.g. with ocaml 3.09.x)
+i: Install the ocamlbracetax library with ocamlfind
+ui: Uninstall the library
 t: Do the tests
 d: Build the documentation without building pdfs
 D: Build the whole documentation.
@@ -86,6 +96,8 @@ for todo in $* ; do
         "bg" ) build "debug" ;;
         "o" ) build "opt";;
         "bc" ) build_no_ocamlbuild ;;
+        "i" ) install_library ;;
+        "ui" ) ocamlfind remove bracetax ;;
         "t" ) test/do_tests ;;
         "d" ) cd doc/ ; make nopdf ; cd .. ;;
         "D" ) cd doc/ ; make  ; cd .. ;;
