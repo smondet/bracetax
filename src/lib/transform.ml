@@ -93,6 +93,80 @@ let get_TOC ~writer ?(filename="<IN>") ~input_char () = (
     Parser.do_transformation printer input_char filename;
 )
 
+let str_to_html ?(doc=false) ?title ?css_link ?(print_comments=false)
+    ?(filename="<IN>") ?class_hook ?img_hook ?url_hook
+    ?separate_header ?(deny_bypass=false) in_str = 
+
+  let errors = ref [] in
+  let error = fun e -> errors := e :: !errors in
+  let out_buf = Buffer.create 42 in
+  let write = Buffer.add_string out_buf in
+  let input_char =
+    let cpt = ref (-1) in
+    (fun () -> try Some (incr cpt; in_str.[!cpt]) with e -> None) in
+  let writer = Signatures.make_writer ~write  ~error in
+  
+  if doc then (
+    writer.w_write
+      (HtmlPrinter.header ~comment:"Generated with BraceTax" ?title
+         ?stylesheet_link:css_link ());
+  );
+  let printer =
+    HtmlPrinter.build ?class_hook ?img_hook ?url_hook ?separate_header
+      ~writer ~print_comments () in
+  Parser.do_transformation ~deny_bypass printer input_char filename;
+  
+  if doc then (
+    writer.w_write (HtmlPrinter.footer ());
+  );
+  (Buffer.contents out_buf, List.rev !errors)
+
+
+
+let str_to_latex  ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
+    ?(print_comments=false) ?(href_is_footnote=false) ?img_hook ?url_hook
+    ?separate_header ?(filename="<IN>") in_str = 
+  let errors = ref [] in
+  let error = fun e -> errors := e :: !errors in
+  let out_buf = Buffer.create 42 in
+  let write = Buffer.add_string out_buf in
+  let input_char =
+    let cpt = ref (-1) in
+    (fun () -> try Some (incr cpt; in_str.[!cpt]) with e -> None) in
+  let writer = Signatures.make_writer ~write  ~error in
+  
+  if doc then
+    writer.w_write
+      (LatexPrinter.header
+         ~comment:"Generated with BraceTax" ?title
+         ?stylesheet_link:use_package ());
+  
+  let printer =
+    LatexPrinter.build
+      ~writer ~print_comments ~href_is_footnote
+      ?separate_header ?img_hook ?url_hook () in
+  Parser.do_transformation ~deny_bypass printer input_char filename;
+  
+  if doc then (
+    writer.w_write (LatexPrinter.footer ());
+  );
+  (Buffer.contents out_buf, List.rev !errors)
+
+
+let str_to_TOC ?(filename="<IN>") in_str =
+  let errors = ref [] in
+  let error = fun e -> errors := e :: !errors in
+  let out_buf = Buffer.create 42 in
+  let write = Buffer.add_string out_buf in
+  let input_char =
+    let cpt = ref (-1) in
+    (fun () -> try Some (incr cpt; in_str.[!cpt]) with e -> None) in
+  let writer = Signatures.make_writer ~write  ~error in
+  let output_funs = TOCOutput.create () in
+  let printer = GenericPrinter.build ~writer ~output_funs () in
+  Parser.do_transformation printer input_char filename;
+  (Buffer.contents out_buf, List.rev !errors)
+
 
 
 
