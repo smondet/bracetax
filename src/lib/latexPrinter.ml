@@ -586,37 +586,46 @@ let stop_command t location = (
         t.error (Error.mk t.loc `error `nothing_to_end_with_brace);
 )
 
-let start_raw_mode t location kind args = (
-    t.loc <- location;
-    match kind with
-    | `code ->
-        CS.push t.stack (`code args);
-        begin match args with
-        | q :: _ -> t.write (~% "%%\n%%verbatimbegin:%s\n\\begin{verbatim}" q)
-        | _ -> t.write "%\n\\begin{verbatim}";
-        end;
-    | `bypass ->
-        CS.push t.stack (`bypass);
-)
-let handle_raw_text t location text = (
-    t.loc <- location;
-    t.write text;
-)
-let stop_raw_mode t location = (
-    t.loc <- location;
-    match CS.pop t.stack with
-    | Some (`code args) ->
-        t.write "\\end{verbatim}";
-        begin match args with
-        | q :: _ -> t.write (~% "\n%%verbatimend:%s\n" q)
-        | _ -> ()
-        end;
-    | Some `bypass -> ()
-    | _ ->
-        (* warning ? error ? anyway, *)
-        failwith "Shouldn't be there, Parser's fault ?";
+let start_raw_mode t location kind args =
+  t.loc <- location;
+  begin match kind with
+  | `code ->
+      CS.push t.stack (`code args);
+      begin match args with
+      | q :: _ -> t.write (~% "%%\n%%verbatimbegin:%s\n\\begin{verbatim}" q)
+      | _ -> t.write "%\n\\begin{verbatim}";
+      end;
+  | `bypass | `text | `ignore as env_kind ->
+      CS.push t.stack env_kind;
+  end
 
-)
+let handle_raw_text t location text =
+  t.loc <- location;
+  begin match CS.head t.stack with
+  | Some (`code _) | Some `bypass ->
+      t.write text;
+  | Some `text ->
+      t.write (sanitize_text text);
+  | Some `ignore -> ()
+  | _ ->
+      failwith "handle_raw_text: Shouldn't be there, Parser's fault ?";
+  end
+
+let stop_raw_mode t location =
+  t.loc <- location;
+  begin match CS.pop t.stack with
+  | Some (`code args) ->
+      t.write "\\end{verbatim}";
+      begin match args with
+      | q :: _ -> t.write (~% "\n%%verbatimend:%s\n" q)
+      | _ -> ()
+      end;
+  | Some `bypass | Some `text | Some `ignore -> ()
+  | _ ->
+      (* warning ? error ? anyway, *)
+      failwith "Shouldn't be there, Parser's fault ?";
+  end
+
 
 (* ==== Directly exported functions ==== *)
 

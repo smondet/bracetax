@@ -34,7 +34,7 @@ let make_writer ~write  ~error = (
     }
 )
 
-type raw_t = [ `bypass | `code ]
+type raw_t = [ `bypass | `code | `text | `ignore ]
 
 type printer = {
     print_comment: Error.location -> string -> unit;

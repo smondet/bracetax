@@ -110,6 +110,8 @@ module Stack = struct
         | `utf8_char of int
         | `code of string list
         | `bypass
+        | `text
+        | `ignore
         | `list of [`itemize | `numbered ] * string list * bool ref
         | `item
         | `section of int * string
@@ -259,6 +261,8 @@ let rec env_to_string (e:Stack.environment) = (
     | `utf8_char i               -> spr "utf8_char 0x%x" i
     | `code l                    -> spr "code"
     | `bypass                    -> spr "bypass"
+    | `text                      -> "text"
+    | `ignore                    -> "ignore"
     | `list l                    -> spr "list"
     | `item                      -> spr "item (*)"
     | `section (n, l)            -> spr "section %d" n

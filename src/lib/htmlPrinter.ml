@@ -546,47 +546,50 @@ let terminate t location = (
 
 
 (* ==== Directly exported functions ==== *)
-let start_raw_mode t location kind args = (
-    t.current_line <- location.Error.l_line;
-    match kind with
-    | `code ->
-        CS.push t.stack (`code args);
-        begin match args with
-        | q :: _ ->
-            t.write (~% "\n<!--verbatimbegin:%s -->\n" (sanitize_comments q))
-        | _ -> ()
-        end;
-        t.write (~% "<pre%s>"  (AddClass.attribute t.class_hook "pre"));
-    | `bypass ->
-        CS.push t.stack (`bypass);
-)
-let handle_raw_text t location text = (
-    t.current_line <- location.Error.l_line;
-    match CS.head t.stack with
-    | Some (`code args) ->
-        let pcdata = sanitize_pcdata text in
-        t.write (~% "%s" pcdata);
-    | Some `bypass ->
-        t.write text;
-    | _ ->
-        failwith "handle_raw_text: Shouldn't be there, Parser's fault ?";
-)
-let stop_raw_mode t location = (
-    t.current_line <- location.Error.l_line;
-    match CS.pop t.stack with
-    | Some (`code args) ->
-        t.write "</pre>";
-        begin match args with
-        | q :: _ ->
-            t.write (~% "\n<!--verbatimend:%s -->\n" (sanitize_comments q))
-        | _ -> ()
-        end;
-    | Some `bypass -> ()
-    | _ ->
-        (* warning ? error ? anyway, *)
-        failwith "Shouldn't be there, Parser's fault ?";
+let start_raw_mode t location kind args =
+  t.current_line <- location.Error.l_line;
+  begin match kind with
+  | `code ->
+      CS.push t.stack (`code args);
+      begin match args with
+      | q :: _ ->
+          t.write (~% "\n<!--verbatimbegin:%s -->\n" (sanitize_comments q))
+      | _ -> ()
+      end;
+      t.write (~% "<pre%s>"  (AddClass.attribute t.class_hook "pre"));
+  | `bypass | `text | `ignore as env_kind ->
+      CS.push t.stack env_kind;
+  end
 
-)
+let handle_raw_text t location text =
+  t.current_line <- location.Error.l_line;
+  begin match CS.head t.stack with
+  | Some (`code _) | Some `text ->
+      let pcdata = sanitize_pcdata text in
+      t.write (~% "%s" pcdata);
+  | Some `bypass ->
+      t.write text;
+  | Some `ignore -> ()
+  | _ ->
+      failwith "handle_raw_text: Shouldn't be there, Parser's fault ?";
+  end
+  
+let stop_raw_mode t location =
+  t.current_line <- location.Error.l_line;
+  begin match CS.pop t.stack with
+  | Some (`code args) ->
+      t.write "</pre>";
+      begin match args with
+      | q :: _ ->
+          t.write (~% "\n<!--verbatimend:%s -->\n" (sanitize_comments q))
+      | _ -> ()
+      end;
+  | Some `bypass | Some `text | Some `ignore -> ()
+  | _ ->
+      (* warning ? error ? anyway, *)
+      failwith "Shouldn't be there, Parser's fault ?";
+  end
+
 let build ?(print_comments=false)
 ?separate_header ?img_hook ?url_hook ?class_hook ~writer () = (
     let t =

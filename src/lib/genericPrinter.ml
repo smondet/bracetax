@@ -356,8 +356,8 @@ let start_raw_mode t location kind args =
       | q :: _ -> t.write (t.output.start_raw kind (Some q))
       | _ -> t.write (t.output.start_raw kind None);
       end;
-  | `bypass ->
-      CS.push t.stack (`bypass);
+  | `bypass | `text | `ignore as env_kind->
+      CS.push t.stack (env_kind :> Commands.Stack.environment);
       t.write (t.output.start_raw kind None);
   end
 
@@ -367,6 +367,8 @@ let handle_raw_text t location text =
   | Some (`code args) ->
       t.write (t.output.raw_line `code text);
   | Some `bypass -> t.write (t.output.raw_line `bypass text)
+  | Some `text -> t.write (t.output.raw_line `text text)
+  | Some `ignore -> t.write (t.output.raw_line `ignore text)
   | _ ->
       failwith "GenericPrinter.handle_raw_text in wrong state";
   end
@@ -380,6 +382,8 @@ let stop_raw_mode t location =
       | _ -> t.write (t.output.stop_raw `code None)
       end;
   | Some `bypass -> t.write (t.output.stop_raw `bypass None)
+  | Some `text   -> t.write (t.output.stop_raw `text None)
+  | Some `ignore -> t.write (t.output.stop_raw `ignore None)
   | _ ->
       failwith "GenericPrinter.stop_raw_mode in wrong state";
   end

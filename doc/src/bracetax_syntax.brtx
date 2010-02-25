@@ -129,6 +129,13 @@ For security reasons, this command can be disabled (actually treated as the
 Using {{}bypass{}} with a web application written with an interpreted language
 could lead to code injection issues{...}
 
+{section 3 sec_text|The text command}
+
+{b|TODO}
+
+{section 3 sec_ignore|The ignore comand}
+
+{b|TODO}
 
 {section 2|Formating}
 
