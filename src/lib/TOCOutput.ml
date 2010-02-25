@@ -84,77 +84,74 @@ let termination me () = (
     String.concat "" (List.rev (transform_list 0 [] (List.rev me.sections)))
 )
 
-let create () = (
-    let me = {
-        current = None;
-        title_buffer = Buffer.create 42;
-        sections = [] } in
-    {
-        GenericPrinter.
+let create () =
+  let me = 
+    { current = None; title_buffer = Buffer.create 42; sections = [] } in
+  {
+    GenericPrinter.
 
-        start_text = (fun _ -> "");
-        terminate = termination me;
-        start_code = (fun _ -> "");
-        code_line = (fun a -> "");
-        stop_code = (fun _ -> "");
+    start_text = (fun _ -> "");
+    terminate = termination me;
+    start_raw = (fun _ _ -> "");
+    raw_line = (fun _ _ -> "");
+    stop_raw = (fun _ _ -> "");
 
-        line = store_opt_nonunit me;
-        comment_line = (fun _ -> "");
+    line = store_opt_nonunit me;
+    comment_line = (fun _ -> "");
 
-        quotation_open = (fun style ->
-            store_opt me (spr "{q %s|" style) ());
-        quotation_close = (fun style ->
-            store_opt me "}" ());
+    quotation_open = (fun style ->
+                        store_opt me (spr "{q %s|" style) ());
+    quotation_close = (fun style ->
+                         store_opt me "}" ());
 
-        start_italic = store_opt me "{i|";
-        start_bold = store_opt me "{b|";
-        start_type = store_opt me "{t|";
-        start_sup = store_opt me "{sup|";
-        start_sub = store_opt me "{sub|";
-        stop_italic = store_opt me "}";
-        stop_bold = store_opt me "}";
-        stop_type = store_opt me "}";
-        stop_sup = store_opt me "}";
-        stop_sub = store_opt me "}";
+    start_italic = store_opt me "{i|";
+    start_bold = store_opt me "{b|";
+    start_type = store_opt me "{t|";
+    start_sup = store_opt me "{sup|";
+    start_sub = store_opt me "{sub|";
+    stop_italic = store_opt me "}";
+    stop_bold = store_opt me "}";
+    stop_type = store_opt me "}";
+    stop_sup = store_opt me "}";
+    stop_sub = store_opt me "}";
 
-        list_start = (fun _ -> "");
-        list_first_item = (fun _ -> "");
-        list_item = (fun _ -> "");
-        list_stop = (fun _ -> "");
+    list_start = (fun _ -> "");
+    list_first_item = (fun _ -> "");
+    list_item = (fun _ -> "");
+    list_stop = (fun _ -> "");
 
-        section_start = start_section me;
-        section_stop  = stop_section me;
+    section_start = start_section me;
+    section_stop  = stop_section me;
 
-        paragraph  = store_opt me "{p}";
-        new_line  = store_opt me "{br}";
-        non_break_space  = store_opt me "{~}";
-        horizontal_ellipsis  = store_opt me "{...}";
-        open_brace  = store_opt me "{{}";
-        close_brace  = store_opt me "{}}";
-        sharp  = store_opt me "{#}";
+    paragraph  = store_opt me "{p}";
+    new_line  = store_opt me "{br}";
+    non_break_space  = store_opt me "{~}";
+    horizontal_ellipsis  = store_opt me "{...}";
+    open_brace  = store_opt me "{{}";
+    close_brace  = store_opt me "{}}";
+    sharp  = store_opt me "{#}";
 
-        utf8_char = (fun i -> store_opt me (spr "{utf %d}" i) ());
+    utf8_char = (fun i -> store_opt me (spr "{utf %d}" i) ());
 
-        link = (fun  kind target text ->
-            store_opt me (Commands.Link.unparse kind target text) ());
+    link = (fun  kind target text ->
+              store_opt me (Commands.Link.unparse kind target text) ());
 
-        start_header = (fun () -> "");
-        start_title = (fun () -> "");
-        start_authors = (fun () -> "");
-        start_subtitle = (fun () -> "");
-        stop_header = (fun () -> "");
-        stop_title = (fun () -> "");
-        stop_authors = (fun () -> "");
-        stop_subtitle = (fun () -> "");
+    start_header = (fun () -> "");
+    start_title = (fun () -> "");
+    start_authors = (fun () -> "");
+    start_subtitle = (fun () -> "");
+    stop_header = (fun () -> "");
+    stop_title = (fun () -> "");
+    stop_authors = (fun () -> "");
+    stop_subtitle = (fun () -> "");
 
-        start_image = (fun _ _ _ -> ""); 
-        stop_image  = (fun _ _ _ -> ""); 
+    start_image = (fun _ _ _ -> ""); 
+    stop_image  = (fun _ _ _ -> ""); 
 
-        print_table = (fun _ _ -> ());
+    print_table = (fun _ _ -> ());
 
-        start_note = (fun () -> "");
-        stop_note = (fun () -> "");
+    start_note = (fun () -> "");
+    stop_note = (fun () -> "");
 
-    }
+  }
 
-)

@@ -30,65 +30,65 @@ type transform_string_fun = string -> string
 
 type output_t = {
 
-    start_text: string_fun;
-    terminate: string_fun;
-    start_code: string option -> string;
-    code_line: transform_string_fun;
-    stop_code: string option -> string;
+  start_text: string_fun;
+  terminate: string_fun;
+  start_raw: Signatures.raw_t -> string option -> string;
+  raw_line: Signatures.raw_t -> transform_string_fun;
+  stop_raw: Signatures.raw_t -> string option -> string;
 
-    line: transform_string_fun;
-    comment_line: transform_string_fun;
+  line: transform_string_fun;
+  comment_line: transform_string_fun;
 
-    quotation_open:  string -> string;
-    quotation_close: string -> string;
-    
-    start_italic: string_fun;
-    start_bold:   string_fun;
-    start_type:   string_fun;
-    start_sup:    string_fun;
-    start_sub:    string_fun;
-    stop_italic:  string_fun;
-    stop_bold:    string_fun;
-    stop_type:    string_fun;
-    stop_sup:     string_fun;
-    stop_sub:     string_fun;
+  quotation_open:  string -> string;
+  quotation_close: string -> string;
+  
+  start_italic: string_fun;
+  start_bold:   string_fun;
+  start_type:   string_fun;
+  start_sup:    string_fun;
+  start_sub:    string_fun;
+  stop_italic:  string_fun;
+  stop_bold:    string_fun;
+  stop_type:    string_fun;
+  stop_sup:     string_fun;
+  stop_sub:     string_fun;
 
-    list_start: [`itemize | `numbered ] -> string;
-    list_first_item: [`itemize | `numbered ] -> string;
-    list_item: [`itemize | `numbered ] -> string;
-    list_stop: [`itemize | `numbered ] -> string;
+  list_start: [`itemize | `numbered ] -> string;
+  list_first_item: [`itemize | `numbered ] -> string;
+  list_item: [`itemize | `numbered ] -> string;
+  list_stop: [`itemize | `numbered ] -> string;
 
-    section_start : int -> string -> string;
-    section_stop : int -> string -> string;
+  section_start : int -> string -> string;
+  section_stop : int -> string -> string;
 
-    paragraph : string_fun;
-    new_line : string_fun;
-    non_break_space : string_fun;
-    horizontal_ellipsis : string_fun;
-    open_brace : string_fun;
-    close_brace : string_fun;
-    sharp : string_fun;
+  paragraph : string_fun;
+  new_line : string_fun;
+  non_break_space : string_fun;
+  horizontal_ellipsis : string_fun;
+  open_brace : string_fun;
+  close_brace : string_fun;
+  sharp : string_fun;
 
-    utf8_char: int -> string;
+  utf8_char: int -> string;
 
-    link: Commands.Link.kind -> string option -> string option -> string;
+  link: Commands.Link.kind -> string option -> string option -> string;
 
-    start_header: string_fun;
-    start_title: string_fun;
-    start_authors: string_fun;
-    start_subtitle: string_fun;
-    stop_header: string_fun;
-    stop_title: string_fun;
-    stop_authors: string_fun;
-    stop_subtitle: string_fun;
+  start_header: string_fun;
+  start_title: string_fun;
+  start_authors: string_fun;
+  start_subtitle: string_fun;
+  stop_header: string_fun;
+  stop_title: string_fun;
+  stop_authors: string_fun;
+  stop_subtitle: string_fun;
 
-    start_image: string -> Commands.Stack.image_size -> string -> string; 
-    stop_image : string -> Commands.Stack.image_size -> string -> string; 
+  start_image: string -> Commands.Stack.image_size -> string -> string; 
+  stop_image : string -> Commands.Stack.image_size -> string -> string; 
 
-    print_table: (string -> unit) -> Commands.Table.table -> unit;
+  print_table: (string -> unit) -> Commands.Table.table -> unit;
 
-    start_note: string_fun;
-    stop_note: string_fun;
+  start_note: string_fun;
+  stop_note: string_fun;
 
 }
 
@@ -346,67 +346,45 @@ let terminate t location = (
     );  
     t.write (t.output.terminate ());
 ) 
-(*
-let start_raw_mode t location args = (
-    CS.push t.stack (`code args);
-    let postpro =
-        match args with
-        | q :: _ -> Some q | _ -> None
-    in
-    t.write (t.output.start_verbatim postpro);
-)
-let stop_raw_mode t location = (
-    let env =  (CS.pop t.stack) in
-    match env with
-    | Some (`code args) ->
-        let postpro =
-            match args with
-            | q :: _ -> Some q | _ -> None
-        in
-        t.write (t.output.stop_verbatim postpro);
-    | _ ->
-        (* warning ? error ? anyway, *)
-        failwith "Shouldn't be there, Parser's fault ?";
-)
 
-let handle_raw_text t location line = (
-    t.write (t.output.verbatim_line line);
-)
-*)
-let start_raw_mode t location kind args = (
-    t.loc <- location;
-    match kind with
-    | `code ->
-        CS.push t.stack (`code args);
-        begin match args with
-            | q :: _ -> t.write (t.output.start_code (Some q))
-        | _ -> t.write (t.output.start_code None);
-        end;
-    | `bypass ->
-        CS.push t.stack (`bypass);
-)
-let handle_raw_text t location text = (
-    t.loc <- location;
-    if CS.head t.stack = (Some `bypass) then (
-        t.write text;
-    ) else (
-        t.write (t.output.code_line text);
-    );
-)
-let stop_raw_mode t location = (
-    t.loc <- location;
-    match CS.pop t.stack with
-    | Some (`code args) ->
-        begin match args with
-        | q :: _ -> t.write (t.output.stop_code (Some q))
-        | _ -> t.write (t.output.stop_code None)
-        end;
-    | Some `bypass -> ()
-    | _ ->
-        (* warning ? error ? anyway, *)
-        failwith "Shouldn't be there, Parser's fault ?";
+let start_raw_mode t location kind args =
+  t.loc <- location;
+  begin match kind with
+  | `code ->
+      CS.push t.stack (`code args);
+      begin match args with
+      | q :: _ -> t.write (t.output.start_raw kind (Some q))
+      | _ -> t.write (t.output.start_raw kind None);
+      end;
+  | `bypass ->
+      CS.push t.stack (`bypass);
+      t.write (t.output.start_raw kind None);
+  end
 
-)
+let handle_raw_text t location text =
+  t.loc <- location;
+  begin match CS.head t.stack with
+  | Some (`code args) ->
+      t.write (t.output.raw_line `code text);
+  | Some `bypass -> t.write (t.output.raw_line `bypass text)
+  | _ ->
+      failwith "GenericPrinter.handle_raw_text in wrong state";
+  end
+        
+let stop_raw_mode t location = 
+  t.loc <- location;
+  begin match CS.pop t.stack with
+  | Some (`code args) ->
+      begin match args with
+      | q :: _ -> t.write (t.output.stop_raw `code (Some q))
+      | _ -> t.write (t.output.stop_raw `code None)
+      end;
+  | Some `bypass -> t.write (t.output.stop_raw `bypass None)
+  | _ ->
+      failwith "GenericPrinter.stop_raw_mode in wrong state";
+  end
+
+
 
 
 (* ==== Directly exported functions ==== *)
