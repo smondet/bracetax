@@ -118,7 +118,8 @@ and parse_command t location = (
     let rec read_loop location escaping = 
         match t.read_fun () with
         | None ->
-            err t.printer location (`end_of_input_not_in_text "Reading Command");
+            err t.printer location
+              (`end_of_input_not_in_text "Reading Command");
             t.printer.terminate location;
         | Some '\\' ->
             if escaping then (
@@ -175,10 +176,8 @@ and parse_command t location = (
                 read_loop location false
             ) else (
                 cmd := (Buffer.contents buf) :: !cmd;
-                match List.rev !cmd with
-                | [] ->
-                    failwith "Shouldn't be here..."
-                | "" :: [] ->
+                match List.rev (List.filter ((<>) "") !cmd) with
+                | [] | "" :: [] ->
                     err t.printer location (`unknown_command "EMPTY CMD!!!");
                     parse_text t location
                 | q :: tl ->
