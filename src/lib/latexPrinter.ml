@@ -667,6 +667,7 @@ let header ?(title="") ?(comment="") ?stylesheet_link () = (
     \\usepackage[T1]{fontenc}\n\
     \\usepackage[english]{babel}\n\
     \\usepackage{multirow}\n\
+    \\usepackage{tipa}\n\
     \\usepackage{ucs}\n\
     \\usepackage[utf8x,utf8]{inputenc}\n\
     \\usepackage[                         \n\
