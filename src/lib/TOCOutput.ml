@@ -133,8 +133,7 @@ let create () =
 
     utf8_char = (fun i -> store_opt me (spr "{utf %d}" i) ());
 
-    link = (fun  kind target text ->
-              store_opt me (Commands.Link.unparse kind target text) ());
+    link = (fun _ _ _ -> "");
 
     start_header = (fun () -> "");
     start_title = (fun () -> "");
