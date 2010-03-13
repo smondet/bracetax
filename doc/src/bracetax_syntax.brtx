@@ -131,11 +131,30 @@ could lead to code injection issues{...}
 
 {section 3 sec_text|The text command}
 
-{b|TODO}
+The {t|{text}{text}{end}} command works also like
+{t|{text}{code}{end}}, but it used to treat all the content as
+{q|text}, {q|braces} and {q|sharps}, will have no effect.
+For example:
+{code}
+{text endtag} Some text with {braces, |pipes} and #sharps#.{endtag}
+{end}
+will give: {text endtag} Some text with {braces, |pipes} and #sharps#.{endtag}
 
 {section 3 sec_ignore|The ignore comand}
 
-{b|TODO}
+The {t|{text}{ignore}{end}} command has also the same syntax as the
+{t|{text}{code}{end}} one, but is used to {i|ignore} some text, it
+can be used to implement so-called {q|block comments}.
+{code}
+Some {ignore someendtag}uninteresting,
+useless, and unreadable{someendtag} text
+{end}
+is equivalent to
+{code}
+Some #uninteresting,
+#useless, and unreadable{someendtag}
+ text
+{end}
 
 {section 2|Formating}
 
