@@ -64,8 +64,11 @@ install_library() {
         _build/src/lib/ocamlbracetax.* _build/src/lib/*.cm[iox]
 }
 
-
-
+document_library(){
+    rm -fr ref_lib_doc
+    mkdir ref_lib_doc
+    ocamldoc -d ref_lib_doc -html -sort -I _build/src/lib/ src/lib/*.ml
+}
 
 echo_help ()
 {
@@ -79,6 +82,7 @@ i: Install the ocamlbracetax library with ocamlfind
 ui: Uninstall the library
 t: Do the tests
 d: Build the documentation without building pdfs
+doclib: Build the HTML documentation of the library
 D: Build the whole documentation.
 cd: Clean documentation
 c: Clean
@@ -100,6 +104,7 @@ for todo in $* ; do
         "ui" ) ocamlfind remove bracetax ;;
         "t" ) test/do_tests ;;
         "d" ) cd doc/ ; make nopdf ; cd .. ;;
+        "doclib" ) document_library ;;
         "D" ) cd doc/ ; make  ; cd .. ;;
         "cd" )rm -rf doc/site/ ;;
         "c" ) ocamlbuild -clean ; rm -rf _test_results/ doc/site/ ;;
