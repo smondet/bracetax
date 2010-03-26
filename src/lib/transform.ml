@@ -23,7 +23,7 @@
 (*      OTHER DEALINGS IN THE SOFTWARE.                                       *)
 (******************************************************************************)
 
-(** This module is the main entry point to use bracetax as a library. *)
+(** This module is the {b main entry point} to use bracetax as a library. *)
 
 (** The functions here are used to transform {i Bracetax} input to the
     formats currently handled by the library (XHTML, LaTeX, or a
@@ -48,7 +48,7 @@ let opt_may ~f = function None -> () | Some o -> f o
 
     @param title If [doc = true], use [title] as HTML header title.
 
-    @param css_link Add a “meta” link to a CSS URL.
+    @param css_link Add a "meta" link to a CSS URL.
 
     @param print_comments If [true], output Bracetax comments as HTML
     comments (Default: [false]).
@@ -101,6 +101,9 @@ let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
 
     @param use_package Add a [\\usepackage\{<package>\}] call in the
     LaTeX header (doc = true).
+
+    @param href_is_footnote If [true], render links as footnotes
+    (Default: [false]).
 
 *)
 let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)

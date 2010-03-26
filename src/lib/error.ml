@@ -23,95 +23,98 @@
 (*      OTHER DEALINGS IN THE SOFTWARE.                                       *)
 (******************************************************************************)
 
+(** Parsing error messages. *)
+
+
 type gravity = [
-    | `fatal_error
-    | `error
-    | `warning
+  | `fatal_error
+  | `error
+  | `warning
 ]
 
 type message = [
-    | `transformer_lost of string
-    | `ignored_text_after_verbatim_begin of string (* the ignored text *)
-    | `malformed_verbatim_begin
-    | `cell_out_of_table
-    | `cell_inside_cell
-    | `unknown_command of string
-    | `begin_without_arg
-    | `non_matching_end
-    | `closing_brace_matching_begin
-    | `nothing_to_end_with_brace
-    | `item_out_of_list
-    | `terminating_with_open_environments of string list
-    | `bad_size_specification_in_image of string
-    | `unknown_list_style of string
-    | `end_of_input_not_in_text of string
-    | `invalid_end_pattern of string
-    | `command_shouldnot_have_args of string
-    | `unknown_quotation_style of string
+  | `transformer_lost of string
+  | `ignored_text_after_verbatim_begin of string (* the ignored text *)
+  | `malformed_verbatim_begin
+  | `cell_out_of_table
+  | `cell_inside_cell
+  | `unknown_command of string
+  | `begin_without_arg
+  | `non_matching_end
+  | `closing_brace_matching_begin
+  | `nothing_to_end_with_brace
+  | `item_out_of_list
+  | `terminating_with_open_environments of string list
+  | `bad_size_specification_in_image of string
+  | `unknown_list_style of string
+  | `end_of_input_not_in_text of string
+  | `invalid_end_pattern of string
+  | `command_shouldnot_have_args of string
+  | `unknown_quotation_style of string
 ]
 
 type location = {
-    l_line: int;
-    l_char: int;
-    l_file: string;
+  l_line: int;
+  l_char: int;
+  l_file: string;
 }
 
 type error = [
-    | `message of location * gravity * message
-    | `undefined of string (* Temporary, will be removed progressively *)
+  | `message of location * gravity * message
+  | `undefined of string (* Temporary, will be removed progressively *)
 ]
 
 type error_fun = error -> unit
 
+(** Build an error message. *)
 let mk location gravity message =
-    (`message (location, gravity, message): error)
+  (`message (location, gravity, message): error)
 
-(* An built-in error to string function *)
-let to_string (location, gravity, message) = (
-    let spr = Printf.sprintf in
-    let gravity_str = 
-        match gravity with
-        | `fatal_error -> "FATAL ERROR"
-        | `error -> "ERROR"
-        | `warning -> "Warning"
-    in
-    let message_str =
-        match (message:message) with
-        | `transformer_lost s -> 
-            spr "Shouldn't be there (%s)" s
-        | `ignored_text_after_verbatim_begin s ->
-            spr "Text after {verbatim ...} will be ignored: %s" s
-        | `malformed_verbatim_begin -> "Malformed begin of verbatim environment"
-        | `cell_out_of_table -> "Cell (\"{c ...}\") command not in table"
-        | `cell_inside_cell -> "Cell (\"{c ...}\") command inside another cell"
-        | `unknown_command s -> spr "Unknown command: %s" s
-        | `begin_without_arg -> "{begin} without argument"
-        | `non_matching_end -> "{end} does not match a {begin}"
-        | `closing_brace_matching_begin ->
-            "Closing brace ('}') matches a {begin ...}"
-        | `nothing_to_end_with_brace -> "Closing brace doesn't match"
-        | `item_out_of_list -> "Item ({*}) not in a {list} environment}"
-        | `terminating_with_open_environments l -> 
-            spr "Reached end of input with opened environments: %s"
-                (String.concat ", " l)
-        | `bad_size_specification_in_image s ->
-            spr "Bad size specification in image: \"%s\"" s
-        | `unknown_list_style s ->
-            spr "Unknown list syle: \"%s\"" s
-        | `end_of_input_not_in_text s ->
-            spr "Reached end of input in wrong state... \"%s\"" s
-        | `invalid_end_pattern s ->
-            spr "Invalid end pattern: \"%S\"" s
-        | `command_shouldnot_have_args s ->
-            spr "This command should not have arguments: %s" s
-        | `unknown_quotation_style s ->
-            spr "Unknown quotation style \"%s\" (using default)" s
-    in
-    Printf.sprintf "[%s:%d%s][%s] %s"
-        location.l_file location.l_line 
-        (if location.l_char = -1 then "" else (spr ",%d" location.l_char))
-        gravity_str message_str
-)
+(** A built-in function for rendering errors as strings. *)
+let to_string (location, gravity, message) = 
+  let spr = Printf.sprintf in
+  let gravity_str = 
+    match gravity with
+    | `fatal_error -> "FATAL ERROR"
+    | `error -> "ERROR"
+    | `warning -> "Warning"
+  in
+  let message_str =
+    match (message:message) with
+    | `transformer_lost s -> 
+        spr "Shouldn't be there (%s)" s
+    | `ignored_text_after_verbatim_begin s ->
+        spr "Text after {verbatim ...} will be ignored: %s" s
+    | `malformed_verbatim_begin -> "Malformed begin of verbatim environment"
+    | `cell_out_of_table -> "Cell (\"{c ...}\") command not in table"
+    | `cell_inside_cell -> "Cell (\"{c ...}\") command inside another cell"
+    | `unknown_command s -> spr "Unknown command: %s" s
+    | `begin_without_arg -> "{begin} without argument"
+    | `non_matching_end -> "{end} does not match a {begin}"
+    | `closing_brace_matching_begin ->
+        "Closing brace ('}') matches a {begin ...}"
+    | `nothing_to_end_with_brace -> "Closing brace doesn't match"
+    | `item_out_of_list -> "Item ({*}) not in a {list} environment}"
+    | `terminating_with_open_environments l -> 
+        spr "Reached end of input with opened environments: %s"
+          (String.concat ", " l)
+    | `bad_size_specification_in_image s ->
+        spr "Bad size specification in image: \"%s\"" s
+    | `unknown_list_style s ->
+        spr "Unknown list syle: \"%s\"" s
+    | `end_of_input_not_in_text s ->
+        spr "Reached end of input in wrong state... \"%s\"" s
+    | `invalid_end_pattern s ->
+        spr "Invalid end pattern: \"%S\"" s
+    | `command_shouldnot_have_args s ->
+        spr "This command should not have arguments: %s" s
+    | `unknown_quotation_style s ->
+        spr "Unknown quotation style \"%s\" (using default)" s
+  in
+  (Printf.sprintf "[%s:%d%s][%s] %s"
+     location.l_file location.l_line 
+     (if location.l_char = -1 then "" else (spr ",%d" location.l_char))
+     gravity_str message_str)
 
 
 

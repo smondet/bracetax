@@ -23,30 +23,37 @@
 (*      OTHER DEALINGS IN THE SOFTWARE.                                       *)
 (******************************************************************************)
 
+(** Common types used for printers. *)
+
+
 type writer = {
-    w_write: string -> unit;
-    w_error: Error.error -> unit;
+  w_write: string -> unit;
+  w_error: Error.error -> unit;
 }
-let make_writer ~write  ~error = (
-    {
-        w_write = write;
-        w_error = error;
-    }
-)
+
+
+let make_writer ~write  ~error = {
+  w_write = write;
+  w_error = error;
+}
+
 
 type raw_t = [ `bypass | `code | `text | `ignore ]
+    (** The four kinds of {i non-parsed} blocs. *)
 
 type printer = {
-    print_comment: Error.location -> string -> unit;
-    print_text:    Error.location -> string -> unit;
-    enter_cmd:     Error.location -> string -> string list -> unit;
-    leave_cmd:     Error.location -> unit;
-    terminate:     Error.location -> unit;
+  print_comment: Error.location -> string -> unit;
+  print_text:    Error.location -> string -> unit;
+  enter_cmd:     Error.location -> string -> string list -> unit;
+  leave_cmd:     Error.location -> unit;
+  terminate:     Error.location -> unit;
 
-    enter_raw:     Error.location -> raw_t -> string list -> unit;
-    print_raw:     Error.location -> string -> unit;
-    leave_raw:     Error.location -> unit;
-    error: Error.error -> unit;
+  enter_raw:     Error.location -> raw_t -> string list -> unit;
+  print_raw:     Error.location -> string -> unit;
+  leave_raw:     Error.location -> unit;
+  error: Error.error -> unit;
 }
+    (** The functions called by {!val:Parser.do_transformation}. For
+        example, {!val:HtmlPrinter.build} outputs a {!type:printer}. *)
 
 

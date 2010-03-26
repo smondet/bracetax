@@ -23,10 +23,13 @@
 (*      OTHER DEALINGS IN THE SOFTWARE.                                       *)
 (******************************************************************************)
 
+(** Version and License of the library. *)
+
+
 let version = "0.2"
 
 let license = "\
-Copyright (c) 2008, 2009, Sebastien MONDET                         \n\
+Copyright (c) 2008, 2009, 2010 Sebastien MONDET\n\
 \n\
 Permission is hereby granted, free of charge, to any person        \n\
 obtaining a copy of this software and associated documentation     \n\
