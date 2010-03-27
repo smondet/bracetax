@@ -22,68 +22,76 @@
 (*      FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR         *)
 (*      OTHER DEALINGS IN THE SOFTWARE.                                       *)
 (******************************************************************************)
+
+(** Implements {!type:GenericPrinter.output_t} for tables of contents. *)
+
+(**/**)
+
+
 let spr = Printf.sprintf
 
 type inside = {
-    mutable current: (int * string option) option;
-    title_buffer: Buffer.t;
-    mutable sections: (int * string option * string) list;
+  mutable current: (int * string option) option;
+  title_buffer: Buffer.t;
+  mutable sections: (int * string option * string) list;
 }
 
-let store_opt me str () = (
-    if me.current <> None then (
-        Buffer.add_string me.title_buffer str;
-    );
-    ""
-)
-let store_opt_nonunit me str = (
-    if me.current <> None then (
-        Buffer.add_string me.title_buffer str;
-    );
-    ""
-)
-let start_section me level label = (
-    me.current <- Some (level, match label with "" -> None | s -> Some s);
-    ""
-)
-let stop_section me level label = (
-    let lv, lb =
-        match me.current with None -> failwith "Gni ??" | Some (a,b) -> (a,b) in
-    me.sections <- (lv, lb, Buffer.contents me.title_buffer) :: me.sections;
-    Buffer.reset me.title_buffer;
-    me.current <- None;
-    ""
-)
-let termination me () = (
-    let string_of_section label title =
-        match label with
-        | None -> title
-        | Some link -> spr "{link local:%s|%s}" link title in
-    let spaces_of_level level = String.make (level * 2) ' ' in
-    let adjust_level_before curlv lv =
-        let res = ref "" in
-        for i = curlv to lv - 1 do
-            res := !res ^ (spr "%s{list enum|\n" (spaces_of_level i));
-        done;
-        !res in
-    let adjust_level_after curlv lv =
-        if curlv > lv then
-            (spr "%s%s\n" (spaces_of_level lv) (String.make (curlv - lv) '}'))
-        else "" in
-    let rec transform_list current_level acc = function
-        | [] -> (String.make current_level '}') :: acc
-        | (level, label, title) :: t ->
-            let str =
-                spr "%s%s%s{*} %s\n"
-                    (adjust_level_before current_level level)
-                    (adjust_level_after current_level level)
-                    (spaces_of_level level) (string_of_section label title)
-            in
-            transform_list level (str :: acc) t
-    in
-    String.concat "" (List.rev (transform_list 0 [] (List.rev me.sections)))
-)
+let store_opt me str () =
+  if me.current <> None then (
+    Buffer.add_string me.title_buffer str;
+  );
+  ""
 
+let store_opt_nonunit me str =
+  if me.current <> None then (
+    Buffer.add_string me.title_buffer str;
+  );
+  ""
+
+let start_section me level label =
+  me.current <- Some (level, match label with "" -> None | s -> Some s);
+  ""
+
+let stop_section me level label =
+  let lv, lb =
+    match me.current with None -> failwith "Gni ??" | Some (a,b) -> (a,b) in
+  me.sections <- (lv, lb, Buffer.contents me.title_buffer) :: me.sections;
+  Buffer.reset me.title_buffer;
+  me.current <- None;
+  ""
+
+let termination me () =
+  let string_of_section label title =
+    match label with
+    | None -> title
+    | Some link -> spr "{link local:%s|%s}" link title in
+  let spaces_of_level level = String.make (level * 2) ' ' in
+  let adjust_level_before curlv lv =
+    let res = ref "" in
+    for i = curlv to lv - 1 do
+      res := !res ^ (spr "%s{list enum|\n" (spaces_of_level i));
+    done;
+    !res in
+  let adjust_level_after curlv lv =
+    if curlv > lv then
+      (spr "%s%s\n" (spaces_of_level lv) (String.make (curlv - lv) '}'))
+    else "" in
+  let rec transform_list current_level acc = function
+    | [] -> (String.make current_level '}') :: acc
+    | (level, label, title) :: t ->
+        let str =
+          spr "%s%s%s{*} %s\n"
+            (adjust_level_before current_level level)
+            (adjust_level_after current_level level)
+            (spaces_of_level level) (string_of_section label title)
+        in
+        transform_list level (str :: acc) t
+  in
+  (String.concat "" (List.rev (transform_list 0 [] (List.rev me.sections))))
+
+(**/**)
+
+(** Creation of the {!type:GenericPrinter.output_t}. *)
 let create () =
   let me = 
     { current = None; title_buffer = Buffer.create 42; sections = [] } in
