@@ -25,7 +25,7 @@
 
 
 (** A generic printer, it implements {!type:Signatures.printer}
-    functions for "outputs". *)
+    functions from {!type:GenericPrinter.output_t}s. *)
 
 (** The so-called "outputs" are structures of type
     {!type:GenericPrinter.output_t}. *)

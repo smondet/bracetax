@@ -23,7 +23,8 @@
 (*      OTHER DEALINGS IN THE SOFTWARE.                                       *)
 (******************************************************************************)
 
-(** The generic parser for bracetax. *)
+(** The generic parser for bracetax, needs an implementation of
+    {!type:Signatures.printer}. *)
 
 (**/**)
 open Signatures 
