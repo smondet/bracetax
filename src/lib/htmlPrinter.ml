@@ -325,7 +325,7 @@ let cell_stop t env =
 
 let note_start t =
   t.write
-    (~% "class=\"notebegin%s\"> (</small><small class=\"note%s\">"
+    (~% "<small class=\"notebegin%s\"> (</small><small class=\"note%s\">"
        (AddClass.name t.class_hook "notebegin")
        (AddClass.name t.class_hook "note"));
   `note
