@@ -23,6 +23,7 @@ i: Install the ocamlbracetax library with ocamlfind
 ui: Uninstall the library
 t: Do the tests
 d: Build the documentation without building pdfs
+doclib: Build the HTML documentation of the library
 D: Build the whole documentation.
 cd: Clean documentation
 c: Clean
@@ -78,7 +79,7 @@ brtx -html -i README.brtx -o README.html
 {p}
 Convert a file to LaTeX:
 {code}
-brtx -latex -i README.brtx -o README.html
+brtx -latex -i README.brtx -o README.tex
 {end}
 {p}
 
@@ -86,13 +87,13 @@ The option {t|-doc} adds header and footer (for both HTML and LaTeX):
 {code e}
 brtx -html -i README.brtx -o README.html -doc
 {e}
-will provide the {t|<!DOCTYPE html ...} etc...
+will provide the {t|<!DOCTYPE html ...} etc.
 {p}
 
 Transform any string:
 {code}
  $ echo 'I say {b|Hello} {i|world}{~}!!' | brtx -html
-<p>I say <b>Hello</b> <i>world</i>&nbsp;!!</p>
+ <div class="p">I say <b>Hello</b> <i>world</i>&nbsp;!!</div>
 {end}
 
 

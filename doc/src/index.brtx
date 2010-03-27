@@ -11,19 +11,20 @@
 The {b|Bracetax} Project is:
 {list|
     {*} {i|bracetax}: a simple and deterministic text-processing syntax;
-    {*} {t|ocamlbracetax}: an {link http://ocaml.org|ocaml} library
-    manipulating the syntax (convert to HTML, LaTeX{...});
-    {*} {t|brtx}: a command-line application using the {t|ocamlbracetax}
+    {*} {t|bracetax}: an {link http://ocaml.org|ocaml} library
+    manipulating the syntax (convert to HTML, LaTeX{~}{...});
+    {*} {t|brtx}: a command-line application using the {t|bracetax}
     library;
     {*} {i|tools}: a few small tools related to the syntax (VIM syntax
-    highlighting{...}) 
+    highlighting{~}{...}).
 }
 
 {section|Download}
 
 For now, you can get a snapshot of the sources from the
-{link http://git.berlios.de/cgi-bin/gitweb.cgi?p=bracetax;a=summary|gitweb interface},
-binaries will be available later.
+{link http://git.berlios.de/cgi-bin/gitweb.cgi?p=bracetax;a=summary|gitweb interface}
+(the head of the master branch is considered always the most up-to-date version),
+binaries will become available if there is enough demand.
 
 
 {section|Documentation}
@@ -33,6 +34,7 @@ For now the documentations are:
     {*} the {link bracetax_syntax.html|Bracetax syntax} reference;
     # {*} the ocamlbracetax library;
     {*} the {t|brtx} {link brtx_app.html|application} build & usage;
+    {*} the {link ./doclib/index.html|documentation} of the bracetax library;
     {*} the {link tools.html|tools} usage.
     # {*} room for more development.
 {end}

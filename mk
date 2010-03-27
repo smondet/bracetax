@@ -66,6 +66,7 @@ install_library() {
 
 document_library(){
     local docinput=" -sort -I _build/src/lib/ src/lib/*.ml"
+    local docdir="doc/site/doclib/"
 cat <<EOF > /tmp/intro
 This is the ocamldoc documentation for the
 {{:http://bracetax.berlios.de}{i Bracetax}} library.
@@ -96,13 +97,14 @@ Other indexes:
 {!indexlist}
 
 EOF
-    rm -fr ref_lib_doc
-    mkdir ref_lib_doc
-    ocamldoc -d ref_lib_doc -intro /tmp/intro -html -colorize-code $docinput
+    rm -fr $docdir
+    mkdir -p $docdir
+    ocamldoc -d $docdir -t "Bracetax Library" -intro /tmp/intro \
+        -html -colorize-code $docinput
     ocamldoc -o /tmp/brtxmods.dot -dot -dot-reduce -dot-include-all $docinput
     ocamldoc -o /tmp/brtxtyps.dot -dot -dot-types -dot-reduce $docinput
-    grep -v rotate /tmp/brtxmods.dot | dot -Tpng > ref_lib_doc/bracetax_modules.png
-    grep -v rotate /tmp/brtxtyps.dot | dot -Tpng > ref_lib_doc/bracetax_types.png
+    grep -v rotate /tmp/brtxmods.dot | dot -Tpng > $docdir/bracetax_modules.png
+    grep -v rotate /tmp/brtxtyps.dot | dot -Tpng > $docdir/bracetax_types.png
 }
 
 echo_help ()
