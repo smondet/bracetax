@@ -170,6 +170,8 @@ sub{sub|script}
 
 {section 2|Quoting}
 
+{section 3|Run-In Quotations}
+
 {code e}
 Quotes:
     {q|default},
@@ -181,8 +183,31 @@ Quotes:
     {q brout|unknown is default}
 {e}
 Quotes: {q|default}, {q '|single}, {q es|españolas}, {q fr|françaises},
-{q en|English}, {q de|Deutsch} and {q|unknown is default}
+{q en|English}, {q de|Deutsch} and {q|unknown is default}.
 # {q en|English}, {q de|Deutsch} and {q brout|unknown is default}
+
+{section 3|Block Quotations}
+
+They are as simple as {t|{text}{quote| ... }{end}}. For example:
+{code e}
+{begin quote}
+There is a theory which states that if ever anybody discovers exactly
+what the Universe is for and why it is here, it will instantly
+disappear and be replaced by something even more bizarre and
+inexplicable. There is another theory which states that this has
+already happened.
+{b|Douglas Adams}
+{end}
+{e}
+will give:
+{begin quote}
+There is a theory which states that if ever anybody discovers exactly
+what the Universe is for and why it is here, it will instantly
+disappear and be replaced by something even more bizarre and
+inexplicable. There is another theory which states that this has
+already happened.
+{b|Douglas Adams}
+{end}
 
 {section 2|Paragraphs and line-breaks}
 

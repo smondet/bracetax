@@ -15,7 +15,7 @@ div.p {
     /* The debug border: */
     /* border: thin silver solid; */
 }
-div.p + div.p { padding-top: 1.5em; }
+div.p + div.p { padding-top: 1.1em; }
 
 div.header {
     /* text-align: center; */
@@ -26,7 +26,7 @@ div.header {
 h1 {           font-size: 300%; font-variant: small-caps; color: #AA0000;}
 div.authors {  font-size: 200%; line-height: 200%; }
 div.subtitle { font-size: 150%; font-style: italic; }
-h2 {           font-size: 210%; /* border-bottom: 1px solid #000; */ }
+h2 {           font-size: 210%;  border-bottom: 1px solid #000;  }
 h3 {           font-size: 180%; padding-top: 0.1em;padding-bottom: 0.05em;}
 h4 {           font-size: 150%; padding-top: 0.1em;padding-bottom: 0.05em;}
 h5 {           font-size: 125%; padding-top: 0.1em;padding-bottom: 0.05em;}
@@ -55,6 +55,11 @@ pre {
     width: 70%;
     /* clear: both; */
     /*padding-bottom: 1em;*/
+}
+
+blockquote {
+  background-color: #eeeeee;
+  padding: 1em;
 }
 
 ul, ol {
