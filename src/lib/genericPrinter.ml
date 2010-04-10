@@ -115,6 +115,9 @@ type output_t = {
   start_note: string_fun;
   stop_note: string_fun;
 
+  start_quote: string_fun;
+  stop_quote: string_fun;
+
 }
 
 (**/**)
@@ -214,6 +217,7 @@ let start_environment ?(is_begin=false) t location name args =
         | Some tab -> Commands.Table.cell_start ~loc:t.loc ~error:t.error tab args
         end;
     | s when C.is_note s -> t.write (o.start_note ()); `note
+    | s when C.is_quote s -> t.write (o.start_quote ()); `quote
     | s ->
         t.error (Error.mk t.loc `error (`unknown_command  s));
         `unknown (s, args)
@@ -319,6 +323,7 @@ let stop_command t location = (
         | Some tab -> Commands.Table.cell_stop ~loc:t.loc ~error:t.error tab
         end;
     | `note -> t.write (o.stop_note ())
+    | `quote -> t.write (o.stop_quote ())
     | `cmd_inside c ->
         t.error (Error.mk t.loc `error `closing_brace_matching_begin);
     | `unknown c -> () (* Already "t.error-ed" in start_environment *)

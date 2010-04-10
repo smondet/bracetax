@@ -160,5 +160,8 @@ let create () =
     start_note = (fun () -> "");
     stop_note = (fun () -> "");
 
+    start_quote = (fun () -> "");
+    stop_quote = (fun () -> "");
+
   }
 

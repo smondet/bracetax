@@ -390,6 +390,9 @@ let start_environment ?(is_begin=false) t location name args =
         | s when C.is_table s -> table_start t args
         | s when C.is_cell s -> cell_start t args
         | s when C.is_note s -> note_start t
+        | s when C.is_quote s ->
+            t.write (~% "<blockquote%s>" (AddClass.attribute t.class_hook "quote"));
+            `quote
         | s ->
             t.error (Error.mk t.loc `error (`unknown_command  s));
             `unknown (s, args)
@@ -482,6 +485,7 @@ let stop_command t location =
     | `table _ -> table_stop t
     | `cell _ as c -> cell_stop t c
     | `note -> t.write (note_stop t)
+    | `quote ->  t.write "</blockquote>"
     | `cmd_inside c ->
         t.error (Error.mk t.loc `error `closing_brace_matching_begin);
     | `unknown c -> () (* Already "t.error-ed" in start_environment *)

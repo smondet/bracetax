@@ -139,6 +139,7 @@ module Stack = struct
   | `table of int * string option
   | `cell of bool * int * [`right | `center | `left]
   | `note
+  | `quote
   ]
 
   type t = environment list ref
@@ -238,6 +239,7 @@ module Names = struct
     
   let is_note = (=) "note"
     
+  let is_quote = (=) "quote"
 end
 
 (** Transforms some commands to their {!type:Stack.environment} counter part. Returns 
@@ -298,6 +300,7 @@ let rec env_to_string (e:Stack.environment) =
   | `table _                   ->     "table"
   | `cell _                    ->     "cell"
   | `note                      ->     "note"
+  | `quote                     ->     "quote"
 
 (** Module to build tables. *)
 module Table = struct
