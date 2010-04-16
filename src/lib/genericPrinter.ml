@@ -85,6 +85,8 @@ type output_t = {
   new_line : string_fun;
   non_break_space : string_fun;
   horizontal_ellipsis : string_fun;
+  en_dash : string_fun;
+  em_dash : string_fun;
   open_brace : string_fun;
   close_brace : string_fun;
   sharp : string_fun;
@@ -270,6 +272,8 @@ let stop_command t location = (
     | `new_line -> t.write (o.new_line ())
     | `non_break_space -> t.write (o.non_break_space ())
     | `horizontal_ellipsis -> t.write (o.horizontal_ellipsis ())
+    | `en_dash -> t.write (o.en_dash ())
+    | `em_dash -> t.write (o.em_dash ())
     | `open_brace -> t.write (o.open_brace ())
     | `close_brace -> t.write (o.close_brace ())
     | `sharp -> t.write (o.sharp ())

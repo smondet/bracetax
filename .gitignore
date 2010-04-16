@@ -8,6 +8,7 @@
 _build/*
 gendoc/*
 doc/site/*
+ref_lib_doc/*
 _test_results/*
 _log
 brtx
