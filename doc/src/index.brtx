@@ -17,13 +17,16 @@ The {b|Bracetax} Project is:
     library;
     {*} {i|tools}: a few small tools related to the syntax (VIM syntax
     highlighting{~}{...}).
-}
+} {p}
+
+The code is available under a permissive MIT license.
 
 {section|Download}
 
-For now, you can get a snapshot of the sources from the
+You can get a snapshot ({t|.tar.gz} or {t|.zip}) of the sources from the
 {link http://git.berlios.de/cgi-bin/gitweb.cgi?p=bracetax;a=summary|gitweb interface}
-(the head of the master branch is considered always the most up-to-date version),
+(the head of the {t|master} branch will always be considered as
+the most up-to-date {i|usable/stable} version),
 binaries will become available if there is enough demand.
 
 
