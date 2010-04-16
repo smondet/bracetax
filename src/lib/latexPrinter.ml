@@ -531,6 +531,8 @@ let stop_command t location =
     | `new_line -> t.write "\\\\{}\n"
     | `non_break_space -> t.write "~"
     | `horizontal_ellipsis -> t.write "\\ldots{}"
+    | `en_dash -> t.write "--"
+    | `em_dash -> t.write "---"
     | `open_brace -> t.write "\\{"
     | `close_brace -> t.write "\\}"
     | `sharp -> t.write "\\#{}"

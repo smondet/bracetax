@@ -135,6 +135,9 @@ let create () =
     new_line  = store_opt me "{br}";
     non_break_space  = store_opt me "{~}";
     horizontal_ellipsis  = store_opt me "{...}";
+    en_dash = store_opt me "{--}";
+    em_dash = store_opt me "{---}";
+
     open_brace  = store_opt me "{{}";
     close_brace  = store_opt me "{}}";
     sharp  = store_opt me "{#}";

@@ -448,6 +448,8 @@ let stop_command t location =
         t.write (~% "<br%s/>\n" (AddClass.attribute t.class_hook "br"))
     | `non_break_space -> t.write "&nbsp;"
     | `horizontal_ellipsis -> t.write "&hellip;"
+    | `en_dash -> t.write "&ndash;"
+    | `em_dash -> t.write "&mdash;"
     | `open_brace -> t.write "{"
     | `close_brace -> t.write "}"
     | `sharp -> t.write "#"
