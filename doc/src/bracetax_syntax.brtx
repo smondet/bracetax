@@ -69,10 +69,46 @@ Text # Comments...
 Example:
 {code e}
 Those are {{}, {}}, {#}, Unbreakable->{~}<-space,
-horizontal{...}ellipsis and {utf 0x42}, {utf 339}.
+horizontal{...}ellipsis, dashes: en{--}em{---}, and {utf 0x42}, {utf 339}.
 {e}
 Those are {{}, {}}, {#}, Unbreakable->{~}<-space,
-horizontal{...}ellipsis and {utf 0x42}, {utf 339}.
+horizontal{...}ellipsis, dashes: en{--}em{---}, and {utf 0x42}, {utf 339}. {p}
+
+Here are actually all the commands available for special characters:
+{begin table 2}
+Bracetax's character{--}commands.
+{c h|Command} {c h|Character}
+{c|{t|{text}{{}{end}}} {c|{i|Left brace: '{{}'}}
+{c|{t|{text}{}}{end}}} {c|{i|Right brace: '{}}'}}
+{c|{t|{text}{#}{end}}} {c|{i|Sharp: '{#}'}}
+{c|{t|{text}{~}{end}}} {c|{i|Unbreakable space: '{~}'}}
+{c|{t|{text}{...}{end}}} {c|{i|Horizontal ellipsis: '{...}'}}
+{c|{t|{text}{--}{end}}} {c|{i|The en-dash: '{--}'}}
+{c|{t|{text}{---}{end}}} {c|{i|The em-dash: '{---}'}}
+{c|{t|{text}{utf <int>}{end}}} {c|{i|Any UTF char as integer.}}
+{end}
+ {p}
+
+Notes:
+{list|
+{*} In LaTeX, {t|{text}{utf <int>}{end}} depends on the
+{t|{text}\unichar{...}{end}} command which is far from complete.
+{*} There are many different typographical dashes. Bracetax provides
+the two most used (together with the standard hyphen-minus which is on
+every keyboard: '-').
+See
+{link http://en.wikipedia.org/wiki/Dash
+|wikipedia:Dash},
+{link http://en.wikipedia.org/wiki/Hyphen
+|wikipedia:Hyphen},
+{link http://en.wikipedia.org/wiki/Quotation_mark,_non-English_usage#Quotation_dash
+|wikipedia:Quotation_dash}.
+
+
+}
+
+
+
 
 {section 2|Header}
 
