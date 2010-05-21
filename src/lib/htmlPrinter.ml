@@ -543,7 +543,7 @@ let terminate t location =
     let l = List.map Commands.env_to_string (CS.to_list t.stack) in
     t.error (Error.mk t.loc `error (`terminating_with_open_environments l));
   );  
-  t.write "</div>\n";
+  t.write (if t.started_text then "</div>\n" else "");
   () 
 
 
