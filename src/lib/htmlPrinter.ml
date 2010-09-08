@@ -296,7 +296,7 @@ let print_table t table =
         write_cells tl next_row next_col
   in
   write_cells (List.rev table.CT.cells) 0 0;
-  write "</tr></table></div>\n"
+  write "</table></div>\n"
 
 
 let table_stop t =
