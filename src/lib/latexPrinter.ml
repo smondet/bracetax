@@ -79,18 +79,19 @@ let sanitize_comments line = line
 
 let sanitize_text line =
   let patterns = [
-    ('$' , "\\${}" );
+    ('$' , "{\\char`$}" );
     ('-' , "-{}" );
     ('&' , "\\&\\linebreak[0]" );
     ('%' , "\\%{}" );
     ('#' , "\\#{}" );
-    ('{' , "\\{" );
-    ('}' , "\\}" );
+    ('{' , "{\\char`{}" );
+    ('}' , "{\\char`}}" );
     ('/' , "\\slash{}\\linebreak[0]" );
     ('_' , "\\_{}" );
-    ('\\', "\\textbackslash{}" );
-    ('^' , "\\textasciicircum{}" );
-    ('~' , "\\textasciitilde{}" );
+    ('\\', "{\\char`\\\\}" );
+    ('^' , "{\\char`^}" );
+    ('~' , "{\\char`~}" );
+    ('`' , "{\\char``}" );
   ] in
   Escape.replace_chars ~src:line ~patterns
 
