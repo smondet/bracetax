@@ -403,8 +403,8 @@ let start_subsup t supsub =
   in
   t.write (~% "$%c{\\textnormal{\\footnotesize{}%s%s"
              discriminating_char
-             (if inside_italic then "\\it{}" else "")
-             (if inside_bold then "\\bf{}" else "")
+             (if inside_italic then "\\itshape{}" else "")
+             (if inside_bold then "\\bfseries{}" else "")
           );
   supsub
 
@@ -451,8 +451,8 @@ let start_environment ?(is_begin=false) t location name args =
         let op, clo = quotation_open_close t args in
         t.write op;
         `quotation (op, clo)
-    | s when C.is_italic s      -> t.write "{\\it{}"  ; `italic
-    | s when C.is_bold s        -> t.write "{\\bf{}"  ; `bold
+    | s when C.is_italic s      -> t.write "{\\itshape{}"  ; `italic
+    | s when C.is_bold s        -> t.write "{\\bfseries{}"  ; `bold
     | s when C.is_mono_space s  -> t.write "\\texttt{" ; `mono_space
     | s when C.is_superscript s -> start_subsup t `superscript
     | s when C.is_subscript s   -> start_subsup t `subscript
