@@ -40,6 +40,7 @@ type t = {
   opt_href_footnote: bool;
   url_hook: string -> string;
   img_hook: string -> string;
+  opt_table_caption_after: bool;
   separate_header: (string * string * string) ref option;
 }
 
@@ -50,7 +51,7 @@ let p = print_string
 
 let create
     ~writer ?(href_is_footnote=false) ?separate_header ?(img_hook=fun s -> s)
-    ?(url_hook=fun s -> s) () =  
+    ?(url_hook=fun s -> s) ?(table_caption_after=true) () =  
   let module S = Signatures in
   let write = writer.S.w_write in
   {
@@ -64,6 +65,7 @@ let create
     opt_href_footnote = href_is_footnote;
     url_hook = url_hook;
     img_hook = img_hook;
+    opt_table_caption_after = table_caption_after;
     separate_header = separate_header;
   }
 
@@ -267,8 +269,9 @@ let table_start t args =
   t.write <- new_write;
   to_stack
 
-let print_table write table =
+let print_table t table =
   let module CT = Commands.Table in
+  let write = t.write in
   let lbl_str =
     match table.CT.label with
     | None -> ""
@@ -281,11 +284,14 @@ let print_table write table =
     in
     "|" ^ (String.concat "|" (make [] table.CT.col_nb)) ^ "|"
   in
+  let caption_str =
+    (~% "\\caption{%s%s}\n" (Buffer.contents table.CT.caption) lbl_str) in
   write (~% "\n\
         \\begin{table}[htcb]\n\
+        \  %s\
         \  \\begin{center}\n\
         \    \\begin{tabular}{%s}\n\
-        \    \\hline " table_format
+        \    \\hline " (if not t.opt_table_caption_after then caption_str else "") table_format
         );
   let nb_rows, nb_cols, matrix = 
     CT.Util.cells_to_matrix table in
@@ -352,8 +358,9 @@ let print_table write table =
   write (~% "\n\
         \  \\end{tabular}\n\
         \  \\end{center}\n\
-        \  \\caption{%s%s}\n\
-        \\end{table}\n" (Buffer.contents table.CT.caption) lbl_str);
+        \  %s\
+        \\end{table}\n" 
+            (if t.opt_table_caption_after then caption_str else ""));
   ()
 
 let table_stop t =
@@ -363,7 +370,7 @@ let table_stop t =
       (* p (~% "End of table: %s\n" (Buffer.contents tab.caption)); *)
       t.write <- Stack.pop t.write_mem;
       t.current_table <- None;
-      print_table t.write tab;
+      print_table t tab;
   end
 
 let cell_start t args =
@@ -627,11 +634,11 @@ let stop_raw_mode t location =
 optional arguments have the same meaning than for
 {!val:Transform.brtx_to_latex}. *)
 let build
-    ?(print_comments=false) ?separate_header 
+    ?(print_comments=false) ?separate_header ?table_caption_after
     ?img_hook ?url_hook ?href_is_footnote ~writer () =
   let t =
     create ~writer ?href_is_footnote
-      ?separate_header ?img_hook ?url_hook () in
+      ?separate_header ?img_hook ?url_hook ?table_caption_after () in
   let printer = {
     Signatures.
       print_comment =

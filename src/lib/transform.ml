@@ -108,7 +108,7 @@ let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
 *)
 let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
     ?(print_comments=false) ?(href_is_footnote=false) ?img_hook ?url_hook
-    ?separate_header
+    ?separate_header ?table_caption_after
     ?(filename="<IN>") ~input_char () = 
 
   if doc then (
@@ -117,8 +117,8 @@ let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
                       ?stylesheet_link:use_package ());
   );
   let printer =
-    LatexPrinter.build ~writer ~print_comments ~href_is_footnote
-      ?separate_header ?img_hook ?url_hook () in
+    LatexPrinter.build ~writer ~print_comments ~href_is_footnote 
+      ?table_caption_after ?separate_header ?img_hook ?url_hook () in
 
   Parser.do_transformation ~deny_bypass printer input_char filename;
 
@@ -192,6 +192,7 @@ let str_to_html ?(doc=false) ?title ?css_link ?(print_comments=false)
 together with a list of {!type:Error.error}s. *)
 let str_to_latex  ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
     ?(print_comments=false) ?(href_is_footnote=false) ?img_hook ?url_hook
+    ?table_caption_after
     ?separate_header ?(filename="<IN>") in_str = 
   let errors = ref [] in
   let error = fun e -> errors := e :: !errors in
@@ -210,7 +211,7 @@ let str_to_latex  ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
   
   let printer =
     LatexPrinter.build
-      ~writer ~print_comments ~href_is_footnote
+      ~writer ~print_comments ~href_is_footnote ?table_caption_after
       ?separate_header ?img_hook ?url_hook () in
   Parser.do_transformation ~deny_bypass printer input_char filename;
   

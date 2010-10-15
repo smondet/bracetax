@@ -77,8 +77,8 @@ module CommandLine = struct
             io_common * html_latex_common * string option * string option
                 (* inout, com, css, csshook *)
         | `Brtx2Latex of
-            io_common * html_latex_common * string option * bool
-                (* inout, com, package, href_is_footnote *)
+            io_common * html_latex_common * string option * bool * bool
+                (* inout, com, package, href_is_footnote, table_caption_after *)
         | `GetTOC of io_common
     ]
     let parse () : todo = (
@@ -95,6 +95,7 @@ module CommandLine = struct
         let todo = ref `html in
         let warn_error = ref true in
         let ignore_header = ref false in
+        let table_caption_after = ref true in
 
         let options = Arg.align [
             ("-version", Arg.Unit (fun () -> todo := `version),
@@ -149,6 +150,10 @@ module CommandLine = struct
             ("-warn-error",
                 Arg.Unit (fun () -> warn_error := true),
                 " Treat warnings as errors (default, return 2 to shell)");
+            ("-table-caption-before",
+             Arg.Unit (fun () -> table_caption_after := false),
+             " In LaTeX output, put the captions before the tables \
+             \ (like LNCS, IEEE, ...)");
         ] in
         let short_usage =
             ~% "usage: %s [-i file] [-o file] [-help]" Sys.argv.(0) in
@@ -175,7 +180,7 @@ module CommandLine = struct
                     print_comments = !print_comments;
                     deny_bypass = !deny_bypass;
                     ignore_header = !ignore_header},
-                !ltx_package, !href_is_footnote)
+                !ltx_package, !href_is_footnote, !table_caption_after)
         | `toc ->
             `GetTOC (
                 {in_out = {file_in = !f_in; file_out = !f_out};
@@ -218,7 +223,7 @@ let () = (
         Bracetax.Transform.brtx_to_html ~writer ~doc ?title ?css_link
             ?separate_header
             ~deny_bypass ~print_comments ~input_char ~filename ?class_hook ();
-    | `Brtx2Latex (io, common, use_package, href_is_footnote) ->
+    | `Brtx2Latex (io, common, use_package, href_is_footnote, table_caption_after) ->
         let input_char, filename, write = meta_open_inout io.CL.in_out in
         warn_error := io.CL.warn_error;
         let {CommandLine.doc = doc; title = title;
@@ -229,7 +234,7 @@ let () = (
         let separate_header = 
             if ignore_header then Some (ref ("", "", "")) else None in
         Bracetax.Transform.brtx_to_latex ~writer ~doc ?title ?use_package 
-            ?separate_header
+            ?separate_header ~table_caption_after
             ~href_is_footnote
             ~print_comments ~input_char ~filename ~deny_bypass ();
     | `GetTOC io ->
