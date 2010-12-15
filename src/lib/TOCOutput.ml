@@ -34,6 +34,7 @@ type inside = {
   mutable current: (int * string option) option;
   title_buffer: Buffer.t;
   mutable sections: (int * string option * string) list;
+  make_links: [ `never | `when_labeled | `always ];
 }
 
 let store_opt me str () =
@@ -61,10 +62,24 @@ let stop_section me level label =
   ""
 
 let termination me () =
+  let clean_string dont_touch =
+    let s = String.copy dont_touch in
+    for i = 0 to String.length s - 1 do
+      s.[i] <-
+        match s.[i] with
+        | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' -> s.[i]
+        | c -> '_';
+    done;
+    s
+  in
   let string_of_section label title =
-    match label with
-    | None -> title
-    | Some link -> spr "{link local:%s|%s}" link title in
+    match me.make_links, label with
+    | `never, _ -> title
+    | `when_labeled, None -> title
+    | `when_labeled, Some link -> spr "{link local:%s|%s}" link title 
+    | `always, None -> spr "{link local:%s|%s}" (clean_string title) title
+    | `always, Some link -> spr "{link local:%s|%s}" link title
+  in
   let spaces_of_level level = String.make (level * 2) ' ' in
   let adjust_level_before curlv lv =
     let res = ref "" in
@@ -91,10 +106,12 @@ let termination me () =
 
 (**/**)
 
-(** Creation of the {!type:GenericPrinter.output_t}. *)
-let create () =
+(** Creation of the {!type:GenericPrinter.output_t}. The default
+[~make_links] behaviour is [`when_labeled]. *)
+let create ?(make_links=`when_labeled) () =
   let me = 
-    { current = None; title_buffer = Buffer.create 42; sections = [] } in
+    { current = None; title_buffer = Buffer.create 42;
+      sections = []; make_links = make_links } in
   {
     GenericPrinter.
 

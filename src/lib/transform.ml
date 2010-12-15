@@ -127,8 +127,8 @@ let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
 
 (** Retrieve a table of contents from a {i Bracetax} input. The TOC is
     itself in {i Bracetax}; it is a set of lists with links. *)
-let get_TOC ~writer ?(filename="<IN>") ~input_char () =
-  let output_funs = TOCOutput.create () in
+let get_TOC ~writer ?(filename="<IN>") ?make_links ~input_char () =
+  let output_funs = TOCOutput.create ?make_links () in
   let printer = GenericPrinter.build ~writer ~output_funs () in
   Parser.do_transformation printer input_char filename;
   ()
@@ -224,7 +224,7 @@ let str_to_latex  ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
 {!val:get_TOC}, to get the table of contents from a [string]
 into another [string]
 together with a list of {!type:Error.error}s. *)
-let str_to_TOC ?(filename="<IN>") in_str =
+let str_to_TOC ?make_links ?(filename="<IN>") in_str =
   let errors = ref [] in
   let error = fun e -> errors := e :: !errors in
   let out_buf = Buffer.create 42 in
@@ -233,7 +233,7 @@ let str_to_TOC ?(filename="<IN>") in_str =
     let cpt = ref (-1) in
     (fun () -> try Some (incr cpt; in_str.[!cpt]) with e -> None) in
   let writer = Signatures.make_writer ~write  ~error in
-  let output_funs = TOCOutput.create () in
+  let output_funs = TOCOutput.create ?make_links () in
   let printer = GenericPrinter.build ~writer ~output_funs () in
   Parser.do_transformation printer input_char filename;
   (Buffer.contents out_buf, List.rev !errors)
