@@ -35,6 +35,8 @@ type inside = {
   title_buffer: Buffer.t;
   mutable sections: (int * string option * string) list;
   make_links: [ `never | `when_labeled | `always ];
+  list_type: [ `enum | `item ];
+  numbering: [ `none | `integers ];
 }
 
 let store_opt me str () =
@@ -62,6 +64,7 @@ let stop_section me level label =
   ""
 
 let termination me () =
+  let counters_array = Array.make 5 0 in
   let clean_string dont_touch =
     let s = String.copy dont_touch in
     for i = 0 to String.length s - 1 do
@@ -72,19 +75,25 @@ let termination me () =
     done;
     s
   in
-  let string_of_section label title =
+  let string_of_section section_number label title =
     match me.make_links, label with
     | `never, _ -> title
     | `when_labeled, None -> title
     | `when_labeled, Some link -> spr "{link local:%s|%s}" link title 
-    | `always, None -> spr "{link local:%s|%s}" (clean_string title) title
+    | `always, None ->
+      spr "{link local:%s_%s|%s}" 
+        section_number (clean_string title) title
     | `always, Some link -> spr "{link local:%s|%s}" link title
   in
   let spaces_of_level level = String.make (level * 2) ' ' in
   let adjust_level_before curlv lv =
+    let list_type_str = 
+      match me.list_type with
+      | `enum -> " enum"
+      | `item -> "" in
     let res = ref "" in
     for i = curlv to lv - 1 do
-      res := !res ^ (spr "%s{list enum|\n" (spaces_of_level i));
+      res := !res ^ (spr "%s{list%s|\n" (spaces_of_level i) list_type_str);
     done;
     !res in
   let adjust_level_after curlv lv =
@@ -94,24 +103,42 @@ let termination me () =
   let rec transform_list current_level acc = function
     | [] -> (String.make current_level '}') :: acc
     | (level, label, title) :: t ->
-        let str =
-          spr "%s%s%s{*} %s\n"
-            (adjust_level_before current_level level)
-            (adjust_level_after current_level level)
-            (spaces_of_level level) (string_of_section label title)
-        in
-        transform_list level (str :: acc) t
+      let section_number =
+        let s = ref "" in
+        counters_array.(level - 1) <- counters_array.(level - 1) + 1;
+        for i = 0 to level - 1 do
+          s := !s ^ (Printf.sprintf "%d." counters_array.(i));
+        done;
+        for i = level to 4 do
+          counters_array.(i) <- 0;
+        done;
+        !s
+      in 
+      let numbering = 
+        match me.numbering with
+        | `none -> ""
+        | `integers -> section_number in
+      let str =
+        spr "%s%s%s{*} %s %s\n"
+          (adjust_level_before current_level level)
+          (adjust_level_after current_level level)
+          (spaces_of_level level) numbering 
+          (string_of_section section_number label title)
+      in
+      transform_list level (str :: acc) t
   in
   (String.concat "" (List.rev (transform_list 0 [] (List.rev me.sections))))
 
 (**/**)
 
 (** Creation of the {!type:GenericPrinter.output_t}. The default
-[~make_links] behaviour is [`when_labeled]. *)
-let create ?(make_links=`when_labeled) () =
+    [~make_links] behaviour is [`when_labeled]. *)
+let create
+    ?(make_links=`when_labeled) ?(list_type=`enum) ?(numbering=`none) () =
   let me = 
     { current = None; title_buffer = Buffer.create 42;
-      sections = []; make_links = make_links } in
+      sections = []; make_links = make_links;
+      list_type = list_type; numbering = numbering } in
   {
     GenericPrinter.
 
