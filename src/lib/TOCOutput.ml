@@ -65,24 +65,14 @@ let stop_section me level label =
 
 let termination me () =
   let counters_array = Array.make 5 0 in
-  let clean_string dont_touch =
-    let s = String.copy dont_touch in
-    for i = 0 to String.length s - 1 do
-      s.[i] <-
-        match s.[i] with
-        | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' -> s.[i]
-        | c -> '_';
-    done;
-    s
-  in
   let string_of_section section_number label title =
     match me.make_links, label with
     | `never, _ -> title
     | `when_labeled, None -> title
     | `when_labeled, Some link -> spr "{link local:%s|%s}" link title 
     | `always, None ->
-      spr "{link local:%s_%s|%s}" 
-        section_number (clean_string title) title
+      spr "{link local:%s|%s}" 
+        (Escape.clean_string title) title
     | `always, Some link -> spr "{link local:%s|%s}" link title
   in
   let spaces_of_level level = String.make (level * 2) ' ' in

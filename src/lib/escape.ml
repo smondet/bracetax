@@ -93,6 +93,16 @@ let is_white_space str =
   with 
     Exit -> false
 
+(** Cleans a string to use only A-Z, a-z, 0-9, _ characters. *)
+let clean_string dont_touch =
+  let s = String.copy dont_touch in
+  for i = 0 to String.length s - 1 do
+    s.[i] <-
+      match s.[i] with
+      | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' -> s.[i]
+      | c -> '_';
+  done;
+  s
 
 
 
