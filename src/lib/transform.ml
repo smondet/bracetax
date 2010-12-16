@@ -73,7 +73,8 @@ let opt_may ~f = function None -> () | Some o -> f o
     [\{code\}] (Default: [false]).
 
 *)
-let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
+let brtx_to_html ~writer 
+    ?make_section_links ?(doc=false) ?title ?css_link ?(print_comments=false)
     ?(filename="<IN>") ?class_hook ?img_hook ?url_hook ~input_char
     ?separate_header ?(deny_bypass=false) () = 
 
@@ -83,7 +84,8 @@ let brtx_to_html ~writer ?(doc=false) ?title ?css_link ?(print_comments=false)
                       ?stylesheet_link:css_link ());
   );
   let printer =
-    HtmlPrinter.build ?class_hook ?img_hook ?url_hook ?separate_header
+    HtmlPrinter.build 
+      ?make_section_links ?class_hook ?img_hook ?url_hook ?separate_header
       ~writer ~print_comments () in
 
   Parser.do_transformation ~deny_bypass printer input_char filename;
@@ -159,7 +161,8 @@ let string_io in_string out_buf err_buf =
 (** This function is a convenience replacement for {!val:brtx_to_html},
 to transform a [string]
 into another [string] together with a list of {!type:Error.error}s. *)
-let str_to_html ?(doc=false) ?title ?css_link ?(print_comments=false)
+let str_to_html
+    ?make_section_links ?(doc=false) ?title ?css_link ?(print_comments=false)
     ?(filename="<IN>") ?class_hook ?img_hook ?url_hook
     ?separate_header ?(deny_bypass=false) in_str = 
 
@@ -179,6 +182,7 @@ let str_to_html ?(doc=false) ?title ?css_link ?(print_comments=false)
   );
   let printer =
     HtmlPrinter.build ?class_hook ?img_hook ?url_hook ?separate_header
+      ?make_section_links
       ~writer ~print_comments () in
   Parser.do_transformation ~deny_bypass printer input_char filename;
   

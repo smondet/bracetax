@@ -36,12 +36,14 @@ type t = {
   mutable started_text: bool;
   mutable inside_header:bool;
   mutable current_table: Commands.Table.table option;
+  mutable current_section: (int * string * Buffer.t) option;
   error: Error.error -> unit;
   mutable loc: Error.location;
   class_hook: string option;
   url_hook: string -> string;
   img_hook: string -> string;
   separate_header: (string * string * string) ref option;
+  make_section_links: [ `never | `when_labeled | `always ];
 }
 
 module CS = Commands.Stack
@@ -62,7 +64,8 @@ module AddClass = struct
 end
 
 let create
-    ~writer ?class_hook ?separate_header 
+    ~writer ?class_hook ?separate_header
+    ?(make_section_links=`when_labeled)
     ?(img_hook=fun s -> s) ?(url_hook=fun s -> s) () =
   let module S = Signatures in
   let write = writer.S.w_write in
@@ -74,12 +77,14 @@ let create
     started_text = false;
     inside_header = false;
     current_table = None;
+    current_section = None;
     error = writer.S.w_error;
     loc = {Error.l_line = -1; l_char = -1; l_file = "NO FILE";};
     class_hook = class_hook;
     url_hook = url_hook;
     img_hook = img_hook;
     separate_header = separate_header;
+    make_section_links = make_section_links;
   }
     
 
@@ -135,15 +140,36 @@ let list_stop t =
   function `itemize -> "</li>\n</ul>\n" | `numbered -> "</li>\n</ol>\n"
 
 let section_start t n l =
-  let lsan =
-    match sanitize_xml_attribute l with
-    | "" -> "" | s -> ~% " id=\"%s\"" s
-  in
-  let tag = ~% "h%d" (n + 1) in
-  ~% "</div>\n<%s%s%s>" tag lsan (AddClass.attribute t.class_hook tag)
+  let buf = Buffer.create 42 in
+  match t.current_section with
+  | Some _ ->
+    failwith "Nested Sections not allowed"
+  | None ->
+    t.current_section <- Some (n, l, buf);
+    Stack.push t.write t.write_mem;
+    t.write <- Buffer.add_string buf;
+    "</div>\n"
 
 let section_stop t n l =
-  ~% "</h%d>\n<div class=\"p%s\">" (n + 1) (AddClass.name t.class_hook "p")
+  begin match t.current_section with
+  | None -> failwith "fatal error: section_stop with no section_start"
+  | Some (n, l, buf) ->
+    let lsan =
+      match t.make_section_links, sanitize_xml_attribute l with
+      | `never, _ -> ""
+      | `when_labeled, "" -> "" 
+      | `when_labeled, s -> ~% " id=\"%s\"" s
+      | `always, "" -> ~% " id=\"%s\"" (Escape.clean_string (Buffer.contents buf))
+      | `always, s  -> ~% " id=\"%s\"" s
+    in
+    t.write <- Stack.pop t.write_mem;
+    t.current_section <- None;
+    let tag = ~% "h%d" (n + 1) in
+    ~% "<%s%s%s>%s</%s>\n<div class=\"p%s\">"
+      tag lsan (AddClass.attribute t.class_hook tag)
+      (Buffer.contents buf)
+      tag (AddClass.name t.class_hook "p")
+  end
 
 let link_start t args =
   let link, new_write = Commands.Link.start ~url_hook:t.url_hook args in
@@ -478,7 +504,8 @@ let stop_command t location =
             t.error (Error.mk t.loc `error `item_out_of_list);
         end
     | `section (level, label) ->
-        t.write (section_stop t level label);
+      let section = (section_stop t level label) in
+      t.write section;
     | `link l -> link_stop t l;
     | `image _ -> t.write image_stop;
     | `header ->  (header_stop t);
@@ -597,9 +624,11 @@ let stop_raw_mode t location =
 optional arguments have the same meaning than for
 {!val:Transform.brtx_to_html}. *)
 let build ?(print_comments=false)
+    ?make_section_links
     ?separate_header ?img_hook ?url_hook ?class_hook ~writer () =
   let t =
-    create ~writer ?class_hook ?separate_header ?img_hook ?url_hook () in
+    create ~writer ?make_section_links
+      ?class_hook ?separate_header ?img_hook ?url_hook () in
   { Signatures.
       print_comment =
       if print_comments then 
