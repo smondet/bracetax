@@ -147,8 +147,9 @@ let section_start t n l =
   | None ->
     t.current_section <- Some (n, l, buf);
     Stack.push t.write t.write_mem;
+    t.write "</div>\n";
     t.write <- Buffer.add_string buf;
-    "</div>\n"
+    ()
 
 let section_stop t n l =
   begin match t.current_section with
@@ -409,7 +410,7 @@ let start_environment ?(is_begin=false) t location name args =
         | s when C.is_item s -> `item
         | s when C.is_section s -> 
             let level, label = C.section_params args in
-            t.write (section_start t level label);
+            section_start t level label;
             `section (level, label)
         | s when C.is_link s -> (link_start t args)
         | s when C.is_image s -> image_start t args
