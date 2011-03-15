@@ -595,7 +595,8 @@ let start_raw_mode t location kind_str args =
   | `code ->
       CS.push t.stack (`code args);
       begin match args with
-      | q :: _ -> t.write (~% "%%\n%%verbatimbegin:%s\n\\begin{verbatim}" q)
+      | _ :: q :: _ -> 
+        t.write (~% "%%\n%%verbatimbegin:%s\n\\begin{verbatim}" q)
       | _ -> t.write "%\n\\begin{verbatim}";
       end;
   | `bypass | `text | `ignore as env_kind ->
@@ -620,7 +621,7 @@ let stop_raw_mode t location =
   | Some (`code args) ->
       t.write "\\end{verbatim}";
       begin match args with
-      | q :: _ -> t.write (~% "\n%%verbatimend:%s\n" q)
+      | _ :: q :: _ -> t.write (~% "\n%%verbatimend:%s\n" q)
       | _ -> ()
       end;
   | Some `bypass | Some `text | Some `ignore -> ()

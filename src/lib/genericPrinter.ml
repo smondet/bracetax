@@ -387,14 +387,14 @@ let start_raw_mode t location kind_str args =
   let kind = Commands.Raw.raw_cmd_of_str kind_str in
   begin match kind with
   | `code ->
-      CS.push t.stack (`code args);
-      begin match args with
-      | q :: _ -> t.write (t.output.start_raw kind (Some q))
-      | _ -> t.write (t.output.start_raw kind None);
-      end;
+    CS.push t.stack (`code args);
+    begin match args with
+    | _ :: q :: _ -> t.write (t.output.start_raw kind (Some q))
+    | _ -> t.write (t.output.start_raw kind None);
+    end;
   | `bypass | `text | `ignore as env_kind->
-      CS.push t.stack (env_kind :> Commands.Stack.environment);
-      t.write (t.output.start_raw kind None);
+    CS.push t.stack (env_kind :> Commands.Stack.environment);
+    t.write (t.output.start_raw kind None);
   end
 
 let handle_raw_text t location text =
@@ -413,10 +413,10 @@ let stop_raw_mode t location =
   t.loc <- location;
   begin match CS.pop t.stack with
   | Some (`code args) ->
-      begin match args with
-      | q :: _ -> t.write (t.output.stop_raw `code (Some q))
-      | _ -> t.write (t.output.stop_raw `code None)
-      end;
+    begin match args with
+    | _ :: q :: _ -> t.write (t.output.stop_raw `code (Some q))
+    | _ -> t.write (t.output.stop_raw `code None)
+    end;
   | Some `bypass -> t.write (t.output.stop_raw `bypass None)
   | Some `text   -> t.write (t.output.stop_raw `text None)
   | Some `ignore -> t.write (t.output.stop_raw `ignore None)

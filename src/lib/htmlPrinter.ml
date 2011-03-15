@@ -582,8 +582,8 @@ let start_raw_mode t location kind_str args =
   | `code ->
       CS.push t.stack (`code args);
       begin match args with
-      | q :: _ ->
-          t.write (~% "\n<!--verbatimbegin:%s -->\n" (sanitize_comments q))
+      | _ :: q :: _ ->
+        t.write (~% "\n<!--verbatimbegin:%s -->\n" (sanitize_comments q))
       | _ -> ()
       end;
       t.write (~% "<pre%s>"  (AddClass.attribute t.class_hook "pre"));
@@ -610,8 +610,8 @@ let stop_raw_mode t location =
   | Some (`code args) ->
       t.write "</pre>";
       begin match args with
-      | q :: _ ->
-          t.write (~% "\n<!--verbatimend:%s -->\n" (sanitize_comments q))
+      | _ :: q :: _ ->
+        t.write (~% "\n<!--verbatimend:%s -->\n" (sanitize_comments q))
       | _ -> ()
       end;
   | Some `bypass | Some `text | Some `ignore -> ()

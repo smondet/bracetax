@@ -146,7 +146,7 @@ and parse_command t location =
                 match tl with
                 | [] -> (t.printer.default_raw_end c,[])
                 | h :: q ->
-                  if check_end_pattern h then (h, q)
+                  if check_end_pattern h then (h, tl)
                   else (
                     err t.printer location (`invalid_end_pattern h);
                     (t.printer.default_raw_end c, [])
