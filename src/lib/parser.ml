@@ -37,7 +37,7 @@ let check_end_pattern pattern =
     String.iter (function
                  | '0' .. '9' | 'a' .. 'z' | 'A' .. 'Z' | '_' | '-' | ':' -> ()
                  | _ -> raise Not_found) pattern;
-    true
+    (pattern <> "")
   with Not_found ->
     false
 
