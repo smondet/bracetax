@@ -31,6 +31,37 @@ let (~%) = Printf.sprintf
 
 (**/**)
 
+(** Standard raw commands *)
+module Raw = struct
+
+  (** The four standard kinds of {i non-parsed} blocs. *)    
+  type t = [ `bypass | `code | `text | `ignore ]
+      
+  let str_of_raw_cmd : t -> string = function
+    | `bypass -> "bypass"
+    | `code -> "code"
+    | `text -> "text"
+    | `ignore -> "ignore"
+      
+  let raw_cmd_of_str: string -> t = function
+    | "bypass"   -> `bypass
+    | "code" -> `code
+    | "ignore" -> `ignore
+    | "text" -> `text
+    | s -> failwith (~% "Bad usage of raw_cmd_of_str: %S" s)
+
+  let is_raw_cmd c =
+    (c = "bypass") || (c = "code") || (c = "ignore") || (c = "text")
+
+
+  let default_raw_end = "end"
+
+end
+
+
+
+
+
 (** Module for handling links. *)
 module Link = struct
 

@@ -45,12 +45,12 @@ type output_t = {
   start_text: string_fun; (** Function called when printing starts. *)
   terminate: string_fun; (** Function called before stopping the printing. *)
 
-  start_raw: Signatures.raw_t -> string option -> string;
+  start_raw: Commands.Raw.t -> string option -> string;
   (** Begin a non-parsed bloc, the [string option] is the optional
       post-processing plugin "identifier". *)
 
-  raw_line: Signatures.raw_t -> transform_string_fun;
-  stop_raw: Signatures.raw_t -> string option -> string;
+  raw_line: Commands.Raw.t -> transform_string_fun;
+  stop_raw: Commands.Raw.t -> string option -> string;
 
   line: transform_string_fun; (** Handle a line of "pure" text. *)
   comment_line: transform_string_fun;
@@ -382,8 +382,9 @@ let terminate t location = (
   t.write (t.output.terminate ());
 ) 
 
-let start_raw_mode t location kind args =
+let start_raw_mode t location kind_str args =
   t.loc <- location;
+  let kind = Commands.Raw.raw_cmd_of_str kind_str in
   begin match kind with
   | `code ->
       CS.push t.stack (`code args);
@@ -442,6 +443,8 @@ let build ?(print_comments=false) ~writer ~output_funs () =
     enter_cmd =     start_command t;
     leave_cmd =     stop_command t;
     terminate =     terminate t;
+    is_raw = Commands.Raw.is_raw_cmd;
+    default_raw_end = Commands.Raw.default_raw_end;
     enter_raw =     start_raw_mode t;
     print_raw =     handle_raw_text t;
     leave_raw =     stop_raw_mode t;

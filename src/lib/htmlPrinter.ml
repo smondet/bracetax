@@ -575,8 +575,9 @@ let terminate t location =
   () 
 
 
-let start_raw_mode t location kind args =
+let start_raw_mode t location kind_str args =
   t.current_line <- location.Error.l_line;
+  let kind = Commands.Raw.raw_cmd_of_str kind_str in
   begin match kind with
   | `code ->
       CS.push t.stack (`code args);
@@ -640,6 +641,8 @@ let build ?(print_comments=false)
     enter_cmd =     start_command t;
     leave_cmd =     stop_command t;
     terminate =     terminate t;
+    is_raw = Commands.Raw.is_raw_cmd;
+    default_raw_end = Commands.Raw.default_raw_end;
     enter_raw =     start_raw_mode t;
     print_raw =     handle_raw_text t;
     leave_raw =     stop_raw_mode t;

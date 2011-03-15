@@ -31,24 +31,7 @@ open Signatures
 
 let (~%) = Printf.sprintf
 
-let str_of_raw_cmd : raw_t -> string = function
-  | `bypass -> "bypass"
-  | `code -> "code"
-  | `text -> "text"
-  | `ignore -> "ignore"
 
-let raw_cmd_of_str: string -> raw_t = function
-  | "bypass"   -> `bypass
-  | "code" -> `code
-  | "ignore" -> `ignore
-  | "text" -> `text
-  | s -> failwith (~% "Bad usage of raw_cmd_of_str: %S" s)
-
-let is_raw_cmd c =
-  (c = "bypass") || (c = "code") || (c = "ignore") || (c = "text")
-
-
-let default_raw_end = "end"
 let check_end_pattern pattern =
   try
     String.iter (function
@@ -160,18 +143,20 @@ and parse_command t location =
           match List.rev !cmd with
           | [] ->
               failwith "Shouldn't be here..."
-          | c :: tl when is_raw_cmd c ->
+          | c :: tl when t.printer.is_raw c ->
               let endpat,args =
-                match tl with [] -> default_raw_end,[]
+                match tl with [] -> t.printer.default_raw_end,[]
                 | h :: q ->
                     if check_end_pattern h then
                       h,q
                     else (
                       err t.printer location (`invalid_end_pattern h);
-                      (default_raw_end, [])
+                      (t.printer.default_raw_end, [])
                     ) in
               let kind = 
-                if t.deny_bypass then `code else raw_cmd_of_str c in
+                if t.deny_bypass then 
+                  if c = "bypass" then "code"  else c
+                else c in
               t.printer.enter_raw location kind args;
               parse_raw t location endpat;
           | q :: tl ->

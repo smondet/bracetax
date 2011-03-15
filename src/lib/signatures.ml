@@ -37,10 +37,6 @@ let make_writer ~write  ~error = {
   w_error = error;
 }
 
-
-type raw_t = [ `bypass | `code | `text | `ignore ]
-    (** The four kinds of {i non-parsed} blocs. *)
-
 type printer = {
   print_comment: Error.location -> string -> unit;
   print_text:    Error.location -> string -> unit;
@@ -48,7 +44,9 @@ type printer = {
   leave_cmd:     Error.location -> unit;
   terminate:     Error.location -> unit;
 
-  enter_raw:     Error.location -> raw_t -> string list -> unit;
+  is_raw: string -> bool;
+  default_raw_end: string;
+  enter_raw:     Error.location -> string -> string list -> unit;
   print_raw:     Error.location -> string -> unit;
   leave_raw:     Error.location -> unit;
   error: Error.error -> unit;
