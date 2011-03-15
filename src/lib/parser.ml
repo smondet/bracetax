@@ -92,13 +92,11 @@ and parse_comment t location =
         let new_loc =
           try 
             Scanf.sscanf comment_line "line %d %S"
-              (fun i s ->
-                 Printf.eprintf "%d %s...\n" i s; (loc i s))
+              (fun i s -> (loc i s))
           with
             _ -> (try
                     Scanf.sscanf comment_line "line %d"
-                      (fun i -> Printf.eprintf "%d same file...\n" i;
-                         mv_loc location i)
+                      (fun i -> mv_loc location i)
                   with _ -> (incr_loc location)) in
         parse_text t new_loc
     | Some given_char ->
