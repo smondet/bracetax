@@ -54,7 +54,7 @@ module Raw = struct
     (c = "bypass") || (c = "code") || (c = "ignore") || (c = "text")
 
 
-  let default_raw_end = "end"
+  let default_raw_end = fun _ -> "end"
 
 end
 

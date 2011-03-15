@@ -45,7 +45,7 @@ type printer = {
   terminate:     Error.location -> unit;
 
   is_raw: string -> bool;
-  default_raw_end: string;
+  default_raw_end: string -> string;
   enter_raw:     Error.location -> string -> string list -> unit;
   print_raw:     Error.location -> string -> unit;
   leave_raw:     Error.location -> unit;

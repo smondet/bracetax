@@ -143,14 +143,14 @@ and parse_command t location =
               failwith "Shouldn't be here..."
           | c :: tl when t.printer.is_raw c ->
               let endpat,args =
-                match tl with [] -> t.printer.default_raw_end,[]
+                match tl with
+                | [] -> (t.printer.default_raw_end c,[])
                 | h :: q ->
-                    if check_end_pattern h then
-                      h,q
-                    else (
-                      err t.printer location (`invalid_end_pattern h);
-                      (t.printer.default_raw_end, [])
-                    ) in
+                  if check_end_pattern h then (h, q)
+                  else (
+                    err t.printer location (`invalid_end_pattern h);
+                    (t.printer.default_raw_end c, [])
+                  ) in
               let kind = 
                 if t.deny_bypass then 
                   if c = "bypass" then "code"  else c
