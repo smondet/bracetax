@@ -111,19 +111,20 @@ echo_help ()
 {
     echo "\
 $0 <cmd>
-b: Build brtx (default action)
-bg: Build brtx with debug symbols
-o: Build brtx with native compilation
-bc: Build brtx without ocamlfind and ocamlbuild (e.g. with ocaml 3.09.x)
-i: Install the ocamlbracetax library with ocamlfind
-ui: Uninstall the library
-t: Do the tests
-d: Build the documentation without building pdfs
+build|b: Build brtx (default action)
+build_debug: Build brtx with debug symbols
+build_opt|o: Build brtx with native compilation
+build_no_obuild: Build brtx without ocamlfind and ocamlbuild
+                 (e.g. with ocaml 3.09.x)
+install_library|il: Install the ocamlbracetax library with ocamlfind
+uninstall_library|uil: Uninstall the library
+tests|t: Run a few tests
+doc: Build the documentation (website with PDFs)
+docnopdf: Build the documentation without the PDFs
 doclib: Build the HTML documentation of the library
-D: Build the whole documentation.
-cd: Clean documentation
-c: Clean
-h: This help"
+docall: Build the whole documentation.
+clean|c: Clean
+-help|--help|help|h: This help"
 }
 
 if [ $# -eq 0 ]; then
@@ -133,20 +134,20 @@ fi
 
 for todo in $* ; do
     case "$todo" in
-        "b" ) build ;;
-        "bg" ) build "debug" ;;
-        "o" ) build "opt";;
-        "bc" ) build_no_ocamlbuild ;;
-        "i" ) install_library ;;
-        "ui" ) ocamlfind remove bracetax ;;
-        "t" ) test/do_tests ;;
-        "d" ) cd doc/ ; make nopdf ; cd .. ;;
-        "doclib" ) document_library ;;
-        "D" ) cd doc/ ; make  ; cd .. ;;
-        "cd" )rm -rf doc/site/ ;;
-        "c" ) ocamlbuild -clean ; rm -rf _test_results/ doc/site/ ;;
-        "h" ) echo_help ;;
-        * ) echo "see \`mk h\`";;
+        build|b ) build ;;
+        build_debug ) build "debug" ;;
+        build_opt|o ) build "opt";;
+        build_no_obuild ) build_no_ocamlbuild ;;
+        install_library|il ) install_library ;;
+        uninstall_library|uil ) ocamlfind remove bracetax ;;
+        tests|t ) test/do_tests ;;
+        doc ) cd doc/ ; make  ; cd ..  ;;
+        docnopdf ) cd doc/ ; make nopdf ; cd .. ;;
+        doclib ) document_library ;;
+        docall|D ) cd doc/ ; make  ; cd .. ; document_library ;;
+        clean|c ) ocamlbuild -clean ; rm -rf _test_results/ doc/site/ ;;
+        -help|--help|help|h ) echo_help ;;
+        * ) echo "Can't understand \`$todo' see \`mk help'";;
     esac
 done
 
