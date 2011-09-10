@@ -1,32 +1,11 @@
+Bracetax 0.2
 
 A simple syntax for wikis and more...
 
 BUILD:
   ./mk
 
-
-DOCUMENTATION:
-Launch the generation (needs brtx and pdflatex in the $PATH):
-  ./mk d
-And open doc/site/index.html
-
 OTHER: See `mk h`
 
 
-
-
-TODO:
-  * build documentation of lib
-  * in Commands, should replace `quotation (open,close) by `quotation style
-  * doc: Update whole documentation...
-
-MAYBE TODO:
-  * ?? an {options ...} command 
-    with default language, etc… also parametrable from command line…
-  * add a hack for figure names  
-    % becomes png for HTML output and pdf for LaTeX output.
-  * use Dynlink for custom printers 
-  * resume ConTeXt output
-  * Pure Text output
-  * add section numbering (for HTML, and also in TOC and for internal links)
 
