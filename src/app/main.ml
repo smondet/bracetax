@@ -107,41 +107,45 @@ module CommandLine = struct
             ("-latex", Arg.Unit (fun () -> todo := `latex),
                 ~% " \n\tOutput LaTeX format");
             ("-toc", Arg.Unit (fun () -> todo := `toc),
-                ~% " \n\tGet the table of contents");
+                ~% " \n\tGet the table of contents (as a Bracetax list)");
             ("-i",
             Arg.String (fun s -> f_in := Some s), 
-                "<file> \n\tinput file (default or \"-\" is standard input)");
+                "<file> \n\tSet input file (default or \"-\" is \
+                 standard input)");
             ("-o",
                 Arg.String (fun s -> f_out := Some s), 
-                "<file> \n\toutput file (default or \"-\" is standard output)");
+                "<file> \n\tSet output file (default or \"-\" is \
+                 standard output)");
             ("-doc",
                 Arg.Unit (fun () -> is_doc := true),
-                " \n\tOutput a complete document");
+                " \n\tOutput a complete document (with header/footer)");
             ("-title",
                 Arg.String (fun s -> title := Some s),
                 "<text> \n\tSet the title of the document ('head.title' for \
                  XHTML,\n\tPDF meta-data for LaTeX), requires -doc");
             ("-link-css",
                 Arg.String (fun s -> link_css := Some s),
-                "<url> \n\tlink to a CSS, requires -html,-doc");
+                "<url> \n\tAdd a link to a CSS, requires -html,-doc");
             ("-css-hook",
                 Arg.String (fun s -> css_hook := Some s),
-                "<text> \n\tadd a class=\"text...\" to all tags, requires -html");
+                "<text> \n\tAdd a class=\"text...\" to all tags, \
+                 requires -html");
             ("-use-package",
                 Arg.String (fun s -> ltx_package := Some s),
-                "<name> \n\tuse a given package, requires -latex,-doc");
+                "<name> \n\tUse a given package, requires -latex,-doc");
             ("-href-footnote",
                 Arg.Unit (fun s -> href_is_footnote := true),
-                " \n\ttreat links as LaTeX footnotes with URLs, requires -latex");
+                " \n\tTreat links as LaTeX footnotes with URLs, \
+                 requires -latex");
             ("-print-comments",
                 Arg.Unit (fun () -> print_comments := true),
-                " \n\tactivate the transmission of brtx comments to the output's \
-                comments\n\t(-html or -latex)");
+                " \n\tActivate the transmission of brtx comments to the \
+                 output's comments\n\t(-html or -latex)");
             ("-deny-bypass",
                 Arg.Unit (fun () -> deny_bypass := true),
-                " \n\ttreat all {bypass} as {code} \
-                (security of interpreted webapps)");
-            (   "-ignore-header",
+                " \n\tTreat all {bypass} as {code} \
+                (security of interpreted web-apps …)");
+            ("-ignore-header",
                 Arg.Unit (fun () -> ignore_header := true),
                 " \n\tDo not process the {header| ... } part");
             ("-no-warn-error",
@@ -153,7 +157,7 @@ module CommandLine = struct
             ("-table-caption-before",
              Arg.Unit (fun () -> table_caption_after := false),
              " \n\tIn LaTeX output, put the captions before the tables\n\t\
-             (like LNCS, IEEE, ...)");
+             (like LNCS, IEEE, …)");
         ] in
         let short_usage =
             ~% "usage: %s [-i file] [-o file] [-help]" Sys.argv.(0) in
