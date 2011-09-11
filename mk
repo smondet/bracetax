@@ -1,64 +1,8 @@
 #! /bin/sh
 
-LIBMODS="
-src/lib/error
-src/lib/signatures
-src/lib/escape
-src/lib/commands
-src/lib/parser
-src/lib/latexPrinter
-src/lib/genericPrinter
-src/lib/htmlPrinter
-src/lib/TOCOutput
-src/lib/transform
-src/lib/info
-"
-
-build ()
-{
-    local APPEXT="byte"
-    local LIBEXT="cma"
-    local CMEXT="cmo"
-    local MKLIB="ocamlc -a"
-    case "$1" in
-        "opt" )
-            APPEXT="native"
-            LIBEXT="cmxa"
-            CMEXT="cmx"
-            MKLIB="ocamlopt -a"
-            ;;
-        "debug" )
-            APPEXT="d.byte"
-            ;;
-    esac
-
-    TAGOPT="-tags pkg_unix"
-    echo "<**/[^B]*.cmx>: for-pack(Bracetax)" > _tags
-    I_OPT="-I src/app -I src/lib"
-    ocamlbuild $I_OPT $TAGOPT -cflags -dtypes src/app/main.$APPEXT
-    $MKLIB -o _build/src/lib/ocamlbracetax.$LIBEXT _build/src/lib/Bracetax.$CMEXT
-    rm -f brtx _tags ; ln -s main.$APPEXT brtx
+build () {
+    ocaml setup.ml -build
 }
-build_no_ocamlbuild ()
-{
-    rm -fr _build
-    mkdir _build
-    cp -r src _build
-    cd _build
-    CCLIB="ocamlc -for-pack Bracetax -c -I src/lib/"
-    CMOS=""
-    for mod in $LIBMODS ; do
-        CMOS="$CMOS $mod.cmo"
-        $CCLIB $mod.ml
-    done;
-    ocamlc -pack -o src/lib/bracetax.cmo  $CMOS
-    ocamlc -a -o src/lib/ocamlbracetax.cma src/lib/bracetax.cmo
-    ocamlc -o brtx -I src/app/ -I . -I src/lib/ unix.cma ocamlbracetax.cma \
-        src/app/main.ml
-    cd -
-    echo "--> _build/brtx"
-}
-
 install_library() {
     ocamlfind install bracetax src/lib/META \
         _build/src/lib/ocamlbracetax.* _build/src/lib/*.cm[iox]
@@ -112,11 +56,7 @@ echo_help ()
     echo "\
 $0 <cmd>
 build|b: Build brtx (default action)
-build_debug: Build brtx with debug symbols
-build_opt|o: Build brtx with native compilation
-build_no_obuild: Build brtx without ocamlfind and ocamlbuild
-                 (e.g. with ocaml 3.09.x)
-install_library|il: Install the ocamlbracetax library with ocamlfind
+install_library|il: Install the bracetax library with ocamlfind
 uninstall_library|uil: Uninstall the library
 tests|t: Run a few tests
 doc: Build the documentation (website with PDFs)
@@ -124,6 +64,7 @@ docnopdf: Build the documentation without the PDFs
 doclib: Build the HTML documentation of the library
 docall: Build the whole documentation.
 clean|c: Clean
+reinstall|ri: re-install everything
 -help|--help|help|h: This help"
 }
 
@@ -135,9 +76,6 @@ fi
 for todo in $* ; do
     case "$todo" in
         build|b ) build ;;
-        build_debug ) build "debug" ;;
-        build_opt|o ) build "opt";;
-        build_no_obuild ) build_no_ocamlbuild ;;
         install_library|il ) install_library ;;
         uninstall_library|uil ) ocamlfind remove bracetax ;;
         tests|t ) test/do_tests ;;
@@ -146,6 +84,9 @@ for todo in $* ; do
         doclib ) document_library ;;
         docall|D ) cd doc/ ; make  ; cd .. ; document_library ;;
         clean|c ) ocamlbuild -clean ; rm -rf _test_results/ doc/site/ ;;
+        reinstall|ri)
+            ocaml setup.ml -uninstall
+            ocaml setup.ml -install ;;
         -help|--help|help|h ) echo_help ;;
         * ) echo "Can't understand \`$todo' see \`mk help'";;
     esac
