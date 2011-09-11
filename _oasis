@@ -26,3 +26,4 @@ Executable brtx
   Path:   ./src/app/
   MainIs: main.ml
   BuildDepends: bracetax
+  CompiledObject: best
