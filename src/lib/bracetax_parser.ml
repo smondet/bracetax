@@ -26,8 +26,10 @@
 (** The generic parser for bracetax, needs an implementation of
     {!type:Signatures.printer}. *)
 
+
 (**/**)
-open Signatures 
+open Bracetax_signatures 
+module Signatures = Bracetax_signatures
 
 let (~%) = Printf.sprintf
 

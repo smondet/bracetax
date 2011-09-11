@@ -28,6 +28,11 @@
 
 (**/**)
 
+module Commands = Bracetax_commands
+module Error = Bracetax_error
+module Signatures = Bracetax_signatures
+module Escape = Bracetax_escape
+
 
 type t = {
   stack: Commands.Stack.t;

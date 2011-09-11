@@ -28,6 +28,13 @@
 
 (**/**)
 
+
+module Commands = Bracetax_commands
+module Error = Bracetax_error
+module Signatures = Bracetax_signatures
+module Escape = Bracetax_escape
+module CS = Commands.Stack
+
 type t = {
   stack: Commands.Stack.t;
   mutable write: string -> unit;
@@ -45,8 +52,6 @@ type t = {
   separate_header: (string * string * string) ref option;
   make_section_links: [ `never | `when_labeled | `always ];
 }
-
-module CS = Commands.Stack
 
 let (~%) = Printf.sprintf
 

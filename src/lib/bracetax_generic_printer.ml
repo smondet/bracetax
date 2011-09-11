@@ -30,7 +30,14 @@
 (** The so-called "outputs" are structures of type
     {!type:GenericPrinter.output_t}. *)
 
+(**/**)
 
+module Commands = Bracetax_commands
+module Error = Bracetax_error
+module Signatures = Bracetax_signatures
+module Escape = Bracetax_escape
+
+(**/**)
 
 type write_fun = string -> unit
 type string_of_args_fun = string list -> string

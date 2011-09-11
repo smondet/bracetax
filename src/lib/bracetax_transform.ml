@@ -30,12 +30,13 @@
     bracetax table of contents). *)
 
 
-open Signatures
 
 (**/**)
+module Signatures = Bracetax_signatures
+module Parser = Bracetax_parser
 let opt_may ~f = function None -> () | Some o -> f o
 (**/**)
-
+open Bracetax_signatures
 
 (** Transformation from {i Bracetax} to HTML (actually {i almost}
     XHTML).  Most optional parameters correspond to command line
@@ -79,18 +80,18 @@ let brtx_to_html ~writer
     ?separate_header ?(deny_bypass=false) () = 
 
   if doc then (
-    writer.w_write (HtmlPrinter.header
+    writer.w_write (Bracetax_HTML_printer.header
                       ~comment:"Generated with BraceTax" ?title
                       ?stylesheet_link:css_link ());
   );
   let printer =
-    HtmlPrinter.build 
+    Bracetax_HTML_printer.build 
       ?make_section_links ?class_hook ?img_hook ?url_hook ?separate_header
       ~writer ~print_comments () in
 
   Parser.do_transformation ~deny_bypass printer input_char filename;
   
-  if doc then writer.w_write (HtmlPrinter.footer ());
+  if doc then writer.w_write (Bracetax_HTML_printer.footer ());
   ()
 
    
@@ -114,25 +115,26 @@ let brtx_to_latex ~writer ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
     ?(filename="<IN>") ~input_char () = 
 
   if doc then (
-    writer.w_write (LatexPrinter.header
+    writer.w_write (Bracetax_latex_printer.header
                       ~comment:"Generated with BraceTax" ?title
                       ?stylesheet_link:use_package ());
   );
   let printer =
-    LatexPrinter.build ~writer ~print_comments ~href_is_footnote 
+    Bracetax_latex_printer.build ~writer ~print_comments ~href_is_footnote 
       ?table_caption_after ?separate_header ?img_hook ?url_hook () in
 
   Parser.do_transformation ~deny_bypass printer input_char filename;
 
-  if doc then (writer.w_write (LatexPrinter.footer ()));
+  if doc then (writer.w_write (Bracetax_latex_printer.footer ()));
   ()
 
 (** Retrieve a table of contents from a {i Bracetax} input. The TOC is
     itself in {i Bracetax}; it is a set of lists with links. *)
 let get_TOC ~writer ?(filename="<IN>") 
     ?make_links ?list_type ?numbering ~input_char () =
-  let output_funs = TOCOutput.create ?list_type ?numbering ?make_links () in
-  let printer = GenericPrinter.build ~writer ~output_funs () in
+  let output_funs = 
+    Bracetax_TOC_output.create ?list_type ?numbering ?make_links () in
+  let printer = Bracetax_generic_printer.build ~writer ~output_funs () in
   Parser.do_transformation printer input_char filename;
   ()
 
@@ -154,7 +156,7 @@ let string_io in_string out_buf err_buf =
     let cpt = ref (-1) in
     (fun () ->
        try Some (incr cpt; in_string.[!cpt]) with e -> None) in
-  let writer = Signatures.make_writer ~write  ~error in
+  let writer = make_writer ~write  ~error in
   (writer, read_char_opt)
 
 
@@ -173,21 +175,21 @@ let str_to_html
   let input_char =
     let cpt = ref (-1) in
     (fun () -> try Some (incr cpt; in_str.[!cpt]) with e -> None) in
-  let writer = Signatures.make_writer ~write  ~error in
+  let writer = make_writer ~write  ~error in
   
   if doc then (
     writer.w_write
-      (HtmlPrinter.header ~comment:"Generated with BraceTax" ?title
+      (Bracetax_HTML_printer.header ~comment:"Generated with BraceTax" ?title
          ?stylesheet_link:css_link ());
   );
   let printer =
-    HtmlPrinter.build ?class_hook ?img_hook ?url_hook ?separate_header
+    Bracetax_HTML_printer.build ?class_hook ?img_hook ?url_hook ?separate_header
       ?make_section_links
       ~writer ~print_comments () in
   Parser.do_transformation ~deny_bypass printer input_char filename;
   
   if doc then (
-    writer.w_write (HtmlPrinter.footer ());
+    writer.w_write (Bracetax_HTML_printer.footer ());
   );
   (Buffer.contents out_buf, List.rev !errors)
 
@@ -206,22 +208,22 @@ let str_to_latex  ?(doc=false) ?title  ?use_package ?(deny_bypass=false)
   let input_char =
     let cpt = ref (-1) in
     (fun () -> try Some (incr cpt; in_str.[!cpt]) with e -> None) in
-  let writer = Signatures.make_writer ~write  ~error in
+  let writer = make_writer ~write  ~error in
   
   if doc then
     writer.w_write
-      (LatexPrinter.header
+      (Bracetax_latex_printer.header
          ~comment:"Generated with BraceTax" ?title
          ?stylesheet_link:use_package ());
   
   let printer =
-    LatexPrinter.build
+    Bracetax_latex_printer.build
       ~writer ~print_comments ~href_is_footnote ?table_caption_after
       ?separate_header ?img_hook ?url_hook () in
   Parser.do_transformation ~deny_bypass printer input_char filename;
   
   if doc then (
-    writer.w_write (LatexPrinter.footer ());
+    writer.w_write (Bracetax_latex_printer.footer ());
   );
   (Buffer.contents out_buf, List.rev !errors)
 
@@ -238,9 +240,10 @@ let str_to_TOC ?make_links ?list_type ?numbering
   let input_char =
     let cpt = ref (-1) in
     (fun () -> try Some (incr cpt; in_str.[!cpt]) with e -> None) in
-  let writer = Signatures.make_writer ~write  ~error in
-  let output_funs = TOCOutput.create ?list_type ?numbering ?make_links () in
-  let printer = GenericPrinter.build ~writer ~output_funs () in
+  let writer = make_writer ~write  ~error in
+  let output_funs = 
+    Bracetax_TOC_output.create ?list_type ?numbering ?make_links () in
+  let printer = Bracetax_generic_printer.build ~writer ~output_funs () in
   Parser.do_transformation printer input_char filename;
   (Buffer.contents out_buf, List.rev !errors)
 

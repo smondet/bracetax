@@ -28,7 +28,7 @@
 
 (**/**)
 let (~%) = Printf.sprintf
-
+module Error = Bracetax_error
 (**/**)
 
 (** Standard raw commands *)

@@ -9,9 +9,20 @@ BuildTools:  ocamlbuild
 
 Library bracetax
   Path: ./src/lib/
-  Modules: Bracetax
+  Modules: Bracetax,
+           Bracetax_commands,
+           Bracetax_error,
+           Bracetax_escape,
+           Bracetax_generic_printer,
+           Bracetax_HTML_printer,
+           Bracetax_info,
+           Bracetax_latex_printer,
+           Bracetax_parser,
+           Bracetax_signatures,
+           Bracetax_TOC_output,
+           Bracetax_transform
 
 Executable brtx
   Path:   ./src/app/
   MainIs: main.ml
-
+  BuildDepends: bracetax

@@ -28,6 +28,9 @@
 (**/**)
 
 
+module Escape = Bracetax_escape
+module Generic_printer = Bracetax_generic_printer
+
 let spr = Printf.sprintf
 
 type inside = {
@@ -121,7 +124,7 @@ let termination me () =
 
 (**/**)
 
-(** Creation of the {!type:GenericPrinter.output_t}. The default
+(** Creation of the {!type:Generic_printer.output_t}. The default
     [~make_links] behaviour is [`when_labeled]. *)
 let create
     ?(make_links=`when_labeled) ?(list_type=`enum) ?(numbering=`none) () =
@@ -130,7 +133,7 @@ let create
       sections = []; make_links = make_links;
       list_type = list_type; numbering = numbering } in
   {
-    GenericPrinter.
+    Generic_printer.
 
     start_text = (fun _ -> "");
     terminate = termination me;

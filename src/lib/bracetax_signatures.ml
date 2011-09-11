@@ -25,6 +25,9 @@
 
 (** Common types used for printers. *)
 
+(**/**)
+module Error = Bracetax_error
+(**/**)
 
 type writer = {
   w_write: string -> unit;
