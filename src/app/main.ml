@@ -99,61 +99,61 @@ module CommandLine = struct
 
         let options = Arg.align [
             ("-version", Arg.Unit (fun () -> todo := `version),
-                " Print version and exit");
+                " \n\tPrint version and exit");
             ("-license", Arg.Unit (fun () -> todo := `license), 
-                " Print license and exit");
+                " \n\tPrint license and exit");
             ("-html", Arg.Unit (fun () -> todo := `html),
-                ~% " Output HTML format (default)");
+                ~% " \n\tOutput HTML format (default)");
             ("-latex", Arg.Unit (fun () -> todo := `latex),
-                ~% " Output LaTeX format");
+                ~% " \n\tOutput LaTeX format");
             ("-toc", Arg.Unit (fun () -> todo := `toc),
-                ~% " Get the table of contents");
+                ~% " \n\tGet the table of contents");
             ("-i",
             Arg.String (fun s -> f_in := Some s), 
-                "<file> input file (default or \"-\" is standard input)");
+                "<file> \n\tinput file (default or \"-\" is standard input)");
             ("-o",
                 Arg.String (fun s -> f_out := Some s), 
-                "<file> output file (default or \"-\" is standard output)");
+                "<file> \n\toutput file (default or \"-\" is standard output)");
             ("-doc",
                 Arg.Unit (fun () -> is_doc := true),
-                " Output a complete document");
+                " \n\tOutput a complete document");
             ("-title",
                 Arg.String (fun s -> title := Some s),
-                "<text> Set the title of the document ('head.title' for XHTML, \
-                PDF meta-data for LaTeX), requires -doc");
+                "<text> \n\tSet the title of the document ('head.title' for \
+                 XHTML,\n\tPDF meta-data for LaTeX), requires -doc");
             ("-link-css",
                 Arg.String (fun s -> link_css := Some s),
-                "<url> link to a CSS, requires -html,-doc");
+                "<url> \n\tlink to a CSS, requires -html,-doc");
             ("-css-hook",
                 Arg.String (fun s -> css_hook := Some s),
-                "<text> add a class=\"text...\" to all tags, requires -html");
+                "<text> \n\tadd a class=\"text...\" to all tags, requires -html");
             ("-use-package",
                 Arg.String (fun s -> ltx_package := Some s),
-                "<name> use a given package, requires -latex,-doc");
+                "<name> \n\tuse a given package, requires -latex,-doc");
             ("-href-footnote",
                 Arg.Unit (fun s -> href_is_footnote := true),
-                " treat links as LaTeX footnotes with URLs, requires -latex");
+                " \n\ttreat links as LaTeX footnotes with URLs, requires -latex");
             ("-print-comments",
                 Arg.Unit (fun () -> print_comments := true),
-                " activate the transmission of brtx comments to the output's \
-                comments (-html or -latex)");
+                " \n\tactivate the transmission of brtx comments to the output's \
+                comments\n\t(-html or -latex)");
             ("-deny-bypass",
                 Arg.Unit (fun () -> deny_bypass := true),
-                " treat all {bypass} as {code} \
+                " \n\ttreat all {bypass} as {code} \
                 (security of interpreted webapps)");
             (   "-ignore-header",
                 Arg.Unit (fun () -> ignore_header := true),
-                " Do not process the {header| ... } part");
+                " \n\tDo not process the {header| ... } part");
             ("-no-warn-error",
                 Arg.Unit (fun () -> warn_error := false),
-                " Do not treat warnings as errors (return 0 to shell/make/...)");
+                " \n\tDo not treat warnings as errors (return 0 to shell/make/...)");
             ("-warn-error",
                 Arg.Unit (fun () -> warn_error := true),
-                " Treat warnings as errors (default, return 2 to shell)");
+                " \n\tTreat warnings as errors (default, return 2 to shell)");
             ("-table-caption-before",
              Arg.Unit (fun () -> table_caption_after := false),
-             " In LaTeX output, put the captions before the tables \
-             \ (like LNCS, IEEE, ...)");
+             " \n\tIn LaTeX output, put the captions before the tables\n\t\
+             (like LNCS, IEEE, ...)");
         ] in
         let short_usage =
             ~% "usage: %s [-i file] [-o file] [-help]" Sys.argv.(0) in
