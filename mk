@@ -8,49 +8,6 @@ install_library() {
         _build/src/lib/ocamlbracetax.* _build/src/lib/*.cm[iox]
 }
 
-document_library(){
-    local docinput=" -sort -I _build/src/lib/ src/lib/*.ml"
-    local docdir="doc/site/doclib/"
-cat <<EOF > /tmp/intro
-This is the ocamldoc documentation for the
-{{:http://bracetax.berlios.de}{i Bracetax}} library.
-
-Here are some hig-level graphs:
-- {{:./bracetax_modules.png}Graph of Modules}
-- {{:./bracetax_types.png}Graph of Types}
-
-The modules (don't forget that all modules are "packed" inside the
-Bracetax module):
-{!modules: 
-Transform
-Info
-Error
-Signatures
-Parser
-LatexPrinter
-HtmlPrinter
-GenericPrinter
-TOCOutput
-Escape
-Commands
-}
-
-
-Other indexes:
-
-{!indexlist}
-
-EOF
-    rm -fr $docdir
-    mkdir -p $docdir
-    ocamldoc -d $docdir -t "Bracetax Library" -intro /tmp/intro \
-        -html -colorize-code $docinput
-    ocamldoc -o /tmp/brtxmods.dot -dot -dot-reduce -dot-include-all $docinput
-    ocamldoc -o /tmp/brtxtyps.dot -dot -dot-types -dot-reduce $docinput
-    grep -v rotate /tmp/brtxmods.dot | dot -Tpng > $docdir/bracetax_modules.png
-    grep -v rotate /tmp/brtxtyps.dot | dot -Tpng > $docdir/bracetax_types.png
-}
-
 echo_help ()
 {
     echo "\
@@ -81,7 +38,7 @@ for todo in $* ; do
         tests|t ) test/do_tests ;;
         doc ) cd doc/ ; make  ; cd ..  ;;
         docnopdf ) cd doc/ ; make nopdf ; cd .. ;;
-        doclib ) document_library ;;
+        doclib ) ocaml setup.ml -doc ;;
         docall|D ) cd doc/ ; make  ; cd .. ; document_library ;;
         clean|c ) ocamlbuild -clean ; rm -rf _test_results/ doc/site/ ;;
         reinstall|ri)
