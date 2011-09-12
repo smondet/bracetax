@@ -30,7 +30,7 @@ Executable brtx
 
 Document doclib
   Title:                API reference for bracetax
-  Type:                 ocamlbuild (0.1.0)
+  Type:                 ocamlbuild (0.2)
   Install:              false
   BuildTools+:          ocamldoc
   XOCamlbuildPath:      src/lib/

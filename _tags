@@ -1,0 +1,8 @@
+# OASIS_START
+# DO NOT EDIT (digest: a5d275895ad3f580d5a20380ae902b11)
+# Library bracetax
+"src/lib": include
+# Executable brtx
+<src/app/main.{native,byte}>: use_bracetax
+<src/app/*.ml{,i}>: use_bracetax
+# OASIS_STOP

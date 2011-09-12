@@ -1,0 +1,9 @@
+# OASIS_START
+# DO NOT EDIT (digest: 29cab27e1f06e6540e24bcd2ff0bac7d)
+version = "0.2"
+description = "Text processing syntax."
+archive(byte) = "bracetax.cma"
+archive(native) = "bracetax.cmxa"
+exists_if = "bracetax.cma"
+# OASIS_STOP
+
