@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Bracetax_commands.Raw.html">
+<link rel="next" href="Bracetax_commands.Stack.html">
+<link rel="Up" href="Bracetax_commands.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax_commands.Link</title>
+</head>
+<body>
+<div class="navbar"><a href="Bracetax_commands.Raw.html">Previous</a>
+&nbsp;<a href="Bracetax_commands.html">Up</a>
+&nbsp;<a href="Bracetax_commands.Stack.html">Next</a>
+</div>
+<center><h1>Module <a href="type_Bracetax_commands.Link.html">Bracetax_commands.Link</a></h1></center>
+<br>
+<pre><span class="keyword">module</span> Link: <code class="code">sig</code> <a href="Bracetax_commands.Link.html">..</a> <code class="code">end</code></pre>Module for handling links.<br>
+<hr width="100%">
+<pre><span id="TYPEkind"><span class="keyword">type</span> <code class="type"></code>kind</span> = <code class="type">[ `generic | `local ]</code> </pre>
+
+<br><code><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = {</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>kind&nbsp;: <code class="type"><a href="Bracetax_commands.Link.html#TYPEkind">kind</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>linkto&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>other_args&nbsp;: <code class="type">string list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>contents&nbsp;: <code class="type">Buffer.t</code>;</code></td>
+
+</tr></table>
+}
+
+
+<pre><span id="VALget_kind"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Link.get_kind.html">get_kind</a></span> : <code class="type">string -> [> `generic | `local ] * string</code></pre><div class="info">
+In the returned string, if it is a "local:" link, removes the
+      <code class="code">"local:"</code> part.<br>
+</div>
+<pre><span id="VALcreate"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Link.create.html">create</a></span> : <code class="type">?kind:<a href="Bracetax_commands.Link.html#TYPEkind">kind</a> -><br>       ?linkto:string -> ?other_args:string list -> unit -> <a href="Bracetax_commands.Link.html#TYPEt">t</a></code></pre><pre><span id="VALstart"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Link.start.html">start</a></span> : <code class="type">?url_hook:(string -> string) -><br>       string list -> [> `link of <a href="Bracetax_commands.Link.html#TYPEt">t</a> ] * (string -> unit)</code></pre><div class="info">
+Start recording a link, it returns the <a href="Bracetax_commands.Stack.html#TYPEenvironment"><code class="code">Bracetax_commands.Stack.environment</code></a>
+      element to put in the stack, and new "output" function to
+      write/record the text of the link.<br>
+</div>
+<pre><span id="VALstop"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Link.stop.html">stop</a></span> : <code class="type"><a href="Bracetax_commands.Link.html#TYPEt">t</a> -><br>       <a href="Bracetax_commands.Link.html#TYPEkind">kind</a> * string option * string option</code></pre><div class="info">
+Stop recoring a link, returns the kind of link, the optional
+      target, and the optional link text (already transformed).<br>
+</div>
+<pre><span id="VALunparse"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Link.unparse.html">unparse</a></span> : <code class="type">[< `generic | `local ] -> string option -> string option -> string</code></pre><div class="info">
+Transform back to a Bracetax string (treats the <code class="code">text</code> as pure
+      text).<br>
+</div>
+</body></html>

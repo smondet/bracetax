@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Bracetax.Parser.html">
+<link rel="next" href="Bracetax.Signatures.html">
+<link rel="Up" href="Bracetax.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax.Transform</title>
+</head>
+<body>
+<div class="navbar"><a href="Bracetax.Parser.html">Previous</a>
+&nbsp;<a href="Bracetax.html">Up</a>
+&nbsp;<a href="Bracetax.Signatures.html">Next</a>
+</div>
+<center><h1>Module <a href="type_Bracetax.Transform.html">Bracetax.Transform</a></h1></center>
+<br>
+<pre><span class="keyword">module</span> Transform: <code class="type">Bracetax_transform</code></pre><hr width="100%">
+<br>
+The functions here are used to transform <i>Bracetax</i> input to the
+    formats currently handled by the library (XHTML, LaTeX, or a
+    bracetax table of contents).<br>
+<pre><span id="VALbrtx_to_html"><span class="keyword">val</span> <a href="code_VALBracetax_transform.brtx_to_html.html">brtx_to_html</a></span> : <code class="type">writer:Bracetax_HTML_printer.Signatures.writer -><br>       ?make_section_links:[ `always | `never | `when_labeled ] -><br>       ?doc:bool -><br>       ?title:string -><br>       ?css_link:string -><br>       ?print_comments:bool -><br>       ?filename:string -><br>       ?class_hook:string -><br>       ?img_hook:(string -> string) -><br>       ?url_hook:(string -> string) -><br>       input_char:(unit -> char option) -><br>       ?separate_header:(string * string * string) Pervasives.ref -><br>       ?deny_bypass:bool -> unit -> unit</code></pre><div class="info">
+Transformation from <i>Bracetax</i> to HTML (actually <i>almost</i>
+    XHTML).  Most optional parameters correspond to command line
+    options of <code class="code">brtx -html</code>.<br>
+</div>
+<div class="param_info"><code class="code">writer</code> : The <code class="code">Signatures.writer</code> to use for output.</div>
+<div class="param_info"><code class="code">doc</code> : If <code class="code">true</code>, output a whole document with header and
+    footer (Default: <code class="code">false</code>)).</div>
+<div class="param_info"><code class="code">title</code> : If <code class="code">doc = true</code>, use <code class="code">title</code> as HTML header title.</div>
+<div class="param_info"><code class="code">css_link</code> : Add a "meta" link to a CSS URL.</div>
+<div class="param_info"><code class="code">print_comments</code> : If <code class="code">true</code>, output Bracetax comments as HTML
+    comments (Default: <code class="code">false</code>).</div>
+<div class="param_info"><code class="code">filename</code> : Filename used in error messages (Default: <code class="code">"&lt;IN&gt;"</code>))</div>
+<div class="param_info"><code class="code">class_hook</code> : Add a <pre>class="class_hook"</pre> to all tags in
+    the HTML (it is the <code class="code">-css-hook</code> option of <code class="code">brtx</code>).</div>
+<div class="param_info"><code class="code">img_hook</code> : A "hook" function to transform each image path.</div>
+<div class="param_info"><code class="code">url_hook</code> : A "hook" function to transform each URL.</div>
+<div class="param_info"><code class="code">input_char</code> : The "input" function.</div>
+<div class="param_info"><code class="code">separate_header</code> : If this reference is provided, after the
+    call to <code class="code">brtx_to_html</code>, this reference will contain the <i>title</i>,
+    <i>authors</i>, and <i>subtitle</i> fields; and they won't be output to
+    the <code class="code">writer</code>.</div>
+<div class="param_info"><code class="code">deny_bypass</code> : If <code class="code">true</code>, treat <code class="code">{bypass}</code> commands as
+    <code class="code">{code}</code> (Default: <code class="code">false</code>).</div>
+<pre><span id="VALbrtx_to_latex"><span class="keyword">val</span> <a href="code_VALBracetax_transform.brtx_to_latex.html">brtx_to_latex</a></span> : <code class="type">writer:Bracetax_latex_printer.Signatures.writer -><br>       ?doc:bool -><br>       ?title:string -><br>       ?use_package:string -><br>       ?deny_bypass:bool -><br>       ?print_comments:bool -><br>       ?href_is_footnote:bool -><br>       ?img_hook:(string -> string) -><br>       ?url_hook:(string -> string) -><br>       ?separate_header:(string * string * string) Pervasives.ref -><br>       ?table_caption_after:bool -><br>       ?filename:string -> input_char:(unit -> char option) -> unit -> unit</code></pre><div class="info">
+Transform from <i>Bracetax</i> to LaTeX. Most parameters have the
+    same meaning as for <a href="Bracetax_transform.html#VALbrtx_to_html"><code class="code">Bracetax_transform.brtx_to_html</code></a>, except the following ones.<br>
+</div>
+<div class="param_info"><code class="code">title</code> : The <code class="code">title</code> will be used for the PDF meta-data (for
+    <code class="code">doc = true</code>).</div>
+<div class="param_info"><code class="code">use_package</code> : Add a <code class="code">\\usepackage{&lt;package&gt;}</code> call in the
+    LaTeX header (doc = true).</div>
+<div class="param_info"><code class="code">href_is_footnote</code> : If <code class="code">true</code>, render links as footnotes
+    (Default: <code class="code">false</code>).</div>
+<pre><span id="VALget_TOC"><span class="keyword">val</span> <a href="code_VALBracetax_transform.get_TOC.html">get_TOC</a></span> : <code class="type">writer:Bracetax_generic_printer.Signatures.writer -><br>       ?filename:string -><br>       ?make_links:[ `always | `never | `when_labeled ] -><br>       ?list_type:[ `enum | `item ] -><br>       ?numbering:[ `integers | `none ] -><br>       input_char:(unit -> char option) -> unit -> unit</code></pre><div class="info">
+Retrieve a table of contents from a <i>Bracetax</i> input. The TOC is
+    itself in <i>Bracetax</i>; it is a set of lists with links.<br>
+</div>
+<pre><span id="VALstring_io"><span class="keyword">val</span> <a href="code_VALBracetax_transform.string_io.html">string_io</a></span> : <code class="type">string -><br>       Buffer.t -> Buffer.t -> <a href="Bracetax_signatures.html#TYPEwriter">Bracetax_signatures.writer</a> * (unit -> char option)</code></pre><div class="info">
+Create a <code class="code">writer</code> and a <code class="code">input_char</code> from a <code class="code">string</code> and two
+    <code class="code">Buffer.t</code>.  With <code class="code">let w, ic = (string_io input_str output_buffer
+    error_buffer)</code>, the writer <code class="code">w</code> will write to <code class="code">output_buffer</code>,
+    transform errors to strings, and output them to <code class="code">error_buffer</code>; <code class="code">ic</code>
+    will take characters from <code class="code">input_str</code>.  <code class="code">w</code> and <code class="code">ic</code> can then be used
+    with <a href="Bracetax_transform.html#VALbrtx_to_html"><code class="code">Bracetax_transform.brtx_to_html</code></a> and <a href="Bracetax_transform.html#VALbrtx_to_latex"><code class="code">Bracetax_transform.brtx_to_latex</code></a>.<br>
+</div>
+<pre><span id="VALstr_to_html"><span class="keyword">val</span> <a href="code_VALBracetax_transform.str_to_html.html">str_to_html</a></span> : <code class="type">?make_section_links:[ `always | `never | `when_labeled ] -><br>       ?doc:bool -><br>       ?title:string -><br>       ?css_link:string -><br>       ?print_comments:bool -><br>       ?filename:string -><br>       ?class_hook:string -><br>       ?img_hook:(string -> string) -><br>       ?url_hook:(string -> string) -><br>       ?separate_header:(string * string * string) Pervasives.ref -><br>       ?deny_bypass:bool -> string -> string * Bracetax_signatures.Error.error list</code></pre><div class="info">
+This function is a convenience replacement for <a href="Bracetax_transform.html#VALbrtx_to_html"><code class="code">Bracetax_transform.brtx_to_html</code></a>,
+to transform a <code class="code">string</code>
+into another <code class="code">string</code> together with a list of <code class="code">Error.error</code>s.<br>
+</div>
+<pre><span id="VALstr_to_latex"><span class="keyword">val</span> <a href="code_VALBracetax_transform.str_to_latex.html">str_to_latex</a></span> : <code class="type">?doc:bool -><br>       ?title:string -><br>       ?use_package:string -><br>       ?deny_bypass:bool -><br>       ?print_comments:bool -><br>       ?href_is_footnote:bool -><br>       ?img_hook:(string -> string) -><br>       ?url_hook:(string -> string) -><br>       ?table_caption_after:bool -><br>       ?separate_header:(string * string * string) Pervasives.ref -><br>       ?filename:string -> string -> string * Bracetax_signatures.Error.error list</code></pre><div class="info">
+This function is a convenience replacement for
+<a href="Bracetax_transform.html#VALbrtx_to_latex"><code class="code">Bracetax_transform.brtx_to_latex</code></a>, to transform a <code class="code">string</code> into another <code class="code">string</code>
+together with a list of <code class="code">Error.error</code>s.<br>
+</div>
+<pre><span id="VALstr_to_TOC"><span class="keyword">val</span> <a href="code_VALBracetax_transform.str_to_TOC.html">str_to_TOC</a></span> : <code class="type">?make_links:[ `always | `never | `when_labeled ] -><br>       ?list_type:[ `enum | `item ] -><br>       ?numbering:[ `integers | `none ] -><br>       ?filename:string -> string -> string * Bracetax_signatures.Error.error list</code></pre><div class="info">
+This function is a convenience replacement for
+<a href="Bracetax_transform.html#VALget_TOC"><code class="code">Bracetax_transform.get_TOC</code></a>, to get the table of contents from a <code class="code">string</code>
+into another <code class="code">string</code>
+together with a list of <code class="code">Error.error</code>s.<br>
+</div>
+</body></html>

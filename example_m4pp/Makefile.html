@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>Makefile</title>
+<meta name="Generator" content="Vim/7.3">
+<meta name="plugin-version" content="vim7.3_v6">
+<meta name="syntax" content="make">
+<meta name="settings" content="use_css">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #ffffff; background-color: #808080; }
+body { font-family: monospace; color: #ffffff; background-color: #808080; }
+.Special { color: #ffff00; }
+.Constant { color: #ff40ff; }
+.Comment { color: #ff6060; }
+.Statement { color: #ffff00; }
+.Identifier { color: #00ffff; }
+-->
+</style>
+</head>
+<body>
+<pre>
+
+<span class="Identifier">EXAMPLE_SITE_HTML</span>=main.html main.tex
+
+<span class="Identifier">EXAMPLE_SITE_VIM</span>= Makefile.html main.brtx.html
+
+<span class="Identifier">EXAMPLE_SITE</span>= <span class="Identifier">$(EXAMPLE_SITE_HTML)</span> <span class="Identifier">$(EXAMPLE_SITE_VIM)</span> main.pdf main.tex
+
+<span class="Identifier">all:</span> <span class="Identifier">$(EXAMPLE_SITE)</span>
+
+<span class="Statement">.PHONY:</span> nopdf
+
+<span class="Identifier">nopdf:</span> <span class="Identifier">$(EXAMPLE_SITE_HTML)</span> <span class="Identifier">$(EXAMPLE_SITE_VIM)</span>
+
+<span class="Comment">#</span>
+<span class="Comment"># Generate the HTML page from source:</span>
+<span class="Comment">#                         m4              brtx -html       brtx -prospro    </span>
+<span class="Comment">#   source bracetax + M4 ---&gt; pure bracetax  ---&gt;    HTML       ---&gt;     HTML</span>
+<span class="Comment">#</span>
+<span class="Identifier">HEVEA_OR_NOT</span>= hevea || echo NoHeveaFound
+<span class="Identifier">main.html:</span> main.brtx
+<span class="Constant">        m4 -D_todaydate=</span><span class="Constant">&quot;`date`&quot;</span><span class="Constant"> -D_output_format=</span><span class="Constant">&quot;HTML&quot;</span><span class="Constant"> main.brtx &gt; main.brtx.tmp</span>
+<span class="Constant">        </span><span class="Identifier">$(BRTX2HTML)</span><span class="Constant"> -doc -title </span><span class="Constant">&quot;Bracetax Example&quot;</span><span class="Constant"> -link-css ../</span><span class="Identifier">$(CSS)</span><span class="Constant"> </span><span class="Special">\</span>
+<span class="Constant">            -i main.brtx.tmp -o </span><span class="Identifier">$@</span>
+<span class="Constant">        rm main.brtx.tmp</span>
+
+
+<span class="Comment">#</span>
+<span class="Comment"># Generate the HTML page from source:</span>
+<span class="Comment">#                         m4              brtx -html       brtx -prospro    </span>
+<span class="Comment">#   source bracetax + M4 ---&gt; pure bracetax  ---&gt;    HTML       ---&gt;     HTML</span>
+<span class="Comment">#</span>
+<span class="Identifier">main.tex:</span> main.brtx
+<span class="Constant">        m4 -D_todaydate=</span><span class="Constant">&quot;`date`&quot;</span><span class="Constant"> -D_output_format=</span><span class="Constant">&quot;LATEX&quot;</span><span class="Constant"> main.brtx &gt; main.brtx.tmp</span>
+<span class="Constant">        brtx -doc -title </span><span class="Constant">&quot;Self Documenting Example&quot;</span><span class="Constant"> -latex  -i main.brtx.tmp -o main.tex</span>
+<span class="Constant">        rm main.brtx.tmp </span>
+
+<span class="Comment">#</span>
+<span class="Comment"># A PDF with pdflatex</span>
+<span class="Comment">#</span>
+<span class="Identifier">main.pdf:</span> main.tex
+<span class="Constant">        pdflatex main &amp;&amp; pdflatex main</span>
+<span class="Constant">        rm main.log main.aux main.out</span>
+
+<span class="Comment">#</span>
+<span class="Comment"># Using VIM to generate an HTML page from a source code</span>
+<span class="Comment">#</span>
+<span class="Identifier">Makefile.html:</span> Makefile
+<span class="Constant">        vim -f -R </span><span class="Identifier">$&lt;</span><span class="Constant"> </span><span class="Special">\</span>
+<span class="Constant">                -c </span><span class="Constant">&quot;sy on&quot;</span><span class="Constant"> </span><span class="Special">\</span>
+<span class="Constant">                -c </span><span class="Constant">'colorscheme darkblue'</span><span class="Constant"> </span><span class="Special">\</span>
+<span class="Constant">                -c TOhtml -c </span><span class="Constant">'w! </span><span class="Identifier">$@</span><span class="Constant">.tmp'</span><span class="Constant"> -c </span><span class="Constant">'qa!'</span><span class="Constant"> &amp;&amp; </span><span class="Special">\</span>
+<span class="Constant">        sed -e </span><span class="Constant">'s/&lt;title&gt;.*&lt;\/title&gt;/&lt;title&gt;Makefile&lt;\/title&gt;/'</span><span class="Constant"> </span><span class="Special">\</span>
+<span class="Constant">                </span><span class="Identifier">$@</span><span class="Constant">.tmp &gt; </span><span class="Identifier">$@</span>
+<span class="Constant">        rm -f </span><span class="Identifier">$@</span><span class="Constant">.tmp</span>
+
+<span class="Comment">#</span>
+<span class="Comment"># Using VIM to generate an HTML page from a source code</span>
+<span class="Comment"># (with the provided - incomplete - vim plugin</span>
+<span class="Comment">#</span>
+<span class="Identifier">main.brtx.html:</span> main.brtx
+<span class="Constant">        vim -f -R </span><span class="Identifier">$&lt;</span><span class="Constant"> </span><span class="Special">\</span>
+<span class="Constant">                -c </span><span class="Constant">&quot;sy on&quot;</span><span class="Constant"> </span><span class="Special">\</span>
+<span class="Constant">                -c </span><span class="Constant">'colorscheme darkblue'</span><span class="Constant"> </span><span class="Special">\</span>
+<span class="Constant">                -c </span><span class="Constant">'source ../../../tools/bracetax_syntax.vim'</span><span class="Constant"> </span><span class="Special">\</span>
+<span class="Constant">                -c TOhtml -c </span><span class="Constant">'w! </span><span class="Identifier">$@</span><span class="Constant">.tmp'</span><span class="Constant"> -c </span><span class="Constant">'qa!'</span><span class="Constant"> &amp;&amp; </span><span class="Special">\</span>
+<span class="Constant">        sed -e </span><span class="Constant">'s/&lt;title&gt;.*&lt;\/title&gt;/&lt;title&gt;Example - source&lt;\/title&gt;/'</span><span class="Constant"> </span><span class="Special">\</span>
+<span class="Constant">                </span><span class="Identifier">$@</span><span class="Constant">.tmp &gt; </span><span class="Identifier">$@</span><span class="Constant"> </span>
+<span class="Constant">        rm -f </span><span class="Identifier">$@</span><span class="Constant">.tmp</span>
+
+</pre>
+</body>
+</html>

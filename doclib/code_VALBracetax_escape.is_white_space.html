@@ -1,0 +1,31 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax_escape.is_white_space</title>
+</head>
+<body>
+<code class="code"><span class="keyword">let</span>&nbsp;is_white_space&nbsp;str&nbsp;=<br>
+&nbsp;&nbsp;<span class="keyword">try</span>&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">String</span>.iter<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">fun</span>&nbsp;c&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span>&nbsp;c&nbsp;&lt;&gt;&nbsp;<span class="string">'&nbsp;'</span>&nbsp;<span class="keywordsign">&amp;&amp;</span>&nbsp;c&nbsp;&lt;&gt;&nbsp;<span class="string">'\t'</span>&nbsp;<span class="keywordsign">&amp;&amp;</span>&nbsp;c&nbsp;&lt;&gt;&nbsp;<span class="string">'\n'</span>&nbsp;<span class="keywordsign">&amp;&amp;</span>&nbsp;c&nbsp;&lt;&gt;&nbsp;<span class="string">'\r'</span>&nbsp;&nbsp;<span class="keyword">then</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;raise&nbsp;<span class="constructor">Exit</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">true</span><br>
+&nbsp;&nbsp;<span class="keyword">with</span>&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Exit</span>&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="keyword">false</span></code></body></html>

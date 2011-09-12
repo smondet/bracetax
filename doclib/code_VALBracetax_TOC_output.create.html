@@ -1,0 +1,99 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax_TOC_output.create</title>
+</head>
+<body>
+<code class="code"><span class="keyword">let</span>&nbsp;create<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?(make_links=<span class="keywordsign">`</span>when_labeled)&nbsp;?(list_type=<span class="keywordsign">`</span>enum)&nbsp;?(numbering=<span class="keywordsign">`</span>none)&nbsp;()&nbsp;=<br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;me&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;current&nbsp;=&nbsp;<span class="constructor">None</span>;&nbsp;title_buffer&nbsp;=&nbsp;<span class="constructor">Buffer</span>.create&nbsp;42;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sections&nbsp;=&nbsp;[];&nbsp;make_links&nbsp;=&nbsp;make_links;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list_type&nbsp;=&nbsp;list_type;&nbsp;numbering&nbsp;=&nbsp;numbering&nbsp;}&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Generic_printer</span>.<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_text&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;terminate&nbsp;=&nbsp;termination&nbsp;me;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_raw&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;raw_line&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stop_raw&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;line&nbsp;=&nbsp;store_opt_nonunit&nbsp;me;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;comment_line&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quotation_open&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;style&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;store_opt&nbsp;me&nbsp;(spr&nbsp;<span class="string">"{q&nbsp;%s|"</span>&nbsp;style)&nbsp;());<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quotation_close&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;style&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"}"</span>&nbsp;());<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_italic&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{i|"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_bold&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{b|"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_type&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{t|"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_sup&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{sup|"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_sub&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{sub|"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stop_italic&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"}"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stop_bold&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"}"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stop_type&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"}"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stop_sup&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"}"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stop_sub&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"}"</span>;<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;list_start&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;list_first_item&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;list_item&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;list_stop&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;section_start&nbsp;=&nbsp;start_section&nbsp;me;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;section_stop&nbsp;&nbsp;=&nbsp;stop_section&nbsp;me;<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;paragraph&nbsp;&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{p}"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_line&nbsp;&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{br}"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;non_break_space&nbsp;&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{~}"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;horizontal_ellipsis&nbsp;&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{...}"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;en_dash&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{--}"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;em_dash&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{---}"</span>;<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;open_brace&nbsp;&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{{}"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;close_brace&nbsp;&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{}}"</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sharp&nbsp;&nbsp;=&nbsp;store_opt&nbsp;me&nbsp;<span class="string">"{#}"</span>;<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;utf8_char&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;i&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;store_opt&nbsp;me&nbsp;(spr&nbsp;<span class="string">"{utf&nbsp;%d}"</span>&nbsp;i)&nbsp;());<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;link&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;_&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_header&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;()&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_title&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;()&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_authors&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;()&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_subtitle&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;()&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stop_header&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;()&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stop_title&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;()&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stop_authors&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;()&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stop_subtitle&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;()&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_image&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;_&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stop_image&nbsp;&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;_&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);&nbsp;<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print_table&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;());<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_note&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;()&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stop_note&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;()&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_quote&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;()&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stop_quote&nbsp;=&nbsp;(<span class="keyword">fun</span>&nbsp;()&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">""</span>);<br>
+<br>
+&nbsp;&nbsp;}</code></body></html>

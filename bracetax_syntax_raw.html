@@ -1,0 +1,273 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <!-- Generated with BraceTax -->
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Bracetax - Syntax</title>
+    </head>
+    <body>
+<div class="header">
+
+  <h1>The Bracetax syntax</h1>
+</div> <!-- END HEADER -->
+<div class="p">
+  </div>
+<h2>Introduction</h2>
+<div class="p">  This document defines the rules of the Bracetax syntax and explain the semantics of its commands. Some examples give the expected behaviour for transformations in HTML and LaTeX using the <tt>ocamlbracetax</tt> library. It's also used as a <a href="index.html#sec_example_core">complete example of bracetax syntax</a>.  </div>
+<h2>Rules</h2>
+<div class="p">   In the text there are <i>only</i> three special characters: 
+<ul>
+     <li> The <i>opening brace</i>, <tt>{</tt>, which starts the command mode     </li>
+<li> The <i>closing brace</i>, <tt>}</tt>, which finishes a command     </li>
+<li> The <i>sharp</i>, <tt>#</tt>, which starts a comment to the end of the line </li>
+</ul>
+ Those charcters can be escaped with the commands <tt>{{}</tt>, <tt>{}}</tt> and <tt>{#}</tt>. </div>
+<div class="p"> All whitespace characters are considered as a space (<tt>' '</tt>). </div>
+<div class="p"> A command has the form: <pre>
+{cmd arg1 arg2 arg3|concerned text}
+</pre> Between the <tt>{</tt> and the <tt>|</tt>, it's the command mode: 
+<ul>
+     <li> <tt>'\\'</tt> escapes the backslash (used as escaper)     </li>
+<li> <tt>'\ '</tt> escapes the space (used as argument separator)     </li>
+<li> <tt>'\|'</tt> escapes the pipe (used as command/text separator)     </li>
+<li> <tt>'\{'</tt> and <tt>'\}'</tt> escape         the braces (except for the <tt>{{}</tt> and <tt>{}}</tt> commands) </li>
+</ul>
+ A command can have no arguments and no text, <i>e.g.</i> <tt>{br}</tt> </div>
+<div class="p"> And for long blocs: <tt>{cmd arg|Some text}</tt> is equivalent to <tt>{begin cmd arg}Some text{end}</tt> </div>
+<div class="p"> Non-parsed (<i>i.e. &ldquo;code&rdquo;</i>) blocs have a  <a href="#sec_verbatim">special syntax</a> </div>
+<div class="p"> For each command the arguments can be considered optional (they have default values).  </div>
+<h2>Comments</h2>
+<div class="p">  Are only allowed in <i>text mode</i>: <pre>
+Text # Comments...
+{cmd arg|
+    Text # Also comments...
+}
+{cmd # NOT COMMENTS !!! | Text }
+</pre>  </div>
+<h2>Commands</h2>
+<div class="p">   </div>
+<h3>Characters</h3>
+<div class="p">  Example: <pre>
+Those are {{}, {}}, {#}, Unbreakable-&gt;{~}&lt;-space,
+horizontal{...}ellipsis, dashes: en{--}em{---}, and {utf 0x42}, {utf 339}.
+</pre> Those are {, }, #, Unbreakable-&gt;&nbsp;&lt;-space, horizontal&hellip;ellipsis, dashes: en&ndash;em&mdash;, and &#66;, &#339;. </div>
+<div class="p">  Here are actually all the commands available for special characters: <div class="tablefigure">
+<table class="tablefigure"  border="1"  >
+<caption  class="tablefigure" > Bracetax's character&ndash;commands.                   </caption>
+<tr><th  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" >Command</th><th  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" >Character</th></tr>
+<tr><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><tt>{{}</tt></td><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><i>Left brace: '{'</i></td></tr>
+<tr><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><tt>{}}</tt></td><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><i>Right brace: '}'</i></td></tr>
+<tr><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><tt>{#}</tt></td><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><i>Sharp: '#'</i></td></tr>
+<tr><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><tt>{~}</tt></td><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><i>Unbreakable space: '&nbsp;'</i></td></tr>
+<tr><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><tt>{...}</tt></td><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><i>Horizontal ellipsis: '&hellip;'</i></td></tr>
+<tr><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><tt>{--}</tt></td><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><i>The en-dash: '&ndash;'</i></td></tr>
+<tr><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><tt>{---}</tt></td><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><i>The em-dash: '&mdash;'</i></td></tr>
+<tr><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><tt>{utf &lt;int&gt;}</tt></td><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" ><i>Any UTF char as integer.</i></td></tr>
+</table></div>
+  </div>
+<div class="p">  Notes: 
+<ul>
+ <li> In LaTeX, <tt>{utf &lt;int&gt;}</tt> depends on the <tt>\unichar{...}</tt> command which is far from complete. </li>
+<li> There are many different typographical dashes. Bracetax provides the two most used (together with the standard hyphen-minus which is on every keyboard: '-'). See <a href="http://en.wikipedia.org/wiki/Dash">wikipedia:Dash</a>, <a href="http://en.wikipedia.org/wiki/Hyphen">wikipedia:Hyphen</a>, <a href="http://en.wikipedia.org/wiki/Quotation_mark,_non-English_usage#Quotation_dash">wikipedia:Quotation_dash</a>.   </li>
+</ul>
+     </div>
+<h3>Header</h3>
+<div class="p">  To have a title bloc in you document: <pre>
+{begin header}
+    Ignored text !!
+    {title|Bracetax}
+    {authors|{link http://seb.mondet.org|Sebastien Mondet}}
+    {subtitle|A simple syntax for wikis and more...}
+{end}
+</pre>  </div>
+<h3 id="sec_verbatim">Non parsed blocs</h3>
+<div class="p">  </div>
+<h4 id="sec_code">The code command</h4>
+<div class="p"> The default case: <pre>
+{code}
+My free    form {{ } {|} c
+  code
+{end}
+</pre>  But you can set the <i>end tag</i>: <pre>
+{code AnotherEndTag}
+ Still Free
+ form
+with:
+{end}
+inside the bloc
+{AnotherEndTag}
+</pre>  Those blocs will be rendered as <tt>&lt;pre&gt;</tt> or <tt>\begin{verbatim}</tt>.  </div>
+<h4 id="sec_bypass">The bypass command</h4>
+<div class="p">  The command <tt>{bypass}</tt> has the same syntax than <tt>{code}</tt> but is used to output directly some content, e.g.: <pre>
+{bypass endtag}Some &lt;i&gt;HTML&lt;/i&gt;{endtag}
+</pre> It can be used by preprocessors to implement special commands.  </div>
+<div class="p">  For security reasons, this command can be disabled (actually treated as the {code} command) in <tt>ocamlbracetax</tt> and in <tt>brtx</tt> (option <tt>-deny-bypass</tt>). Using {bypass} with a web application written with an interpreted language could lead to code injection issues&hellip;  </div>
+<h4 id="sec_text">The text command</h4>
+<div class="p">  The <tt>{text}</tt> command works also like <tt>{code}</tt>, but it used to treat all the content as &ldquo;text&rdquo;, &ldquo;braces&rdquo; and &ldquo;sharps&rdquo;, will have no effect. For example: <pre>
+{text endtag} Some text with {braces, |pipes} and #sharps#.{endtag}
+</pre> will give:  Some text with {braces, |pipes} and #sharps#.  </div>
+<h4 id="sec_ignore">The ignore comand</h4>
+<div class="p">  The <tt>{ignore}</tt> command has also the same syntax as the <tt>{code}</tt> one, but is used to <i>ignore</i> some text, it can be used to implement so-called &ldquo;block comments&rdquo;. <pre>
+Some {ignore someendtag}uninteresting,
+useless, and unreadable{someendtag} text
+</pre> is equivalent to <pre>
+Some #uninteresting,
+#useless, and unreadable{someendtag}
+ text
+</pre>  </div>
+<h3>Formating</h3>
+<div class="p">  Some basic formatting: <pre>
+{i|italic}, {b|bold},
+{i|italo{b|bold}},
+{t|mono-spaced},
+super{sup|script}, sub{sub|script}
+</pre> <i>italic</i>, <b>bold</b>, <i>italo<b>bold</b></i>, <tt>mono-spaced</tt>, super<sup>script</sup>, sub<sub>script</sub>  </div>
+<h3>Quoting</h3>
+<div class="p">  </div>
+<h4>Run-In Quotations</h4>
+<div class="p">  <pre>
+Quotes:
+    {q|default},
+    {q '|single},
+    {q es|españolas},
+    {q fr|françaises},
+    {q en|English},
+    {q de|Deutsch} and 
+    {q brout|unknown is default}
+</pre> Quotes: &ldquo;default&rdquo;, &lsquo;single&rsquo;, &laquo;españolas&raquo;, &laquo;&nbsp;françaises&nbsp;&raquo;, &ldquo;English&rdquo;, &bdquo;Deutsch&rdquo; and &ldquo;unknown is default&rdquo;.  </div>
+<h4>Block Quotations</h4>
+<div class="p">  They are as simple as <tt>{quote| ... }</tt>. For example: <pre>
+{begin quote}
+There is a theory which states that if ever anybody discovers exactly
+what the Universe is for and why it is here, it will instantly
+disappear and be replaced by something even more bizarre and
+inexplicable. There is another theory which states that this has
+already happened.
+{b|Douglas Adams}
+{end}
+</pre> will give: <blockquote><div class="p"> There is a theory which states that if ever anybody discovers exactly what the Universe is for and why it is here, it will instantly disappear and be replaced by something even more bizarre and inexplicable. There is another theory which states that this has already happened. <b>Douglas Adams</b> </div></blockquote>  </div>
+<h3>Paragraphs and line-breaks</h3>
+<div class="p">  Paragraph: <tt>{p}</tt>, Line-break: <tt>{br}</tt>  </div>
+<h3>Sections</h3>
+<div class="p">  The syntax is: <pre>
+{section level label|Title of the section}
+</pre> The <tt>level</tt> is an integer: 1, 2, 3 or 4 (default is 1)<br/>
+ The <tt>label</tt> is a string for local <a href="#sec_links">links</a>/references.  </div>
+<h3>Lists</h3>
+<div class="p">  A list can be <tt>item</tt> (default) or <tt>enum</tt>, a new item begins with <tt>{*}</tt>: <pre>
+{begin list enum}
+  {*} The one
+  {*} Two
+  {*} Three
+    {list item|{*} inside {*} more}
+  {*} Four
+{end}
+</pre> 
+<ol>
+   <li> The one   </li>
+<li> Two   </li>
+<li> Three     
+<ul>
+<li> inside </li>
+<li> more</li>
+</ul>
+   </li>
+<li> Four </li>
+</ol>
+  </div>
+<h3 id="sec_links">Links</h3>
+<div class="p">  Local links: <pre>
+The {t|label} is a string for local {link local:sec_links|links}/references.
+...
+{section 2 sec_links|Links}
+</pre> Other: <pre>
+There's a {link http://www.vim.org|Vim} syntax file.
+</pre> but don't forget the <tt>http://</tt> because &ldquo;<tt>www.any-site.bouh</tt>&rdquo; can be interpreted as a local (i.e. <tt>./</tt>) link. </div>
+<div class="p"> A link may not have contents: <pre>
+{link http://seb.mondet.org}
+</pre> Will give: <a href="http://seb.mondet.org">http://seb.mondet.org</a>  </div>
+<h3>Figures</h3>
+<div class="p">  The syntax for images is: <pre>
+{image &lt;src&gt; [&lt;w&gt;px|&lt;w&gt;%] &lt;label&gt;|Caption text}
+</pre>  For example <a href="#img:logo_candidate">this image</a>: <pre>
+{image
+    logo.png
+    100px
+    img:logo_candidate
+    |An image; for now it is the only logo candidate{...}}
+</pre> 
+<div class="figure" id="img:logo_candidate" >
+  <a href="logo.png">
+    <img src="logo.png" width="100px" id="img:logo_candidate"  alt="logo.png"/>
+  </a><br/>
+An image; for now it is the only logo candidate&hellip;</div>    </div>
+<h3>Tables</h3>
+<div class="p">  For table we have two commands, the <tt>table</tt>: <pre>
+{table &lt;nb-of-columns&gt; &lt;label&gt; &lt;default-align&gt;|Caption and cells} 
+</pre> and the cell: <pre>
+{c &lt;format&gt; &lt;size&gt;|content}
+</pre> The <tt>&lt;format&gt;</tt> is the alignment ('l', 'r' or 'c'), the optional &ldquo;is header ?&rdquo; ('h'), in any order (<tt>'_'</tt> means &ldquo;default&rdquo;).<br/>
+ The <tt>&lt;size&gt;</tt> argument is either the number of columns occupied or the total size <i>r</i>x<i>c</i> (numbers of rows and columns).  Example: <pre>
+{begin table 4 tab:example r} 
+{c|Simple cell} {c h|Header cell} {c rh|Header right cell} {c r|Right cell}
+{c c|Center cell} {c l|Left cell} {c r 2|Right double cell} 
+{c lh|Left header cell} {c c 2|Center double cell}  {c hl|Left header cell}
+{c l 2x3|Two rows, three columns, left} {c|Default, fourth in the row}
+                                        {c h|Header, 4th in the row}
+{c|Default, 1st} {c|Default, 2nd} {c _ 2x2|2 rows, 2 columns, default} 
+{c _ 2|Default, 1st and 2nd}                                           
+{c|Simple cell} {c h|Header cell} {c rh|Header right cell} {c r|Right cell}
+Caption of the table, default align is right
+{end}
+</pre>  <div class="tablefigure">
+<table class="tablefigure"  border="1" id="tab:example" >
+<caption  class="tablefigure" id="tab:example">                                                                                                             Caption of the table, default align is right </caption>
+<tr><td  rowspan="1" colspan="1" class="rightalign" style="text-align:right;" >Simple cell</td><th  rowspan="1" colspan="1" class="rightalign" style="text-align:right;" >Header cell</th><th  rowspan="1" colspan="1" class="rightalign" style="text-align:right;" >Header right cell</th><td  rowspan="1" colspan="1" class="rightalign" style="text-align:right;" >Right cell</td></tr>
+<tr><td  rowspan="1" colspan="1" class="centeralign" style="text-align:center;" >Center cell</td><td  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" >Left cell</td><td  rowspan="1" colspan="2" class="rightalign" style="text-align:right;" >Right double cell</td></tr>
+<tr><th  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" >Left header cell</th><td  rowspan="1" colspan="2" class="centeralign" style="text-align:center;" >Center double cell</td><th  rowspan="1" colspan="1" class="leftalign" style="text-align:left;" >Left header cell</th></tr>
+<tr><td  rowspan="2" colspan="3" class="leftalign" style="text-align:left;" >Two rows, three columns, left</td><td  rowspan="1" colspan="1" class="rightalign" style="text-align:right;" >Default, fourth in the row</td></tr>
+<tr><th  rowspan="1" colspan="1" class="rightalign" style="text-align:right;" >Header, 4th in the row</th></tr>
+<tr><td  rowspan="1" colspan="1" class="rightalign" style="text-align:right;" >Default, 1st</td><td  rowspan="1" colspan="1" class="rightalign" style="text-align:right;" >Default, 2nd</td><td  rowspan="2" colspan="2" class="rightalign" style="text-align:right;" >2 rows, 2 columns, default</td></tr>
+<tr><td  rowspan="1" colspan="2" class="rightalign" style="text-align:right;" >Default, 1st and 2nd</td></tr>
+<tr><td  rowspan="1" colspan="1" class="rightalign" style="text-align:right;" >Simple cell</td><th  rowspan="1" colspan="1" class="rightalign" style="text-align:right;" >Header cell</th><th  rowspan="1" colspan="1" class="rightalign" style="text-align:right;" >Header right cell</th><td  rowspan="1" colspan="1" class="rightalign" style="text-align:right;" >Right cell</td></tr>
+</table></div>
+  </div>
+<div class="p">  <b>Note:</b> The alignment doesn't seem to be in XHTML, so we use a <b><tt>style</tt></b> attribute <i>and</i> a <b><tt>class</tt></b> attribute (<i>e.g.</i> <tt>&lt;td class="centeralign" style="text-align:center;"&gt;</tt>).  </div>
+<h3>Notes</h3>
+<div class="p">  Notes are <tt>\footnote</tt>'s<small class="notebegin">(</small><small class="note">In LaTeX</small><small class="noteend">)</small> or <i>sidenotes</i><small class="notebegin">(</small><small class="note">In XHTML... with a CSS</small><small class="noteend">)</small> 
+<!--verbatimbegin:this_is_brtx_code -->
+<pre>
+Notes are {t|\footnote}'s{note|In LaTeX}
+</pre>
+<!--verbatimend:this_is_brtx_code -->
+  </div>
+<h2 id="sec_plugins">Post-processing plugin system</h2>
+<div class="p">  With the <tt>code</tt> environment you can also prepare post-processing: 
+<!--verbatimbegin:brtxcode -->
+<pre>
+{code end_tag name_for_the_plugin}
+A   non - parsed    {b|block}
+{end_tag}
+</pre>
+<!--verbatimend:brtxcode -->
+ Will add <tt>verbatimbegin/end</tt> comments, <i>e.g.</i> for XHTML: <pre>
+&lt;!--verbatimbegin:name_for_the_plugin --&gt;
+&lt;pre&gt;
+A   non - parsed    {b|block}
+&lt;/pre&gt;
+&lt;!--verbatimend:name_for_the_plugin --&gt;
+</pre> or for LaTeX<small class="notebegin">(</small><small class="note">The space between '\' and 'end' is due the impossibility to put '<tt>\end{verbatim}</tt>' in a LaTeX <tt>verbatim</tt> evironment</small><small class="noteend">)</small>: 
+<!--verbatimbegin:latexcode -->
+<pre>
+%verbatimbegin:name_for_the_plugin
+\begin{code}
+A   non - parsed    {b|block}
+\ end{code}
+%verbatimend:name_for_the_plugin
+</pre>
+<!--verbatimend:latexcode -->
+ Then you can post-process your output searching for those &ldquo;comment-tags&rdquo;.   </div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Bracetax_latex_printer.html">
+<link rel="next" href="Bracetax_signatures.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax_parser</title>
+</head>
+<body>
+<div class="navbar"><a href="Bracetax_latex_printer.html">Previous</a>
+&nbsp;<a href="index.html">Up</a>
+&nbsp;<a href="Bracetax_signatures.html">Next</a>
+</div>
+<center><h1>Module <a href="type_Bracetax_parser.html">Bracetax_parser</a></h1></center>
+<br>
+<pre><span class="keyword">module</span> Bracetax_parser: <code class="code">sig</code> <a href="Bracetax_parser.html">..</a> <code class="code">end</code></pre>The generic parser for bracetax, needs an implementation of
+    <code class="code">Signatures.printer</code>.<br>
+<hr width="100%">
+<pre><span id="VALdo_transformation"><span class="keyword">val</span> <a href="code_VALBracetax_parser.do_transformation.html">do_transformation</a></span> : <code class="type">?deny_bypass:bool -><br>       Signatures.printer -> (unit -> char option) -> string -> unit</code></pre><div class="info">
+<code class="code">(do_transformation printer read_fun filename)</code> parses the input
+(the <code class="code">read_fun</code>, until it returns <code class="code">None</code>) by calling <code class="code">printer</code>'s
+functions. <code class="code">filename</code> is used for error messages localtion.<br>
+</div>
+</body></html>

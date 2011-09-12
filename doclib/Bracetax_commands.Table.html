@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Bracetax_commands.Names.html">
+<link rel="Up" href="Bracetax_commands.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax_commands.Table</title>
+</head>
+<body>
+<div class="navbar"><a href="Bracetax_commands.Names.html">Previous</a>
+&nbsp;<a href="Bracetax_commands.html">Up</a>
+&nbsp;</div>
+<center><h1>Module <a href="type_Bracetax_commands.Table.html">Bracetax_commands.Table</a></h1></center>
+<br>
+<pre><span class="keyword">module</span> Table: <code class="code">sig</code> <a href="Bracetax_commands.Table.html">..</a> <code class="code">end</code></pre>Module to build tables.<br>
+<hr width="100%">
+<pre><span id="TYPEalignment"><span class="keyword">type</span> <code class="type"></code>alignment</span> = <code class="type">[ `center | `left | `right ]</code> </pre>
+
+<br><code><span id="TYPEcell"><span class="keyword">type</span> <code class="type"></code>cell</span> = {</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>is_head&nbsp;: <code class="type">bool</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>cols_used&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>rows_used&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>align&nbsp;: <code class="type"><a href="Bracetax_commands.Table.html#TYPEalignment">alignment</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>cell_text&nbsp;: <code class="type">Buffer.t</code>;</code></td>
+
+</tr></table>
+}
+
+
+<pre><span id="VALdefault_default_align"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Table.default_default_align.html">default_default_align</a></span> : <code class="type"><a href="Bracetax_commands.Table.html#TYPEalignment">alignment</a></code></pre><br><code><span id="TYPEtable"><span class="keyword">type</span> <code class="type"></code>table</span> = {</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>col_nb&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>label&nbsp;: <code class="type">string option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span class="keyword">mutable&nbsp;</span>cells&nbsp;: <code class="type"><a href="Bracetax_commands.Table.html#TYPEcell">cell</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span class="keyword">mutable&nbsp;</span>current_cell&nbsp;: <code class="type"><a href="Bracetax_commands.Table.html#TYPEcell">cell</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>caption&nbsp;: <code class="type">Buffer.t</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>default_align&nbsp;: <code class="type"><a href="Bracetax_commands.Table.html#TYPEalignment">alignment</a></code>;</code></td>
+
+</tr></table>
+}
+
+
+<pre><span id="VALtable_args"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Table.table_args.html">table_args</a></span> : <code class="type">string list -> int * string option * <a href="Bracetax_commands.Table.html#TYPEalignment">alignment</a></code></pre><pre><span id="VALcell_arguments"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Table.cell_arguments.html">cell_arguments</a></span> : <code class="type"><a href="Bracetax_commands.Table.html#TYPEtable">table</a> -><br>       string list -> bool * int * int * <a href="Bracetax_commands.Table.html#TYPEalignment">alignment</a></code></pre><pre><span id="VALwrite"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Table.write.html">write</a></span> : <code class="type"><a href="Bracetax_commands.Table.html#TYPEtable">table</a> -> string -> unit</code></pre><pre><span id="VALstart"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Table.start.html">start</a></span> : <code class="type">string list -><br>       <a href="Bracetax_commands.Table.html#TYPEtable">table</a> * [> `table of int * string option ] *<br>       (string -> unit)</code></pre><pre><span id="VALcell_start"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Table.cell_start.html">cell_start</a></span> : <code class="type">loc:Bracetax_commands.Error.location -><br>       error:Bracetax_commands.Error.error_fun -><br>       <a href="Bracetax_commands.Table.html#TYPEtable">table</a> -><br>       string list -> [> `cell of bool * int * <a href="Bracetax_commands.Table.html#TYPEalignment">alignment</a> ]</code></pre><pre><span id="VALcell_stop"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Table.cell_stop.html">cell_stop</a></span> : <code class="type">loc:'a -><br>       error:Bracetax_commands.Error.error_fun -><br>       <a href="Bracetax_commands.Table.html#TYPEtable">table</a> -> unit</code></pre><pre><span class="keyword">module</span> <a href="Bracetax_commands.Table.Util.html">Util</a>: <code class="code">sig</code> <a href="Bracetax_commands.Table.Util.html">..</a> <code class="code">end</code></pre><div class="info">
+Utilities for printing tables without too much headache.
+</div>
+</body></html>

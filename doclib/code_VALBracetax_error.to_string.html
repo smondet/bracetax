@@ -1,0 +1,65 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax_error.to_string</title>
+</head>
+<body>
+<code class="code"><span class="keyword">let</span>&nbsp;to_string&nbsp;(location,&nbsp;gravity,&nbsp;message)&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;spr&nbsp;=&nbsp;<span class="constructor">Printf</span>.sprintf&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;gravity_str&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span>&nbsp;gravity&nbsp;<span class="keyword">with</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>fatal_error&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">"FATAL&nbsp;ERROR"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>error&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">"ERROR"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>warning&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">"Warning"</span><br>
+&nbsp;&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;message_str&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span>&nbsp;(message:message)&nbsp;<span class="keyword">with</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>transformer_lost&nbsp;s&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spr&nbsp;<span class="string">"Shouldn't&nbsp;be&nbsp;there&nbsp;(%s)"</span>&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>ignored_text_after_verbatim_begin&nbsp;s&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spr&nbsp;<span class="string">"Text&nbsp;after&nbsp;{verbatim&nbsp;...}&nbsp;will&nbsp;be&nbsp;ignored:&nbsp;%s"</span>&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>malformed_verbatim_begin&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">"Malformed&nbsp;begin&nbsp;of&nbsp;verbatim&nbsp;environment"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>cell_out_of_table&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">"Cell&nbsp;(\"{c&nbsp;...}\")&nbsp;command&nbsp;not&nbsp;in&nbsp;table"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>cell_inside_cell&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">"Cell&nbsp;(\"{c&nbsp;...}\")&nbsp;command&nbsp;inside&nbsp;another&nbsp;cell"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>unknown_command&nbsp;s&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;spr&nbsp;<span class="string">"Unknown&nbsp;command:&nbsp;%s"</span>&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>begin_without_arg&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">"{begin}&nbsp;without&nbsp;argument"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>non_matching_end&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">"{end}&nbsp;does&nbsp;not&nbsp;match&nbsp;a&nbsp;{begin}"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>closing_brace_matching_begin&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"Closing&nbsp;brace&nbsp;('}')&nbsp;matches&nbsp;a&nbsp;{begin&nbsp;...}"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>nothing_to_end_with_brace&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">"Closing&nbsp;brace&nbsp;doesn't&nbsp;match"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>item_out_of_list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="string">"Item&nbsp;({*})&nbsp;not&nbsp;in&nbsp;a&nbsp;{list}&nbsp;environment}"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>terminating_with_open_environments&nbsp;l&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spr&nbsp;<span class="string">"Reached&nbsp;end&nbsp;of&nbsp;input&nbsp;with&nbsp;opened&nbsp;environments:&nbsp;%s"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="constructor">String</span>.concat&nbsp;<span class="string">",&nbsp;"</span>&nbsp;l)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>bad_size_specification_in_image&nbsp;s&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spr&nbsp;<span class="string">"Bad&nbsp;size&nbsp;specification&nbsp;in&nbsp;image:&nbsp;\"%s\""</span>&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>unknown_list_style&nbsp;s&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spr&nbsp;<span class="string">"Unknown&nbsp;list&nbsp;syle:&nbsp;\"%s\""</span>&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>end_of_input_not_in_text&nbsp;s&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spr&nbsp;<span class="string">"Reached&nbsp;end&nbsp;of&nbsp;input&nbsp;in&nbsp;wrong&nbsp;state...&nbsp;\"%s\""</span>&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>invalid_end_pattern&nbsp;s&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spr&nbsp;<span class="string">"Invalid&nbsp;end&nbsp;pattern:&nbsp;\"%S\""</span>&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>command_shouldnot_have_args&nbsp;s&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spr&nbsp;<span class="string">"This&nbsp;command&nbsp;should&nbsp;not&nbsp;have&nbsp;arguments:&nbsp;%s"</span>&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span>unknown_quotation_style&nbsp;s&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spr&nbsp;<span class="string">"Unknown&nbsp;quotation&nbsp;style&nbsp;\"%s\"&nbsp;(using&nbsp;default)"</span>&nbsp;s<br>
+&nbsp;&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;(<span class="constructor">Printf</span>.sprintf&nbsp;<span class="string">"[%s:%d%s][%s]&nbsp;%s"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;location.l_file&nbsp;location.l_line&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">if</span>&nbsp;location.l_char&nbsp;=&nbsp;-1&nbsp;<span class="keyword">then</span>&nbsp;<span class="string">""</span>&nbsp;<span class="keyword">else</span>&nbsp;(spr&nbsp;<span class="string">",%d"</span>&nbsp;location.l_char))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gravity_str&nbsp;message_str)</code></body></html>

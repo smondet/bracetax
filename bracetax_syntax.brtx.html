@@ -1,0 +1,436 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>Bracetax Syntax - source</title>
+<meta name="Generator" content="Vim/7.3">
+<meta name="plugin-version" content="vim7.3_v6">
+<meta name="syntax" content="bracetax">
+<meta name="settings" content="use_css">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #ffffff; background-color: #808080; }
+body { font-family: monospace; color: #ffffff; background-color: #808080; }
+.Special { color: #ffff00; }
+.PreProc { color: #ff40ff; }
+.Identifier { color: #00ffff; }
+.Statement { color: #ffff00; }
+.Comment { color: #ff6060; }
+-->
+</style>
+</head>
+<body>
+<pre>
+
+<span class="Comment"># The header:</span>
+<span class="Statement">{</span><span class="Identifier">header</span><span class="Statement">|</span>
+    <span class="Statement">{</span><span class="Identifier">title</span><span class="Statement">|</span>The Bracetax syntax<span class="Statement">}</span>
+<span class="Comment"># can also contain {authors|...} and {subtitle|...}</span>
+<span class="Statement">}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 1</span><span class="Statement">|</span>Introduction<span class="Statement">}</span>
+
+This document defines the rules of the Bracetax syntax and explain the
+semantics of its commands. Some examples give the expected behaviour for
+transformations in HTML and LaTeX using the <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>ocamlbracetax<span class="Statement">}</span> library.
+It's also used as a <span class="Statement">{</span><span class="Identifier">link</span><span class="PreProc"> index.html#sec_example_core</span><span class="Statement">|</span>complete example of
+bracetax syntax<span class="Statement">}</span>.
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 1</span><span class="Statement">|</span>Rules<span class="Statement">}</span>
+
+
+In the text there are <span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>only<span class="Statement">}</span> three special characters:
+<span class="Statement">{</span><span class="Identifier">list</span><span class="Statement">|</span>
+    <span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> The <span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>opening brace<span class="Statement">}</span>, <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{{}}</span>, which starts the command mode
+    <span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> The <span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>closing brace<span class="Statement">}</span>, <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{}}}</span>, which finishes a command
+    <span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> The <span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>sharp<span class="Statement">}</span>, <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="Identifier">#</span><span class="Statement">}}</span>, which starts a comment to the end of the line
+<span class="Statement">}</span>
+Those charcters can be escaped with the commands <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{{}{{}{}}}</span>, <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{{}{}}{}}}</span>
+and <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{{}{</span><span class="Identifier">#</span><span class="Statement">}{}}}</span>.
+<span class="Statement">{</span><span class="Identifier">p</span><span class="Statement">}</span>
+All whitespace characters are considered as a space (<span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>' '<span class="Statement">}</span>).
+<span class="Statement">{</span><span class="Identifier">p</span><span class="Statement">}</span>
+A command has the form:
+<span class="Special">{code}</span>
+<span class="Special">{cmd arg1 arg2 arg3|concerned text}</span>
+<span class="Special">{end}</span>
+Between the <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{{}}</span> and the <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">||}</span>, it's the command mode:
+<span class="Statement">{begin</span><span class="PreProc"> </span><span class="Identifier">list</span><span class="Statement">}</span>
+    <span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>'\\'<span class="Statement">}</span> escapes the backslash (used as escaper)
+    <span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>'\ '<span class="Statement">}</span> escapes the space (used as argument separator)
+    <span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>'\<span class="Statement">|</span>'<span class="Statement">}</span> escapes the pipe (used as command/text separator)
+    <span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>'\<span class="Statement">{{}</span>'<span class="Statement">}</span> and <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>'\<span class="Statement">{}}</span>'<span class="Statement">}</span> escape
+        the braces (except for the <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{{}{{}{}}}</span> and <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{{}{}}{}}}</span> commands)
+<span class="Statement">{end}</span>
+A command can have no arguments and no text, <span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>e.g.<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{{}</span>br<span class="Statement">{}}}</span>
+<span class="Statement">{</span><span class="Identifier">p</span><span class="Statement">}</span>
+And for long blocs: <span class="Statement">{begin</span><span class="PreProc"> </span><span class="Identifier">t</span><span class="Statement">}{{}</span>cmd arg<span class="Statement">|</span>Some text<span class="Statement">{}}{end}</span>
+is equivalent to <span class="Statement">{begin</span><span class="PreProc"> </span><span class="Identifier">t</span><span class="Statement">}{{}</span>begin cmd arg<span class="Statement">{}}</span>Some text<span class="Statement">{{}</span>end<span class="Statement">{}}{end}</span>
+<span class="Statement">{</span><span class="Identifier">p</span><span class="Statement">}</span>
+Non-parsed (<span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>i.e. <span class="Statement">{</span><span class="Identifier">q</span><span class="Statement">|</span>code<span class="Statement">}}</span>) blocs have a
+<span class="Statement">{</span><span class="Identifier">link</span><span class="PreProc"> local:sec_verbatim</span><span class="Statement">|</span>special syntax<span class="Statement">}</span>
+<span class="Statement">{</span><span class="Identifier">p</span><span class="Statement">}</span>
+For each command the arguments can be considered optional (they have default
+values).
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 1</span><span class="Statement">|</span>Comments<span class="Statement">}</span>
+
+Are only allowed in <span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>text mode<span class="Statement">}</span>:
+<span class="Special">{code e}</span>
+<span class="Special">Text # Comments...</span>
+<span class="Special">{cmd arg|</span>
+<span class="Special">    Text # Also comments...</span>
+<span class="Special">}</span>
+<span class="Special">{cmd # NOT COMMENTS !!! | Text }</span>
+<span class="Special">{e}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 1</span><span class="Statement">|</span>Commands<span class="Statement">}</span>
+
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 2</span><span class="Statement">|</span>Characters<span class="Statement">}</span>
+
+Example:
+<span class="Special">{code e}</span>
+<span class="Special">Those are {{}, {}}, {#}, Unbreakable-&gt;{~}&lt;-space,</span>
+<span class="Special">horizontal{...}ellipsis, dashes: en{--}em{---}, and {utf 0x42}, {utf 339}.</span>
+<span class="Special">{e}</span>
+Those are <span class="Statement">{{}</span>, <span class="Statement">{}}</span>, <span class="Statement">{</span><span class="Identifier">#</span><span class="Statement">}</span>, Unbreakable-&gt;<span class="Statement">{</span><span class="Identifier">~</span><span class="Statement">}</span>&lt;-space,
+horizontal<span class="Statement">{</span><span class="Identifier">...</span><span class="Statement">}</span>ellipsis, dashes: en<span class="Statement">{</span><span class="PreProc">--</span><span class="Statement">}</span>em<span class="Statement">{</span><span class="PreProc">---</span><span class="Statement">}</span>, and <span class="Statement">{</span><span class="Identifier">utf</span><span class="PreProc"> 0x42</span><span class="Statement">}</span>, <span class="Statement">{</span><span class="Identifier">utf</span><span class="PreProc"> 339</span><span class="Statement">}</span>. <span class="Statement">{</span><span class="Identifier">p</span><span class="Statement">}</span>
+
+Here are actually all the commands available for special characters:
+<span class="Statement">{begin</span><span class="PreProc"> </span><span class="Identifier">table</span><span class="PreProc"> 2</span><span class="Statement">}</span>
+Bracetax's character<span class="Statement">{</span><span class="PreProc">--</span><span class="Statement">}</span>commands.
+<span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> h</span><span class="Statement">|</span>Command<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> h</span><span class="Statement">|</span>Character<span class="Statement">}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}{{}{end}}}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">i</span><span class="Statement">|</span>Left brace: '<span class="Statement">{{}</span>'<span class="Statement">}}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}{}}{end}}}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">i</span><span class="Statement">|</span>Right brace: '<span class="Statement">{}}</span>'<span class="Statement">}}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}{</span><span class="Identifier">#</span><span class="Statement">}{end}}}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">i</span><span class="Statement">|</span>Sharp: '<span class="Statement">{</span><span class="Identifier">#</span><span class="Statement">}</span>'<span class="Statement">}}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}{</span><span class="Identifier">~</span><span class="Statement">}{end}}}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">i</span><span class="Statement">|</span>Unbreakable space: '<span class="Statement">{</span><span class="Identifier">~</span><span class="Statement">}</span>'<span class="Statement">}}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}{</span><span class="Identifier">...</span><span class="Statement">}{end}}}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">i</span><span class="Statement">|</span>Horizontal ellipsis: '<span class="Statement">{</span><span class="Identifier">...</span><span class="Statement">}</span>'<span class="Statement">}}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}{</span><span class="PreProc">--</span><span class="Statement">}{end}}}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">i</span><span class="Statement">|</span>The en-dash: '<span class="Statement">{</span><span class="PreProc">--</span><span class="Statement">}</span>'<span class="Statement">}}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}{</span><span class="PreProc">---</span><span class="Statement">}{end}}}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">i</span><span class="Statement">|</span>The em-dash: '<span class="Statement">{</span><span class="PreProc">---</span><span class="Statement">}</span>'<span class="Statement">}}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}{</span><span class="Identifier">utf</span><span class="PreProc"> &lt;int&gt;</span><span class="Statement">}{end}}}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|{</span><span class="Identifier">i</span><span class="Statement">|</span>Any UTF char as integer.<span class="Statement">}}</span>
+<span class="Statement">{end}</span>
+ <span class="Statement">{</span><span class="Identifier">p</span><span class="Statement">}</span>
+
+Notes:
+<span class="Statement">{</span><span class="Identifier">list</span><span class="Statement">|</span>
+<span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> In LaTeX, <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}{</span><span class="Identifier">utf</span><span class="PreProc"> &lt;int&gt;</span><span class="Statement">}{end}}</span> depends on the
+<span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}</span>\unichar<span class="Statement">{</span><span class="Identifier">...</span><span class="Statement">}{end}}</span> command which is far from complete.
+<span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> There are many different typographical dashes. Bracetax provides
+the two most used (together with the standard hyphen-minus which is on
+every keyboard: '-').
+See
+<span class="Statement">{</span><span class="Identifier">link</span><span class="PreProc"> <a href="http://en.wikipedia.org/wiki/Dash">http://en.wikipedia.org/wiki/Dash</a></span>
+<span class="Statement">|</span>wikipedia:Dash<span class="Statement">}</span>,
+<span class="Statement">{</span><span class="Identifier">link</span><span class="PreProc"> <a href="http://en.wikipedia.org/wiki/Hyphen">http://en.wikipedia.org/wiki/Hyphen</a></span>
+<span class="Statement">|</span>wikipedia:Hyphen<span class="Statement">}</span>,
+<span class="Statement">{</span><span class="Identifier">link</span><span class="PreProc"> <a href="http://en.wikipedia.org/wiki/Quotation_mark,_non-English_usage#Quotation_dash">http://en.wikipedia.org/wiki/Quotation_mark,_non-English_usage#Quotation_dash</a></span>
+<span class="Statement">|</span>wikipedia:Quotation_dash<span class="Statement">}</span>.
+
+
+<span class="Statement">}</span>
+
+
+
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 2</span><span class="Statement">|</span>Header<span class="Statement">}</span>
+
+To have a title bloc in you document:
+<span class="Special">{code e}</span>
+<span class="Special">{begin header}</span>
+<span class="Special">    Ignored text !!</span>
+<span class="Special">    {title|Bracetax}</span>
+<span class="Special">    {authors|{link <a href="http://seb.mondet.org|Sebastien">http://seb.mondet.org|Sebastien</a> Mondet}}</span>
+<span class="Special">    {subtitle|A simple syntax for wikis and more...}</span>
+<span class="Special">{end}</span>
+<span class="Special">{e}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 2 sec_verbatim</span><span class="Statement">|</span>Non parsed blocs<span class="Statement">}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 3 sec_code</span><span class="Statement">|</span>The code command<span class="Statement">}</span>
+<span class="Comment"># We use the 'e' end tag so we are able to put {end} inside a code </span>
+<span class="Comment"># environment:</span>
+The default case:
+<span class="Special">{code e}</span>
+<span class="Special">{code}</span>
+<span class="Special">My free    form {{ } {|} c</span>
+<span class="Special">  code</span>
+<span class="Special">{end}</span>
+<span class="Special">{e}</span>
+
+But you can set the <span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>end tag<span class="Statement">}</span>:
+<span class="Special">{code e}</span>
+<span class="Special">{code AnotherEndTag}</span>
+<span class="Special"> Still Free</span>
+<span class="Special"> form</span>
+<span class="Special">with:</span>
+<span class="Special">{end}</span>
+<span class="Special">inside the bloc</span>
+<span class="Special">{AnotherEndTag}</span>
+<span class="Special">{e}</span>
+
+Those blocs will be rendered as <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>&lt;pre&gt;<span class="Statement">}</span> or <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>\begin<span class="Statement">{{}</span>verbatim<span class="Statement">{}}}</span>.
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 3 sec_bypass</span><span class="Statement">|</span>The bypass command<span class="Statement">}</span>
+
+The command <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{{}</span>bypass<span class="Statement">{}}}</span> has the same syntax than <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{{}</span>code<span class="Statement">{}}}</span> but is
+used to output directly some content, e.g.:
+<span class="Special">{code}</span>
+<span class="Special">{bypass endtag}Some &lt;i&gt;HTML&lt;/i&gt;{endtag}</span>
+<span class="Special">{end}</span>
+It can be used by preprocessors to implement special commands.
+
+<span class="Statement">{</span><span class="Identifier">p</span><span class="Statement">}</span>
+
+For security reasons, this command can be disabled (actually treated as the
+<span class="Statement">{{}</span>code<span class="Statement">{}}</span> command) in <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>ocamlbracetax<span class="Statement">}</span> and in <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>brtx<span class="Statement">}</span> (option
+<span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>-deny-bypass<span class="Statement">}</span>).
+Using <span class="Statement">{{}</span>bypass<span class="Statement">{}}</span> with a web application written with an interpreted language
+could lead to code injection issues<span class="Statement">{</span><span class="Identifier">...</span><span class="Statement">}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 3 sec_text</span><span class="Statement">|</span>The text command<span class="Statement">}</span>
+
+The <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}{</span><span class="PreProc">text</span><span class="Statement">}{end}}</span> command works also like
+<span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}</span><span class="Special">{code}{end}</span><span class="Statement">}</span>, but it used to treat all the content as
+<span class="Statement">{</span><span class="Identifier">q</span><span class="Statement">|</span>text<span class="Statement">}</span>, <span class="Statement">{</span><span class="Identifier">q</span><span class="Statement">|</span>braces<span class="Statement">}</span> and <span class="Statement">{</span><span class="Identifier">q</span><span class="Statement">|</span>sharps<span class="Statement">}</span>, will have no effect.
+For example:
+<span class="Special">{code}</span>
+<span class="Special">{text endtag} Some text with {braces, |pipes} and #sharps#.{endtag}</span>
+<span class="Special">{end}</span>
+will give: <span class="Statement">{</span><span class="PreProc">text endtag</span><span class="Statement">}</span> Some text with <span class="Statement">{</span><span class="PreProc">braces, </span><span class="Statement">|</span>pipes<span class="Statement">}</span> and <span class="Comment">#sharps#.{endtag}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 3 sec_ignore</span><span class="Statement">|</span>The ignore comand<span class="Statement">}</span>
+
+The <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}{</span><span class="PreProc">ignore</span><span class="Statement">}{end}}</span> command has also the same syntax as the
+<span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}</span><span class="Special">{code}{end}</span><span class="Statement">}</span> one, but is used to <span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>ignore<span class="Statement">}</span> some text, it
+can be used to implement so-called <span class="Statement">{</span><span class="Identifier">q</span><span class="Statement">|</span>block comments<span class="Statement">}</span>.
+<span class="Special">{code}</span>
+<span class="Special">Some {ignore someendtag}uninteresting,</span>
+<span class="Special">useless, and unreadable{someendtag} text</span>
+<span class="Special">{end}</span>
+is equivalent to
+<span class="Special">{code}</span>
+<span class="Special">Some #uninteresting,</span>
+<span class="Special">#useless, and unreadable{someendtag}</span>
+<span class="Special"> text</span>
+<span class="Special">{end}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 2</span><span class="Statement">|</span>Formating<span class="Statement">}</span>
+
+Some basic formatting:
+<span class="Special">{code e}</span>
+<span class="Special">{i|italic}, {b|bold},</span>
+<span class="Special">{i|italo{b|bold}},</span>
+<span class="Special">{t|mono-spaced},</span>
+<span class="Special">super{sup|script}, sub{sub|script}</span>
+<span class="Special">{e}</span>
+<span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>italic<span class="Statement">}</span>, <span class="Statement">{</span><span class="Identifier">b</span><span class="Statement">|</span>bold<span class="Statement">}</span>, <span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>italo<span class="Statement">{</span><span class="Identifier">b</span><span class="Statement">|</span>bold<span class="Statement">}}</span>, <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>mono-spaced<span class="Statement">}</span>, super<span class="Statement">{</span><span class="Identifier">sup</span><span class="Statement">|</span>script<span class="Statement">}</span>,
+sub<span class="Statement">{</span><span class="Identifier">sub</span><span class="Statement">|</span>script<span class="Statement">}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 2</span><span class="Statement">|</span>Quoting<span class="Statement">}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 3</span><span class="Statement">|</span>Run-In Quotations<span class="Statement">}</span>
+
+<span class="Special">{code e}</span>
+<span class="Special">Quotes:</span>
+<span class="Special">    {q|default},</span>
+<span class="Special">    {q '|single},</span>
+<span class="Special">    {q es|españolas},</span>
+<span class="Special">    {q fr|françaises},</span>
+<span class="Special">    {q en|English},</span>
+<span class="Special">    {q de|Deutsch} and </span>
+<span class="Special">    {q brout|unknown is default}</span>
+<span class="Special">{e}</span>
+Quotes: <span class="Statement">{</span><span class="Identifier">q</span><span class="Statement">|</span>default<span class="Statement">}</span>, <span class="Statement">{</span><span class="Identifier">q</span><span class="PreProc"> '</span><span class="Statement">|</span>single<span class="Statement">}</span>, <span class="Statement">{</span><span class="Identifier">q</span><span class="PreProc"> es</span><span class="Statement">|</span>españolas<span class="Statement">}</span>, <span class="Statement">{</span><span class="Identifier">q</span><span class="PreProc"> fr</span><span class="Statement">|</span>françaises<span class="Statement">}</span>,
+<span class="Statement">{</span><span class="Identifier">q</span><span class="PreProc"> en</span><span class="Statement">|</span>English<span class="Statement">}</span>, <span class="Statement">{</span><span class="Identifier">q</span><span class="PreProc"> de</span><span class="Statement">|</span>Deutsch<span class="Statement">}</span> and <span class="Statement">{</span><span class="Identifier">q</span><span class="Statement">|</span>unknown is default<span class="Statement">}</span>.
+<span class="Comment"># {q en|English}, {q de|Deutsch} and {q brout|unknown is default}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 3</span><span class="Statement">|</span>Block Quotations<span class="Statement">}</span>
+
+They are as simple as <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{</span><span class="PreProc">text</span><span class="Statement">}{</span><span class="PreProc">quote</span><span class="Statement">|</span> ... <span class="Statement">}{end}}</span>. For example:
+<span class="Special">{code e}</span>
+<span class="Special">{begin quote}</span>
+<span class="Special">There is a theory which states that if ever anybody discovers exactly</span>
+<span class="Special">what the Universe is for and why it is here, it will instantly</span>
+<span class="Special">disappear and be replaced by something even more bizarre and</span>
+<span class="Special">inexplicable. There is another theory which states that this has</span>
+<span class="Special">already happened.</span>
+<span class="Special">{b|Douglas Adams}</span>
+<span class="Special">{end}</span>
+<span class="Special">{e}</span>
+will give:
+<span class="Statement">{begin</span><span class="PreProc"> quote</span><span class="Statement">}</span>
+There is a theory which states that if ever anybody discovers exactly
+what the Universe is for and why it is here, it will instantly
+disappear and be replaced by something even more bizarre and
+inexplicable. There is another theory which states that this has
+already happened.
+<span class="Statement">{</span><span class="Identifier">b</span><span class="Statement">|</span>Douglas Adams<span class="Statement">}</span>
+<span class="Statement">{end}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 2</span><span class="Statement">|</span>Paragraphs and line-breaks<span class="Statement">}</span>
+
+Paragraph: <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{{}</span>p<span class="Statement">{}}}</span>, Line-break: <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{{}</span>br<span class="Statement">{}}}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 2</span><span class="Statement">|</span>Sections<span class="Statement">}</span>
+
+The syntax is:
+<span class="Special">{code e}</span>
+<span class="Special">{section level label|Title of the section}</span>
+<span class="Special">{e}</span>
+The <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>level<span class="Statement">}</span> is an integer: 1, 2, 3 or 4 (default is 1)<span class="Statement">{</span><span class="Identifier">br</span><span class="Statement">}</span>
+The <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>label<span class="Statement">}</span> is a string for local <span class="Statement">{</span><span class="Identifier">link</span><span class="PreProc"> local:sec_links</span><span class="Statement">|</span>links<span class="Statement">}</span>/references.
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 2</span><span class="Statement">|</span>Lists<span class="Statement">}</span>
+
+A list can be <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>item<span class="Statement">}</span> (default) or <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>enum<span class="Statement">}</span>, a new item begins with
+<span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|{{}</span>*<span class="Statement">{}}}</span>:
+<span class="Special">{code e}</span>
+<span class="Special">{begin list enum}</span>
+<span class="Special">  {*} The one</span>
+<span class="Special">  {*} Two</span>
+<span class="Special">  {*} Three</span>
+<span class="Special">    {list item|{*} inside {*} more}</span>
+<span class="Special">  {*} Four</span>
+<span class="Special">{end}</span>
+<span class="Special">{e}</span>
+<span class="Statement">{begin</span><span class="PreProc"> </span><span class="Identifier">list</span><span class="PreProc">  enum </span><span class="Statement">}</span>
+  <span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> The one
+  <span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> Two
+  <span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> Three
+    <span class="Statement">{</span><span class="Identifier">list</span><span class="PreProc"> item</span><span class="Statement">|{</span><span class="Identifier">*</span><span class="Statement">}</span> inside <span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> more<span class="Statement">}</span>
+  <span class="Statement">{</span><span class="Identifier">*</span><span class="Statement">}</span> Four
+<span class="Statement">{end}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 2 sec_links</span><span class="Statement">|</span>Links<span class="Statement">}</span>
+
+Local links:
+<span class="Special">{code e}</span>
+<span class="Special">The {t|label} is a string for local {link local:sec_links|links}/references.</span>
+<span class="Special">...</span>
+<span class="Special">{section 2 sec_links|Links}</span>
+<span class="Special">{e}</span>
+Other:
+<span class="Special">{code e}</span>
+<span class="Special">There's a {link <a href="http://www.vim.org|Vim">http://www.vim.org|Vim</a>} syntax file.</span>
+<span class="Special">{e}</span>
+but don't forget the <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span><a href="http://">http://</a><span class="Statement">}</span> because <span class="Statement">{</span><span class="Identifier">q</span><span class="Statement">|{</span><span class="Identifier">t</span><span class="Statement">|</span>www.any-site.bouh<span class="Statement">}}</span> can be
+interpreted as a local (i.e. <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>./<span class="Statement">}</span>) link.
+<span class="Statement">{</span><span class="Identifier">p</span><span class="Statement">}</span>
+A link may not have contents:
+<span class="Special">{code e}</span>
+<span class="Special">{link <a href="http://seb.mondet.org}">http://seb.mondet.org}</a></span>
+<span class="Special">{e}</span>
+Will give:
+<span class="Statement">{</span><span class="Identifier">link</span><span class="PreProc"> <a href="http://seb.mondet.org">http://seb.mondet.org</a></span><span class="Statement">}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 2</span><span class="Statement">|</span>Figures<span class="Statement">}</span>
+
+The syntax for images is:
+<span class="Special">{code e}</span>
+<span class="Special">{image &lt;src&gt; [&lt;w&gt;px|&lt;w&gt;%] &lt;label&gt;|Caption text}</span>
+<span class="Special">{e}</span>
+
+For example <span class="Statement">{</span><span class="Identifier">link</span><span class="PreProc"> local:img:logo_candidate</span><span class="Statement">|</span>this image<span class="Statement">}</span>:
+<span class="Special">{code e}</span>
+<span class="Special">{image</span>
+<span class="Special">    logo.png</span>
+<span class="Special">    100px</span>
+<span class="Special">    img:logo_candidate</span>
+<span class="Special">    |An image; for now it is the only logo candidate{...}}</span>
+<span class="Special">{e}</span>
+<span class="Statement">{</span><span class="Identifier">image</span>
+<span class="PreProc">    logo.png</span>
+<span class="PreProc">    100px</span>
+<span class="PreProc">    img:logo_candidate</span>
+<span class="PreProc">    </span><span class="Statement">|</span>An image; for now it is the only logo candidate<span class="Statement">{</span><span class="Identifier">...</span><span class="Statement">}}</span>
+
+
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 2</span><span class="Statement">|</span>Tables<span class="Statement">}</span>
+
+For table we have two commands, the <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>table<span class="Statement">}</span>:
+<span class="Special">{code e}</span>
+<span class="Special">{table &lt;nb-of-columns&gt; &lt;label&gt; &lt;default-align&gt;|Caption and cells} </span>
+<span class="Special">{e}</span>
+and the cell:
+<span class="Special">{code e}</span>
+<span class="Special">{c &lt;format&gt; &lt;size&gt;|content}</span>
+<span class="Special">{e}</span>
+The <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>&lt;format&gt;<span class="Statement">}</span> is the alignment ('l', 'r' or 'c'), the optional <span class="Statement">{</span><span class="Identifier">q</span><span class="Statement">|</span>is header
+?<span class="Statement">}</span> ('h'), in any order (<span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>'_'<span class="Statement">}</span> means <span class="Statement">{</span><span class="Identifier">q</span><span class="Statement">|</span>default<span class="Statement">}</span>).<span class="Statement">{</span><span class="Identifier">br</span><span class="Statement">}</span>
+The <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>&lt;size&gt;<span class="Statement">}</span> argument is either the number of columns occupied or the total
+size <span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>r<span class="Statement">}</span>x<span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>c<span class="Statement">}</span> (numbers of rows and columns).
+
+Example:
+<span class="Special">{code endtablecode}</span>
+<span class="Special">{begin table 4 tab:example r} </span>
+<span class="Special">{c|Simple cell} {c h|Header cell} {c rh|Header right cell} {c r|Right cell}</span>
+<span class="Special">{c c|Center cell} {c l|Left cell} {c r 2|Right double cell} </span>
+<span class="Special">{c lh|Left header cell} {c c 2|Center double cell}  {c hl|Left header cell}</span>
+<span class="Special">{c l 2x3|Two rows, three columns, left} {c|Default, fourth in the row}</span>
+<span class="Special">                                        {c h|Header, 4th in the row}</span>
+<span class="Special">{c|Default, 1st} {c|Default, 2nd} {c _ 2x2|2 rows, 2 columns, default} </span>
+<span class="Special">{c _ 2|Default, 1st and 2nd}                                           </span>
+<span class="Special">{c|Simple cell} {c h|Header cell} {c rh|Header right cell} {c r|Right cell}</span>
+<span class="Special">Caption of the table, default align is right</span>
+<span class="Special">{end}</span>
+<span class="Special">{endtablecode}</span>
+
+<span class="Statement">{begin</span><span class="PreProc"> </span><span class="Identifier">table</span><span class="PreProc"> 4 tab:example r</span><span class="Statement">}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|</span>Simple cell<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> h</span><span class="Statement">|</span>Header cell<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> rh</span><span class="Statement">|</span>Header right cell<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> r</span><span class="Statement">|</span>Right cell<span class="Statement">}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> c</span><span class="Statement">|</span>Center cell<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> l</span><span class="Statement">|</span>Left cell<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> r 2</span><span class="Statement">|</span>Right double cell<span class="Statement">}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> lh</span><span class="Statement">|</span>Left header cell<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> c 2</span><span class="Statement">|</span>Center double cell<span class="Statement">}</span>  <span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> hl</span><span class="Statement">|</span>Left header cell<span class="Statement">}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> l 2x3</span><span class="Statement">|</span>Two rows, three columns, left<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|</span>Default, fourth in the row<span class="Statement">}</span>
+                                        <span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> h</span><span class="Statement">|</span>Header, 4th in the row<span class="Statement">}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|</span>Default, 1st<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|</span>Default, 2nd<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> _ 2x2</span><span class="Statement">|</span>2 rows, 2 columns, default<span class="Statement">}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> _ 2</span><span class="Statement">|</span>Default, 1st and 2nd<span class="Statement">}</span>
+<span class="Statement">{</span><span class="Identifier">c</span><span class="Statement">|</span>Simple cell<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> h</span><span class="Statement">|</span>Header cell<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> rh</span><span class="Statement">|</span>Header right cell<span class="Statement">}</span> <span class="Statement">{</span><span class="Identifier">c</span><span class="PreProc"> r</span><span class="Statement">|</span>Right cell<span class="Statement">}</span>
+Caption of the table, default align is right
+<span class="Statement">{end}</span>
+
+<span class="Statement">{</span><span class="Identifier">p</span><span class="Statement">}</span>
+
+<span class="Statement">{</span><span class="Identifier">b</span><span class="Statement">|</span>Note:<span class="Statement">}</span> The alignment doesn't seem to be in XHTML, so we use a <span class="Statement">{</span><span class="Identifier">b</span><span class="Statement">|{</span><span class="Identifier">t</span><span class="Statement">|</span>style<span class="Statement">}}</span>
+attribute <span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>and<span class="Statement">}</span> a <span class="Statement">{</span><span class="Identifier">b</span><span class="Statement">|{</span><span class="Identifier">t</span><span class="Statement">|</span>class<span class="Statement">}}</span> attribute (<span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>e.g.<span class="Statement">}</span>
+<span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>&lt;td class=&quot;centeralign&quot; style=&quot;text-align:center;&quot;&gt;<span class="Statement">}</span>).
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 2</span><span class="Statement">|</span>Notes<span class="Statement">}</span>
+
+Notes are <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>\footnote<span class="Statement">}</span>'s<span class="Statement">{</span><span class="Identifier">note</span><span class="Statement">|</span>In LaTeX<span class="Statement">}</span> or <span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>sidenotes<span class="Statement">}{</span><span class="Identifier">note</span><span class="Statement">|</span>In XHTML... with
+a CSS<span class="Statement">}</span>
+<span class="Special">{code e this_is_brtx_code}</span>
+<span class="Special">Notes are {t|\footnote}'s{note|In LaTeX}</span>
+<span class="Special">{e}</span>
+
+<span class="Statement">{</span><span class="Identifier">section</span><span class="PreProc"> 1 sec_plugins</span><span class="Statement">|</span>Post-processing plugin system<span class="Statement">}</span>
+
+With the <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>code<span class="Statement">}</span> environment you can also prepare post-processing:
+<span class="Special">{code e brtxcode}</span>
+<span class="Special">{code end_tag name_for_the_plugin}</span>
+<span class="Special">A   non - parsed    {b|block}</span>
+<span class="Special">{end_tag}</span>
+<span class="Special">{e}</span>
+Will add <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>verbatimbegin/end<span class="Statement">}</span> comments, <span class="Statement">{</span><span class="Identifier">i</span><span class="Statement">|</span>e.g.<span class="Statement">}</span> for XHTML:
+<span class="Special">{code}</span>
+<span class="Special">&lt;!--verbatimbegin:name_for_the_plugin --&gt;</span>
+<span class="Special">&lt;pre&gt;</span>
+<span class="Special">A   non - parsed    {b|block}</span>
+<span class="Special">&lt;/pre&gt;</span>
+<span class="Special">&lt;!--verbatimend:name_for_the_plugin --&gt;</span>
+<span class="Special">{end}</span>
+or for LaTeX<span class="Statement">{</span><span class="Identifier">note</span><span class="Statement">|</span>The space between '\' and 'end' is due the impossibility to
+put '<span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>\end<span class="Statement">{{}</span>verbatim<span class="Statement">{}}}</span>' in a LaTeX <span class="Statement">{</span><span class="Identifier">t</span><span class="Statement">|</span>verbatim<span class="Statement">}</span> evironment<span class="Statement">}</span>:
+<span class="Special">{code end latexcode}</span>
+<span class="Special">%verbatimbegin:name_for_the_plugin</span>
+<span class="Special">\begin{code}</span>
+<span class="Special">A   non - parsed    {b|block}</span>
+<span class="Special">\ end{code}</span>
+<span class="Special">%verbatimend:name_for_the_plugin</span>
+<span class="Special">{end}</span>
+Then you can post-process your output searching for those <span class="Statement">{</span><span class="Identifier">q</span><span class="Statement">|</span>comment-tags<span class="Statement">}</span>.
+
+
+</pre>
+</body>
+</html>

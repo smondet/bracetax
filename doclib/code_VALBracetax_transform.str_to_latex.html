@@ -1,0 +1,50 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax_transform.str_to_latex</title>
+</head>
+<body>
+<code class="code"><span class="keyword">let</span>&nbsp;str_to_latex&nbsp;&nbsp;?(doc=<span class="keyword">false</span>)&nbsp;?title&nbsp;&nbsp;?use_package&nbsp;?(deny_bypass=<span class="keyword">false</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?(print_comments=<span class="keyword">false</span>)&nbsp;?(href_is_footnote=<span class="keyword">false</span>)&nbsp;?img_hook&nbsp;?url_hook<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?table_caption_after<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?separate_header&nbsp;?(filename=<span class="string">"&lt;IN&gt;"</span>)&nbsp;in_str&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;errors&nbsp;=&nbsp;ref&nbsp;[]&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;error&nbsp;=&nbsp;<span class="keyword">fun</span>&nbsp;e&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;errors&nbsp;:=&nbsp;e&nbsp;::&nbsp;!errors&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;out_buf&nbsp;=&nbsp;<span class="constructor">Buffer</span>.create&nbsp;42&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;write&nbsp;=&nbsp;<span class="constructor">Buffer</span>.add_string&nbsp;out_buf&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;input_char&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;cpt&nbsp;=&nbsp;ref&nbsp;(-1)&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">fun</span>&nbsp;()&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="keyword">try</span>&nbsp;<span class="constructor">Some</span>&nbsp;(incr&nbsp;cpt;&nbsp;in_str.[!cpt])&nbsp;<span class="keyword">with</span>&nbsp;e&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">None</span>)&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;writer&nbsp;=&nbsp;make_writer&nbsp;~write&nbsp;&nbsp;~error&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;<span class="keyword">if</span>&nbsp;doc&nbsp;<span class="keyword">then</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;writer.w_write<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="constructor">Bracetax_latex_printer</span>.header<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~comment:<span class="string">"Generated&nbsp;with&nbsp;BraceTax"</span>&nbsp;?title<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;?stylesheet_link:use_package&nbsp;());<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;printer&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Bracetax_latex_printer</span>.build<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~writer&nbsp;~print_comments&nbsp;~href_is_footnote&nbsp;?table_caption_after<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;?separate_header&nbsp;?img_hook&nbsp;?url_hook&nbsp;()&nbsp;<span class="keyword">in</span><br>
+&nbsp;&nbsp;<span class="constructor">Parser</span>.do_transformation&nbsp;~deny_bypass&nbsp;printer&nbsp;input_char&nbsp;filename;<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;<span class="keyword">if</span>&nbsp;doc&nbsp;<span class="keyword">then</span>&nbsp;(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;writer.w_write&nbsp;(<span class="constructor">Bracetax_latex_printer</span>.footer&nbsp;());<br>
+&nbsp;&nbsp;);<br>
+&nbsp;&nbsp;(<span class="constructor">Buffer</span>.contents&nbsp;out_buf,&nbsp;<span class="constructor">List</span>.rev&nbsp;!errors)</code></body></html>

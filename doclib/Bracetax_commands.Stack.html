@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Bracetax_commands.Link.html">
+<link rel="next" href="Bracetax_commands.Names.html">
+<link rel="Up" href="Bracetax_commands.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax_commands.Stack</title>
+</head>
+<body>
+<div class="navbar"><a href="Bracetax_commands.Link.html">Previous</a>
+&nbsp;<a href="Bracetax_commands.html">Up</a>
+&nbsp;<a href="Bracetax_commands.Names.html">Next</a>
+</div>
+<center><h1>Module <a href="type_Bracetax_commands.Stack.html">Bracetax_commands.Stack</a></h1></center>
+<br>
+<pre><span class="keyword">module</span> Stack: <code class="code">sig</code> <a href="Bracetax_commands.Stack.html">..</a> <code class="code">end</code></pre>A stack of bracetax environments.<br>
+<hr width="100%">
+<pre><span id="TYPEimage_size"><span class="keyword">type</span> <code class="type"></code>image_size</span> = <code class="type">[ `none | `wpercent of int | `wpx of int ]</code> </pre>
+
+<pre><span id="TYPEenvironment"><span class="keyword">type</span> <code class="type"></code>environment</span> = <code class="type">[ `authors<br>       | `bold<br>       | `bypass<br>       | `cell of bool * int * [ `center | `left | `right ]<br>       | `close_brace<br>       | `cmd_begin of string * string list<br>       | `cmd_end<br>       | `cmd_inside of <a href="Bracetax_commands.Stack.html#TYPEenvironment">environment</a><br>       | `code of string list<br>       | `em_dash<br>       | `en_dash<br>       | `header<br>       | `horizontal_ellipsis<br>       | `ignore<br>       | `image of string * <a href="Bracetax_commands.Stack.html#TYPEimage_size">image_size</a> * string<br>       | `italic<br>       | `item<br>       | `link of <a href="Bracetax_commands.Link.html#TYPEt">Bracetax_commands.Link.t</a><br>       | `list of [ `itemize | `numbered ] * string list * bool Pervasives.ref<br>       | `mono_space<br>       | `new_line<br>       | `non_break_space<br>       | `note<br>       | `open_brace<br>       | `paragraph<br>       | `quotation of string * string<br>       | `quote<br>       | `section of int * string<br>       | `sharp<br>       | `subscript<br>       | `subtitle<br>       | `superscript<br>       | `table of int * string option<br>       | `text<br>       | `title<br>       | `unknown of string * string list<br>       | `utf8_char of int ]</code> </pre>
+
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = <code class="type"><a href="Bracetax_commands.Stack.html#TYPEenvironment">environment</a> list Pervasives.ref</code> </pre>
+
+<pre><span id="VALempty"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Stack.empty.html">empty</a></span> : <code class="type">unit -> 'a list Pervasives.ref</code></pre><pre><span id="VALpush"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Stack.push.html">push</a></span> : <code class="type">'a list Pervasives.ref -> 'a -> unit</code></pre><pre><span id="VALpop"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Stack.pop.html">pop</a></span> : <code class="type">'a list Pervasives.ref -> 'a option</code></pre><pre><span id="VALhead"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Stack.head.html">head</a></span> : <code class="type">'a list Pervasives.ref -> 'a option</code></pre><pre><span id="VALto_list"><span class="keyword">val</span> <a href="code_VALBracetax_commands.Stack.to_list.html">to_list</a></span> : <code class="type">'a Pervasives.ref -> 'a</code></pre></body></html>

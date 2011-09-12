@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Bracetax_parser.html">
+<link rel="next" href="Bracetax_TOC_output.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax_signatures</title>
+</head>
+<body>
+<div class="navbar"><a href="Bracetax_parser.html">Previous</a>
+&nbsp;<a href="index.html">Up</a>
+&nbsp;<a href="Bracetax_TOC_output.html">Next</a>
+</div>
+<center><h1>Module <a href="type_Bracetax_signatures.html">Bracetax_signatures</a></h1></center>
+<br>
+<pre><span class="keyword">module</span> Bracetax_signatures: <code class="code">sig</code> <a href="Bracetax_signatures.html">..</a> <code class="code">end</code></pre>Common types used for printers.<br>
+<hr width="100%">
+<br><code><span id="TYPEwriter"><span class="keyword">type</span> <code class="type"></code>writer</span> = {</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>w_write&nbsp;: <code class="type">string -> unit</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>w_error&nbsp;: <code class="type">Error.error -> unit</code>;</code></td>
+
+</tr></table>
+}
+
+
+<pre><span id="VALmake_writer"><span class="keyword">val</span> <a href="code_VALBracetax_signatures.make_writer.html">make_writer</a></span> : <code class="type">write:(string -> unit) -><br>       error:(Error.error -> unit) -> <a href="Bracetax_signatures.html#TYPEwriter">writer</a></code></pre><br><code><span id="TYPEprinter"><span class="keyword">type</span> <code class="type"></code>printer</span> = {</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>print_comment&nbsp;: <code class="type">Error.location -> string -> unit</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>print_text&nbsp;: <code class="type">Error.location -> string -> unit</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>enter_cmd&nbsp;: <code class="type">Error.location -> string -> string list -> unit</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>leave_cmd&nbsp;: <code class="type">Error.location -> unit</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>terminate&nbsp;: <code class="type">Error.location -> unit</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>is_raw&nbsp;: <code class="type">string -> bool</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>default_raw_end&nbsp;: <code class="type">string -> string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>enter_raw&nbsp;: <code class="type">Error.location -> string -> string list -> unit</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>print_raw&nbsp;: <code class="type">Error.location -> string -> unit</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>leave_raw&nbsp;: <code class="type">Error.location -> unit</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>error&nbsp;: <code class="type">Error.error -> unit</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info">
+The functions called by <code class="code">Parser.do_transformation</code>. For
+        example, <code class="code">HtmlPrinter.build</code> outputs a <a href="Bracetax_signatures.html#TYPEprinter"><code class="code">Bracetax_signatures.printer</code></a>.<br>
+</div>
+
+</body></html>

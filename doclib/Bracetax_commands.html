@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Bracetax.html">
+<link rel="next" href="Bracetax_error.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax_commands</title>
+</head>
+<body>
+<div class="navbar"><a href="Bracetax.html">Previous</a>
+&nbsp;<a href="index.html">Up</a>
+&nbsp;<a href="Bracetax_error.html">Next</a>
+</div>
+<center><h1>Module <a href="type_Bracetax_commands.html">Bracetax_commands</a></h1></center>
+<br>
+<pre><span class="keyword">module</span> Bracetax_commands: <code class="code">sig</code> <a href="Bracetax_commands.html">..</a> <code class="code">end</code></pre>Syntaxic helper functions for <code class="code">Signatures.printer</code>s and
+    <code class="code">GenericPrinter.output_t</code>s.<br>
+<hr width="100%">
+<pre><span class="keyword">module</span> <a href="Bracetax_commands.Raw.html">Raw</a>: <code class="code">sig</code> <a href="Bracetax_commands.Raw.html">..</a> <code class="code">end</code></pre><div class="info">
+Standard raw commands
+</div>
+<pre><span class="keyword">module</span> <a href="Bracetax_commands.Link.html">Link</a>: <code class="code">sig</code> <a href="Bracetax_commands.Link.html">..</a> <code class="code">end</code></pre><div class="info">
+Module for handling links.
+</div>
+<pre><span class="keyword">module</span> <a href="Bracetax_commands.Stack.html">Stack</a>: <code class="code">sig</code> <a href="Bracetax_commands.Stack.html">..</a> <code class="code">end</code></pre><div class="info">
+A stack of bracetax environments.
+</div>
+<pre><span class="keyword">module</span> <a href="Bracetax_commands.Names.html">Names</a>: <code class="code">sig</code> <a href="Bracetax_commands.Names.html">..</a> <code class="code">end</code></pre><div class="info">
+Operations to identify Bracetax commands, and "parse" their arguments.
+</div>
+<pre><span id="VALnon_env_cmd_of_name"><span class="keyword">val</span> <a href="code_VALBracetax_commands.non_env_cmd_of_name.html">non_env_cmd_of_name</a></span> : <code class="type">string -> string list -> <a href="Bracetax_commands.Stack.html#TYPEenvironment">Stack.environment</a></code></pre><div class="info">
+Transforms some commands to their <a href="Bracetax_commands.Stack.html#TYPEenvironment"><code class="code">Bracetax_commands.Stack.environment</code></a> counter part. Returns 
+<code class="code">`undefined (name, args)</code> if it is not a "simple" command.<br>
+</div>
+<pre><span id="VALenv_to_string"><span class="keyword">val</span> <a href="code_VALBracetax_commands.env_to_string.html">env_to_string</a></span> : <code class="type"><a href="Bracetax_commands.Stack.html#TYPEenvironment">Stack.environment</a> -> string</code></pre><div class="info">
+Converts to a (human readable) string. Used in error messages.<br>
+</div>
+<pre><span class="keyword">module</span> <a href="Bracetax_commands.Table.html">Table</a>: <code class="code">sig</code> <a href="Bracetax_commands.Table.html">..</a> <code class="code">end</code></pre><div class="info">
+Module to build tables.
+</div>
+</body></html>

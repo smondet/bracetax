@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Bracetax_error.html">
+<link rel="next" href="Bracetax_generic_printer.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax_escape</title>
+</head>
+<body>
+<div class="navbar"><a href="Bracetax_error.html">Previous</a>
+&nbsp;<a href="index.html">Up</a>
+&nbsp;<a href="Bracetax_generic_printer.html">Next</a>
+</div>
+<center><h1>Module <a href="type_Bracetax_escape.html">Bracetax_escape</a></h1></center>
+<br>
+<pre><span class="keyword">module</span> Bracetax_escape: <code class="code">sig</code> <a href="Bracetax_escape.html">..</a> <code class="code">end</code></pre>Utility functions for sanitization of strings.<br>
+<hr width="100%">
+<pre><span id="VALreplace_string"><span class="keyword">val</span> <a href="code_VALBracetax_escape.replace_string.html">replace_string</a></span> : <code class="type">src:string -> find:string -> replace_with:string -> string</code></pre><pre><span id="VALreplace_chars"><span class="keyword">val</span> <a href="code_VALBracetax_escape.replace_chars.html">replace_chars</a></span> : <code class="type">src:string -> patterns:(char * string) list -> string</code></pre><div class="info">
+Replace characters by strings. For example:
+<pre><code class="code">    let patterns = [('&lt;', "&amp;lt;"); ('&gt;', "&amp;gt;"); ('&amp;', "&amp;amp;")] in
+    Escape.replace_chars ~src:line ~patterns </code></pre><br>
+</div>
+<pre><span id="VALis_white_space"><span class="keyword">val</span> <a href="code_VALBracetax_escape.is_white_space.html">is_white_space</a></span> : <code class="type">string -> bool</code></pre><pre><span id="VALclean_string"><span class="keyword">val</span> <a href="code_VALBracetax_escape.clean_string.html">clean_string</a></span> : <code class="type">string -> string</code></pre><div class="info">
+Cleans a string to use only A-Z, a-z, 0-9, _ characters.<br>
+</div>
+</body></html>

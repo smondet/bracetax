@@ -1,0 +1,418 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Bracetax_escape.html">
+<link rel="next" href="Bracetax_HTML_printer.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax_generic_printer</title>
+</head>
+<body>
+<div class="navbar"><a href="Bracetax_escape.html">Previous</a>
+&nbsp;<a href="index.html">Up</a>
+&nbsp;<a href="Bracetax_HTML_printer.html">Next</a>
+</div>
+<center><h1>Module <a href="type_Bracetax_generic_printer.html">Bracetax_generic_printer</a></h1></center>
+<br>
+<pre><span class="keyword">module</span> Bracetax_generic_printer: <code class="code">sig</code> <a href="Bracetax_generic_printer.html">..</a> <code class="code">end</code></pre>A generic printer, it implements <code class="code">Signatures.printer</code>
+    functions from <code class="code">GenericPrinter.output_t</code>s.<br>
+<hr width="100%">
+<br>
+The so-called "outputs" are structures of type
+    <code class="code">GenericPrinter.output_t</code>.<br>
+<pre><span id="TYPEwrite_fun"><span class="keyword">type</span> <code class="type"></code>write_fun</span> = <code class="type">string -> unit</code> </pre>
+
+<pre><span id="TYPEstring_of_args_fun"><span class="keyword">type</span> <code class="type"></code>string_of_args_fun</span> = <code class="type">string list -> string</code> </pre>
+
+<pre><span id="TYPEstring_fun"><span class="keyword">type</span> <code class="type"></code>string_fun</span> = <code class="type">unit -> string</code> </pre>
+
+<pre><span id="TYPEtransform_string_fun"><span class="keyword">type</span> <code class="type"></code>transform_string_fun</span> = <code class="type">string -> string</code> </pre>
+
+<br><code><span id="TYPEoutput_t"><span class="keyword">type</span> <code class="type"></code>output_t</span> = {</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_text&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Function called when printing starts.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>terminate&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Function called before stopping the printing.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_raw&nbsp;: <code class="type">Commands.Raw.t -> string option -> string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Begin a non-parsed bloc, the <code class="code">string option</code> is the optional
+      post-processing plugin "identifier".</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>raw_line&nbsp;: <code class="type">Commands.Raw.t -><br>       <a href="Bracetax_generic_printer.html#TYPEtransform_string_fun">transform_string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>stop_raw&nbsp;: <code class="type">Commands.Raw.t -> string option -> string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>line&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEtransform_string_fun">transform_string_fun</a></code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Handle a line of "pure" text.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>comment_line&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEtransform_string_fun">transform_string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>quotation_open&nbsp;: <code class="type">string -> string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Open "quotation marks" of the kind given as argument.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>quotation_close&nbsp;: <code class="type">string -> string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_italic&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_bold&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_type&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_sup&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_sub&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>stop_italic&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>stop_bold&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>stop_type&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>stop_sup&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>stop_sub&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>list_start&nbsp;: <code class="type">[ `itemize | `numbered ] -> string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>list_first_item&nbsp;: <code class="type">[ `itemize | `numbered ] -> string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>list_item&nbsp;: <code class="type">[ `itemize | `numbered ] -> string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>list_stop&nbsp;: <code class="type">[ `itemize | `numbered ] -> string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>section_start&nbsp;: <code class="type">int -> string -> string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Start a section title given its level and its label.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>section_stop&nbsp;: <code class="type">int -> string -> string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>paragraph&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>new_line&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>non_break_space&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>horizontal_ellipsis&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>en_dash&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>em_dash&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>open_brace&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>close_brace&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>sharp&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>utf8_char&nbsp;: <code class="type">int -> string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>link&nbsp;: <code class="type">Commands.Link.kind -><br>       string option -> string option -> string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><code class="code">(o.link kind target text)</code> to create a link.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_header&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_title&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_authors&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_subtitle&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>stop_header&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>stop_title&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>stop_authors&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>stop_subtitle&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_image&nbsp;: <code class="type">string -><br>       Commands.Stack.image_size -> string -> string</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Start an "image" (i.e. just before the caption), given the URL,
+      the size, and the optional label.</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>stop_image&nbsp;: <code class="type">string -><br>       Commands.Stack.image_size -> string -> string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>print_table&nbsp;: <code class="type">(string -> unit) -> Commands.Table.table -> unit</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Print the table using the first argument (print function).</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_note&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>stop_note&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>start_quote&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>stop_quote&nbsp;: <code class="type"><a href="Bracetax_generic_printer.html#TYPEstring_fun">string_fun</a></code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info">
+The type to "implement" to use the generic printer.<br>
+</div>
+
+<pre><span id="VALbuild"><span class="keyword">val</span> <a href="code_VALBracetax_generic_printer.build.html">build</a></span> : <code class="type">?print_comments:bool -><br>       writer:Signatures.writer -><br>       output_funs:<a href="Bracetax_generic_printer.html#TYPEoutput_t">output_t</a> -><br>       unit -> Signatures.printer</code></pre><div class="info">
+Build a <code class="code">printer</code> from a <code class="code">GenericPrinter.output_t</code> to feed
+<code class="code">Parser.do_transformation</code>, the optional argument has the same
+meaning than for <code class="code">Transform.brtx_to_latex</code>.<br>
+</div>
+</body></html>

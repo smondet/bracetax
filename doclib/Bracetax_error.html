@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Bracetax_commands.html">
+<link rel="next" href="Bracetax_escape.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Bracetax" rel="Chapter" href="Bracetax.html">
+<link title="Bracetax_commands" rel="Chapter" href="Bracetax_commands.html">
+<link title="Bracetax_error" rel="Chapter" href="Bracetax_error.html">
+<link title="Bracetax_escape" rel="Chapter" href="Bracetax_escape.html">
+<link title="Bracetax_generic_printer" rel="Chapter" href="Bracetax_generic_printer.html">
+<link title="Bracetax_HTML_printer" rel="Chapter" href="Bracetax_HTML_printer.html">
+<link title="Bracetax_info" rel="Chapter" href="Bracetax_info.html">
+<link title="Bracetax_latex_printer" rel="Chapter" href="Bracetax_latex_printer.html">
+<link title="Bracetax_parser" rel="Chapter" href="Bracetax_parser.html">
+<link title="Bracetax_signatures" rel="Chapter" href="Bracetax_signatures.html">
+<link title="Bracetax_TOC_output" rel="Chapter" href="Bracetax_TOC_output.html">
+<link title="Bracetax_transform" rel="Chapter" href="Bracetax_transform.html"><title>Bracetax_error</title>
+</head>
+<body>
+<div class="navbar"><a href="Bracetax_commands.html">Previous</a>
+&nbsp;<a href="index.html">Up</a>
+&nbsp;<a href="Bracetax_escape.html">Next</a>
+</div>
+<center><h1>Module <a href="type_Bracetax_error.html">Bracetax_error</a></h1></center>
+<br>
+<pre><span class="keyword">module</span> Bracetax_error: <code class="code">sig</code> <a href="Bracetax_error.html">..</a> <code class="code">end</code></pre>Parsing error messages.<br>
+<hr width="100%">
+<pre><span id="TYPEgravity"><span class="keyword">type</span> <code class="type"></code>gravity</span> = <code class="type">[ `error | `fatal_error | `warning ]</code> </pre>
+
+<pre><span id="TYPEmessage"><span class="keyword">type</span> <code class="type"></code>message</span> = <code class="type">[ `bad_size_specification_in_image of string<br>       | `begin_without_arg<br>       | `cell_inside_cell<br>       | `cell_out_of_table<br>       | `closing_brace_matching_begin<br>       | `command_shouldnot_have_args of string<br>       | `end_of_input_not_in_text of string<br>       | `ignored_text_after_verbatim_begin of string<br>       | `invalid_end_pattern of string<br>       | `item_out_of_list<br>       | `malformed_verbatim_begin<br>       | `non_matching_end<br>       | `nothing_to_end_with_brace<br>       | `terminating_with_open_environments of string list<br>       | `transformer_lost of string<br>       | `unknown_command of string<br>       | `unknown_list_style of string<br>       | `unknown_quotation_style of string ]</code> </pre>
+
+<br><code><span id="TYPElocation"><span class="keyword">type</span> <code class="type"></code>location</span> = {</code><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>l_line&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>l_char&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code>l_file&nbsp;: <code class="type">string</code>;</code></td>
+
+</tr></table>
+}
+
+
+<pre><span id="TYPEerror"><span class="keyword">type</span> <code class="type"></code>error</span> = <code class="type">[ `message of<br>           <a href="Bracetax_error.html#TYPElocation">location</a> * <a href="Bracetax_error.html#TYPEgravity">gravity</a> * <a href="Bracetax_error.html#TYPEmessage">message</a><br>       | `undefined of string ]</code> </pre>
+
+<pre><span id="TYPEerror_fun"><span class="keyword">type</span> <code class="type"></code>error_fun</span> = <code class="type"><a href="Bracetax_error.html#TYPEerror">error</a> -> unit</code> </pre>
+
+<pre><span id="VALmk"><span class="keyword">val</span> <a href="code_VALBracetax_error.mk.html">mk</a></span> : <code class="type"><a href="Bracetax_error.html#TYPElocation">location</a> -><br>       <a href="Bracetax_error.html#TYPEgravity">gravity</a> -> <a href="Bracetax_error.html#TYPEmessage">message</a> -> <a href="Bracetax_error.html#TYPEerror">error</a></code></pre><div class="info">
+Build an error message.<br>
+</div>
+<pre><span id="VALto_string"><span class="keyword">val</span> <a href="code_VALBracetax_error.to_string.html">to_string</a></span> : <code class="type"><a href="Bracetax_error.html#TYPElocation">location</a> * [< `error | `fatal_error | `warning ] *<br>       <a href="Bracetax_error.html#TYPEmessage">message</a> -> string</code></pre><div class="info">
+A built-in function for rendering errors as strings.<br>
+</div>
+</body></html>
