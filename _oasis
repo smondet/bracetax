@@ -27,3 +27,11 @@ Executable brtx
   MainIs: main.ml
   BuildDepends: bracetax
   CompiledObject: best
+
+Document doclib
+  Title:                API reference for bracetax
+  Type:                 ocamlbuild (0.1.0)
+  Install:              false
+  BuildTools+:          ocamldoc
+  XOCamlbuildPath:      src/lib/
+  XOCamlbuildLibraries: bracetax
