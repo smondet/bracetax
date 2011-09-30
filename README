@@ -1,9 +1,15 @@
 Bracetax 0.2
 
-A simple syntax for wikis and more...
+A simple and deterministic syntax for wikis and more...
 
-BUILD:
-  ./mk
+BUILD (brtx and the library):
+
+  ocaml setup.ml -configure  [--prefix /where/you/want]
+
+  ocaml setup.ml -build
+
+  ocaml setup.ml -install   (may require root privileges)
+
 
 OTHER: See `mk h`
 

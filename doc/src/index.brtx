@@ -1,6 +1,4 @@
 
-
-
 {header|
     {title|Bracetax}
     {subtitle|A simple syntax for wikis and more{...}}
@@ -38,6 +36,16 @@ The head of the {t|master} branch will always be considered as
 the most up-to-date and {i|usable/stable} version,
 binaries will become available if there is enough demand.
 
+{section|Build & Install}
+
+Bracetax follows the {i|standard} OASIS setup (with OCamlbuild):
+{code}
+  ocaml setup.ml -configure  [--prefix /where/you/want]
+
+  ocaml setup.ml -build
+
+  ocaml setup.ml -install   (may require root privileges)
+{end}
 
 {section|Documentation}
 
@@ -45,7 +53,7 @@ For now the documentations are:
 {begin list item}
     {*} the {link bracetax_syntax.html|Bracetax syntax} reference;
     # {*} the ocamlbracetax library;
-    {*} the {t|brtx} {link brtx_app.html|application} build & usage;
+    {*} the {t|brtx} {link brtx_app.html|application} usage;
     {*} the {link ./doclib/index.html|documentation} of the bracetax library;
     {*} the {link tools.html|tools} usage.
     # {*} room for more development.
@@ -68,8 +76,7 @@ git log | sed -e 's/\([{}#]\)/{\1}/g' | awk '\
         /^commit / {print "{p}{t|{b|Commit:} "$2"}{br}"} \
         /^Author/  {print "   {t|{b|Author:} " $2 " " $3 "}{br}"} \
         /^Date/    {print "   {t|{b|Date:}" substr($0,6,length($0) - 3) "}{br}"} \
-        /^    .+/    {if ($0 !~ /.*git-svn-id.*/) { print "{t|{i|" $0 "}}{br}" }} \
-        /^   /    {if ($0 ~ /.*git-svn-id.*/) print "{b|Git-SVN:}" $2 "{br}"} \
+        /^    .+/  { print "{t|{i|" $0 "}}{br}" } \
         ' | brtx -html -link-css brtxdoc.css -doc \
             -title "Bracetax - git-log" -o git_log.html
 {end}

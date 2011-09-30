@@ -84,8 +84,7 @@ site/git_log.html: site/
 		/^commit / {print "{p}{t|{b|Commit:} "$$2"}{br}"} \
 		/^Author/  {print "   {t|{b|Author:} " $$2 " " $$3 "}{br}"} \
 		/^Date/    {print "   {t|{b|Date:}" substr($$0,6,length($$0) - 3) "}{br}"} \
-		/^    .+/    {if ($$0 !~ /.*git-svn-id.*/) { print "{t|{i|" $$0 "}}{br}" }} \
-		/^   /    {if ($$0 ~ /.*git-svn-id.*/) print "{b|Git-SVN:}" $$2 "{br}"} \
+		/^    .+/  { print "{t|{i|" $$0 "}}{br}" } \
 		' | $(BRTX2HTMLDOC) -doc -title "Bracetax - git-log" -o $@
 
 
