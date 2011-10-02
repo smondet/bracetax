@@ -19,25 +19,28 @@
 <h2>Presentation</h2>
 <div class="p">  The <b>Bracetax</b> Project is: 
 <ul>
-     <li> <i>bracetax</i>: a simple and deterministic text-processing syntax;     </li>
-<li> <tt>bracetax</tt>: an <a href="http://ocaml.org">ocaml</a> library     manipulating the syntax (convert to HTML, LaTeX&nbsp;&hellip;);     </li>
+     <li> <i>Bracetax</i>: a simple and deterministic text-processing syntax;     </li>
+<li> <tt>bracetax</tt>: an <a href="http://ocaml.org">OCaml</a> library     manipulating the syntax (convert to HTML, LaTeX&nbsp;&hellip;);     </li>
 <li> <tt>brtx</tt>: a command-line application using the <tt>bracetax</tt>     library;     </li>
 <li> <i>tools</i>: a few small tools related to the syntax (VIM syntax     highlighting&nbsp;&hellip;). </li>
 </ul>
  </div>
 <div class="p">  The code is available under a permissive MIT license.  </div>
 <h2>Download</h2>
-<div class="p">  You can get a snapshot  of the <i>stable</i> sources: 
-<ul>
- <li> <a href="http://git.berlios.de/cgi-bin/gitweb.cgi?p=bracetax;a=snapshot;h=refs/heads/master;sf=tgz"><tt>bracetax-master-&lt;version&gt;.tar.gz</tt></a>; </li>
-<li> <a href="http://git.berlios.de/cgi-bin/gitweb.cgi?p=bracetax;a=snapshot;h=refs/heads/master;sf=zip"><tt>bracetax-master-&lt;version&gt;.zip</tt></a>. </li>
-</ul>
- Or go to the <a href="http://git.berlios.de/cgi-bin/gitweb.cgi?p=bracetax;a=summary">gitweb interface</a> and download whichever version you want. The head of the <tt>master</tt> branch will always be considered as the most up-to-date and <i>usable/stable</i> version, binaries will become available if there is enough demand.   </div>
+<div class="p">  You can get a snapshot  of the <i>stable</i> sources from Github: <a href="https://github.com/smondet/bracetax">github.com/smondet/bracetax</a>. The head of the <tt>master</tt> branch will always be considered as the most up-to-date and <i>usable/stable</i> version, binaries will become available if there is enough demand.  </div>
+<h2>Build &amp; Install</h2>
+<div class="p">  Bracetax follows the <i>standard</i> OASIS setup (with OCamlfind and OCamlbuild): <pre>
+  ocaml setup.ml -configure  [--prefix /where/you/want]
+
+  ocaml setup.ml -build
+
+  ocaml setup.ml -install   (may require root privileges)
+</pre>  </div>
 <h2>Documentation</h2>
 <div class="p">  For now the documentations are: 
 <ul>
      <li> the <a href="bracetax_syntax.html">Bracetax syntax</a> reference;         </li>
-<li> the <tt>brtx</tt> <a href="brtx_app.html">application</a> build &amp; usage;     </li>
+<li> the <tt>brtx</tt> <a href="brtx_app.html">application</a> usage;     </li>
 <li> the <a href="./doclib/index.html">documentation</a> of the bracetax library;     </li>
 <li> the <a href="tools.html">tools</a> usage.     </li>
 </ul>
@@ -52,8 +55,7 @@ git log | sed -e 's/\([{}#]\)/{\1}/g' | awk '\
         /^commit / {print "{p}{t|{b|Commit:} "$2"}{br}"} \
         /^Author/  {print "   {t|{b|Author:} " $2 " " $3 "}{br}"} \
         /^Date/    {print "   {t|{b|Date:}" substr($0,6,length($0) - 3) "}{br}"} \
-        /^    .+/    {if ($0 !~ /.*git-svn-id.*/) { print "{t|{i|" $0 "}}{br}" }} \
-        /^   /    {if ($0 ~ /.*git-svn-id.*/) print "{b|Git-SVN:}" $2 "{br}"} \
+        /^    .+/  { print "{t|{i|" $0 "}}{br}" } \
         ' | brtx -html -link-css brtxdoc.css -doc \
             -title "Bracetax - git-log" -o git_log.html
 </pre>  </div>
@@ -78,8 +80,8 @@ git log | sed -e 's/\([{}#]\)/{\1}/g' | awk '\
 <h2>Links</h2>
 <div class="p">  
 <ul>
-     <li> Project <a href="http://bracetax.berlios.de">homepage</a>;     </li>
-<li> project development          <a href="https://developer.berlios.de/projects/bracetax/">page</a>         at <a href="http://www.berlios.de">berlios.de</a>. </li>
+     <li> Project <a href="http://seb.mondet.org/bracetax">homepage</a>;     </li>
+<li> project development          <a href="https://github.com/smondet/bracetax">page</a> at Github. </li>
 </ul>
   </div>
 <h2>Authors</h2>
@@ -87,9 +89,6 @@ git log | sed -e 's/\([{}#]\)/{\1}/g' | awk '\
 <ul>
      <li> <a href="http://seb.mondet.org">Sebastien Mondet</a>. </li>
 </ul>
-   
-<hr/>
-<a href="http://developer.berlios.de" title="BerliOS Developer"> <img src="http://developer.berlios.de/bslogo.php?group_id=10380" width="124px" height="32px" alt="BerliOS Developer Logo"/></a>
- </div>
+  </div>
 </body>
 </html>

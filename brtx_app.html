@@ -11,67 +11,68 @@
     <body>
 <div class="header">
 
-  <h1>Build and Use</h1>
+  <h1>The <tt>brtx</tt> Application</h1>
 </div> <!-- END HEADER -->
 <div class="p">
-  </div>
-<h2>Build</h2>
-<div class="p">  Just need <a href="http://www.ocaml.org">OCamL</a> (at least version 3.09), and run: <pre>
-./mk
-</pre> And then copy <tt>main.byte</tt> somewhere in your <tt>$PATH</tt> as <tt>brtx</tt>. Please see &ldquo;<tt>mk h</tt>&rdquo; for more options (<i>e.g.</i> compilation without <tt>ocamlbuild</tt>, documentation generation&hellip;). <pre>
-./mk &lt;cmd&gt;
-b: Build brtx (default action)
-bg: Build brtx with debug symbols
-o: Build brtx with native compilation
-bc: Build brtx without ocamlfind and ocamlbuild (e.g. with ocaml 3.09.x)
-i: Install the ocamlbracetax library with ocamlfind
-ui: Uninstall the library
-t: Do the tests
-d: Build the documentation without building pdfs
-doclib: Build the HTML documentation of the library
-D: Build the whole documentation.
-cd: Clean documentation
-c: Clean
-h: This help
-</pre>  For example, if you want to use the ocaml library, with ocamlfind, &ldquo;<tt>mk i</tt>&rdquo; will install it (in the standard path for local ocamlfind packages, which may require <i>root</i> access rights).   </div>
+   </div>
 <h2>Usage</h2>
 <div class="p">  </div>
 <h3>Options</h3>
 <div class="p">  Here is the usage information: <pre>
 usage: brtx [-i file] [-o file] [-help]
-  -version            Print version and exit
-  -license            Print license and exit
-  -html               Output HTML format (default)
-  -latex              Output LaTeX format
-  -toc                Get the table of contents
-  -i &lt;file&gt;           input file (default or "-" is standard input)
-  -o &lt;file&gt;           output file (default or "-" is standard output)
-  -doc                Output a complete document
-  -title &lt;text&gt;       Set the title of the document
-                      ('head.title' for XHTML, PDF meta-data for LaTeX),
-                      requires -doc
-  -link-css &lt;url&gt;     link to a CSS, requires -html,-doc
-  -css-hook &lt;text&gt;    add a class="text..." to all tags, requires -html
-  -use-package &lt;name&gt; use a given package, requires -latex,-doc
-  -href-footnote      treat links as LaTeX footnotes with URLs, requires -latex
-  -print-comments     activate the transmission of brtx comments to
-                      the output's comments (-html or -latex)
-  -deny-bypass        treat all {bypass} as {code} (security of interpreted webapps)
-  -ignore-header      Do not process the {header| ... } part
-  -no-warn-error      Do not treat warnings as errors (return 0 to shell/make/...)
-  -warn-error         Treat warnings as errors (default, return 2 to shell)
-  -help               Display this list of options
-  --help              Display this list of options
+  -version               
+	Print version and exit
+  -license               
+	Print license and exit
+  -html                  
+	Output HTML format (default)
+  -latex                 
+	Output LaTeX format
+  -toc                   
+	Get the table of contents (as a Bracetax list)
+  -i &lt;file&gt;              
+	Set input file (default or "-" is standard input)
+  -o &lt;file&gt;              
+	Set output file (default or "-" is standard output)
+  -doc                   
+	Output a complete document (with header/footer)
+  -title &lt;text&gt;          
+	Set the title of the document ('head.title' for XHTML,
+	PDF meta-data for LaTeX), requires -doc
+  -link-css &lt;url&gt;        
+	Add a link to a CSS, requires -html,-doc
+  -css-hook &lt;text&gt;       
+	Add a class="text..." to all tags, requires -html
+  -use-package &lt;name&gt;    
+	Use a given package, requires -latex,-doc
+  -href-footnote         
+	Treat links as LaTeX footnotes with URLs, requires -latex
+  -print-comments        
+	Activate the transmission of brtx comments to the output's comments
+	(-html or -latex)
+  -deny-bypass           
+	Treat all {bypass} as {code} (security of interpreted web-apps …)
+  -ignore-header         
+	Do not process the {header| ... } part
+  -no-warn-error         
+	Do not treat warnings as errors (return 0 to shell/make/...)
+  -warn-error            
+	Treat warnings as errors (default, return 2 to shell)
+  -table-caption-before  
+	In LaTeX output, put the captions before the tables
+	(like LNCS, IEEE, …)
+  -help                  Display this list of options
+  --help                 Display this list of options
 </pre>   </div>
 <h3>Examples</h3>
 <div class="p">   Convert a bracetax file to XHTML: <pre>
-brtx -html -i README.brtx -o README.html
+brtx -html -i file.brtx -o file.html
 </pre> </div>
 <div class="p"> Convert a file to LaTeX: <pre>
-brtx -latex -i README.brtx -o README.tex
+brtx -latex -i file.brtx -o file.tex
 </pre> </div>
 <div class="p">  The option <tt>-doc</tt> adds header and footer (for both HTML and LaTeX): <pre>
-brtx -html -i README.brtx -o README.html -doc
+brtx -html -i file.brtx -o file.html -doc
 </pre> will provide the <tt>&lt;!DOCTYPE html ...</tt> etc. </div>
 <div class="p">  Transform any string: <pre>
  $ echo 'I say {b|Hello} {i|world}{~}!!' | brtx -html
