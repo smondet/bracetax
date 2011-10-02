@@ -10,12 +10,3 @@ There's a {link http://www.vim.org|Vim} syntax file in the distribution,
 just load it: {q|{t|:source ./tools/bracetax_syntax.vim}}
 
 
-{section 1|OCaml toplevel}
-
-After compiling, in the {t|ocaml} toplevel, you can load the library and the
-post-processor:
-{code e}
-#use "tools/top.ml";;
-{e}
-
-
