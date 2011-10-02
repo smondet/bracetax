@@ -26,7 +26,7 @@
 let (~%) = Printf.sprintf
 let p = print_string
 
-let version_string = ~% "0.2 (ocamlbracetax lib: %s)" Bracetax.Info.version
+let version_string = ~% "0.3 (bracetax lib: %s)" Bracetax.Info.version
 
 type in_out = {
     file_in: string option;
