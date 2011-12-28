@@ -299,7 +299,7 @@ let print_table t table =
         \    \\hline " (if not t.opt_table_caption_after then caption_str else "") table_format
         );
   let nb_rows, nb_cols, matrix = 
-    CT.Util.cells_to_matrix table in
+    CT.Util.cells_to_matrix ~loc:t.loc ~error:t.error table in
   let string_of_cell c =
     let text = (Buffer.contents c.CT.cell_text) in
     let text_with_type =
@@ -333,15 +333,22 @@ let print_table t table =
       | `cell c ->
           let the_cell =
             (string_of_cell c) ^ (separator col c.CT.cols_used nb_cols) in
-          str_matrix.(row).(col) <- the_cell;
-          for i = row + 1 to row + c.CT.rows_used - 1 do
-            str_matrix.(i).(col) <- 
-              (empty_multicol c.CT.cols_used) 
-            ^ (separator col c.CT.cols_used nb_cols);
-          done;
-          for i = col to col + c.CT.cols_used - 1 do
-            lines_matrix.(row + c.CT.rows_used - 1).(i) <- true;
-          done;
+          begin
+            try
+              str_matrix.(row).(col) <- the_cell;
+              for i = row + 1 to row + c.CT.rows_used - 1 do
+                Printf.eprintf "\n[]bouh\n%!";
+                str_matrix.(i).(col) <- 
+                  (empty_multicol c.CT.cols_used) 
+                ^ (separator col c.CT.cols_used nb_cols);
+              done;
+              for i = col to col + c.CT.cols_used - 1 do
+                lines_matrix.(row + c.CT.rows_used - 1).(i) <- true;
+              done;
+            with
+              Invalid_argument("index out of bounds") ->
+              (* Error should be already reported. *) ()
+          end
       | `filled (r, c) -> ()
       end;
     done;

@@ -38,6 +38,7 @@ type message = [
   | `malformed_verbatim_begin
   | `cell_out_of_table
   | `cell_inside_cell
+  | `cell_out_of_table_bounds
   | `unknown_command of string
   | `begin_without_arg
   | `non_matching_end
@@ -88,6 +89,7 @@ let to_string (location, gravity, message) =
     | `malformed_verbatim_begin -> "Malformed begin of verbatim environment"
     | `cell_out_of_table -> "Cell (\"{c ...}\") command not in table"
     | `cell_inside_cell -> "Cell (\"{c ...}\") command inside another cell"
+    | `cell_out_of_table_bounds -> "Cell (\"{c ...}\") command out of table bounds"
     | `unknown_command s -> spr "Unknown command: %s" s
     | `begin_without_arg -> "{begin} without argument"
     | `non_matching_end -> "{end} does not match a {begin}"

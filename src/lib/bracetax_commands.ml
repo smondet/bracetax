@@ -498,13 +498,19 @@ module Table = struct
       (* one row too much to simplify next_coordinates *)
       Array.make_matrix (rows + 1) (cols) (-1, -1)
 
-    let fill_riddle riddle from_row from_col offset_row offset_col =
-      for i = 1 to offset_row do
-        for j = 1 to offset_col do
-          riddle.(from_row + i - 1).(from_col + j - 1) <- 
-            (from_row, from_col);
-        done;
-      done;
+    let fill_riddle ~loc ~(error:Error.error_fun) riddle
+        from_row from_col offset_row offset_col =
+      begin 
+        try
+          for i = 1 to offset_row do
+            for j = 1 to offset_col do
+              riddle.(from_row + i - 1).(from_col + j - 1) <- 
+                (from_row, from_col);
+            done;
+          done;
+        with
+          e -> error (Error.mk loc `error `cell_out_of_table_bounds);
+      end;
       ()
 
     (** Find next false in riddle *)
@@ -515,7 +521,7 @@ module Table = struct
         if !col = table.col_nb - 1 then
           (col := 0; incr row;) else (incr col;) in
       next_coord ();
-      while riddle.(!row).(!col) <> (-1, -1) do
+      while try riddle.(!row).(!col) <> (-1, -1) with e -> false do
         next_coord ();
       done;
       (!row, !col)
@@ -534,28 +540,34 @@ module Table = struct
         if !col = table.col_nb - 1 then
           (col := 0; incr row;) else (incr col;) in
       next_coord ();
-      while mat.(!row).(!col) <> `none do
+      while try mat.(!row).(!col) <> `none with e -> false do
         next_coord ();
       done;
       (!row, !col)
         
-    let cells_to_matrix table = 
+    let cells_to_matrix ~loc ~(error:Error.error_fun) table = 
       let rows, cols = nb_rows table, table.col_nb in
       let mat = Array.make_matrix (rows + 1) (cols) `none in
       let rec iter_on_cells cur_row cur_col = function
         | [] -> ()
         | cell :: t ->
-            (* Printf.eprintf "===mat.(%d).(%d) <- `cell str_cell;\n%!" cur_row cur_col; *)
-            (* Printf.eprintf "   rows: %d, cols: %d\n" cell.rows_used cell.cols_used; *)
+          (* Printf.eprintf "===mat.(%d).(%d) <- `cell str_cell;\n%!" cur_row cur_col; *)
+          (* Printf.eprintf "   rows: %d, cols: %d\n" cell.rows_used cell.cols_used; *)
             for i = 0 to cell.rows_used - 1 do
               for j = 0 to cell.cols_used - 1 do
-                (* Printf.eprintf "     at.( %d + %d , %d + %d\n" cur_row i cur_col j; *)
-                if i = 0 && j = 0 then (
-                  mat.(cur_row).(cur_col) <- `cell cell;
-                ) else (
-                  mat.(cur_row + i).(cur_col + j) <- 
-                    `filled (cur_row, cur_col);
-                );
+                (* Printf.eprintf "     at.( %d + %d , %d + %d\n%!" cur_row i cur_col j; *)
+                begin
+                  try
+                    if i = 0 && j = 0 then (
+                      mat.(cur_row).(cur_col) <- `cell cell;
+                    ) else (
+                      mat.(cur_row + i).(cur_col + j) <- 
+                        `filled (cur_row, cur_col);
+                    );
+                  with
+                    e -> error (Error.mk loc `error `cell_out_of_table_bounds);
+                end;
+
               done;
             done;
             let next_row, next_col = 

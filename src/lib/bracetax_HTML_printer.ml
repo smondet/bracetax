@@ -316,7 +316,7 @@ let print_table t table =
                  typ_of_cell c.CT.rows_used c.CT.cols_used alignement
                  (Buffer.contents c.CT.cell_text)
                  typ_of_cell);
-        CT.Util.fill_riddle riddle
+        CT.Util.fill_riddle ~loc:t.loc ~error:t.error riddle
           cur_row cur_col c.CT.rows_used c.CT.cols_used;
         let next_row, next_col = 
           CT.Util.next_coordinates riddle table cur_row cur_col in
