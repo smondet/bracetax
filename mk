@@ -15,7 +15,6 @@ $0 <cmd>
 build|b: Build brtx (default action)
 install_library|il: Install the bracetax library with ocamlfind
 uninstall_library|uil: Uninstall the library
-tests|t: Run a few tests
 docsite: Build the website (with PDFs)
 docnopdf: Build the website but not the PDFs
 doclib: Build the HTML documentation of the library
@@ -35,7 +34,6 @@ for todo in $* ; do
         build|b ) build ;;
         install_library|il ) install_library ;;
         uninstall_library|uil ) ocamlfind remove bracetax ;;
-        tests|t ) test/do_tests ;;
         docsite ) cd doc/ ; make  ; cd ..  ;;
         docnopdf ) cd doc/ ; make nopdf ; cd .. ;;
         docall ) 
