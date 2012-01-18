@@ -287,10 +287,11 @@ let print_table t table =
          lbl_str);
   let caption_str = (Buffer.contents table.CT.caption) in
   if not (Escape.is_white_space caption_str) then (
-    write (~% "<caption  class=\"tablefigure%s\" %s>%s</caption>\n<tr>"
+    write (~% "<caption  class=\"tablefigure%s\" %s>%s</caption>\n"
              (AddClass.name t.class_hook "p")
              lbl_str caption_str);
   );
+  write "<tr>";
 
   let riddle = CT.Util.make_riddle table in
 
