@@ -2,3 +2,7 @@ _build/*
 doc/site/*
 _test_results/*
 _log
+*.native
+*.byte
+setup.data
+setup.log
